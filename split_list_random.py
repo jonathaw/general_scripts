@@ -30,6 +30,7 @@ def main():
     for i, a in enumerate(result):
         write_list('split_list_'+str(i), a)
 
+
 def write_list(file_o, l):
     with open(file_o, 'wr+') as fout:
         for a in l:

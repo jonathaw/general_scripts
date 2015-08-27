@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+"""
+a script to take a design and revert it to WT in any position not allowed for design due to Ca binding loop etc.
+"""
 def main():
     # import sys
     wt_dict = {

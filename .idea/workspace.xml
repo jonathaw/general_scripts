@@ -1,7 +1,159 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ae6ef3d4-3da6-4131-a373-88ca3166d1ef" name="Default" comment="" />
+    <list default="true" id="ae6ef3d4-3da6-4131-a373-88ca3166d1ef" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/MyPDB.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/-m.rmsd" afterPath="$PROJECT_DIR$/-m.rmsd" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/._COPYING" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/._COPYING" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._Makefile" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._Makefile" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/._README" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/._README" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._README" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._README" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-ala-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-ala-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-arg-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-arg-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-asn-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-asn-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-asp-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-asp-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-cys-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-cys-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-gln-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-gln-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-glu-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-glu-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-gly-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-gly-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-his-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-his-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-ile-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-ile-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-leu-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-leu-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-lys-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-lys-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-met-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-met-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-phe-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-phe-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-pro-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-pro-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-ser-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-ser-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-thr-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-thr-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-trp-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-trp-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-tyr-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-tyr-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-val-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-val-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._crdfrmt.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._crdfrmt.f" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._mkwij.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._mkwij.f" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._prescan.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._prescan.f" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._satkelni.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._satkelni.f" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._statacc.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._statacc.f" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/development/._to-do" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/development/._to-do" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/general_scripts" afterPath="$PROJECT_DIR$/general_scripts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1c" afterPath="$PROJECT_DIR$/pdbTools_0.2.1c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/.___init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/.___init__.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/.___init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/.___init__.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/.___init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/.___init__.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/.___init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/.___init__.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-ala-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-ala-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-arg-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-arg-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-asn-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-asn-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-asp-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-asp-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-cys-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-cys-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-gln-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-gln-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-glu-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-glu-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-gly-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-gly-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-his-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-his-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-ile-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-ile-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-leu-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-leu-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-lys-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-lys-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-met-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-met-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-phe-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-phe-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-pro-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-pro-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-ser-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-ser-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-thr-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-thr-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-trp-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-trp-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-tyr-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-tyr-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-val-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-val-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/._cmdline.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/._cmdline.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/._cohesins_from_rachel.fasta" afterPath="$PROJECT_DIR$/._cohesins_from_rachel.fasta" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/._common.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/._common.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/._container.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/._container.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/._dockerins_from_rachel.fasta" afterPath="$PROJECT_DIR$/._dockerins_from_rachel.fasta" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/._gen_input.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/._gen_input.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/._geometry.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/._geometry.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/._interface.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/._interface.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/development/._pdb_template.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/development/._pdb_template.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/._polar.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/._polar.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/._polar_param.txt" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/._polar_param.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/.name" afterPath="$PROJECT_DIR$/.idea/.name" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/COPYING" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/COPYING" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/Makefile" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/Makefile" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/README" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/README" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/README" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/README" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/__init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/__init__.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/__init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/__init__.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/__init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/__init__.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/__init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/__init__.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-ala-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-ala-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-ala-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-ala-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-arg-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-arg-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-arg-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-arg-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-asn-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-asn-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-asn-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-asn-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-asp-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-asp-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-asp-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-asp-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-cys-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-cys-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-cys-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-cys-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-gln-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-gln-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-gln-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-gln-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-glu-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-glu-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-glu-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-glu-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-gly-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-gly-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-gly-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-gly-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-his-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-his-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-his-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-his-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-ile-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-ile-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-ile-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-ile-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-leu-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-leu-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-leu-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-leu-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-lys-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-lys-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-lys-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-lys-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-met-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-met-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-met-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-met-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-phe-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-phe-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-phe-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-phe-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-pro-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-pro-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-pro-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-pro-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-ser-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-ser-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-ser-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-ser-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-thr-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-thr-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-thr-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-thr-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-trp-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-trp-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-trp-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-trp-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-tyr-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-tyr-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-tyr-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-tyr-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-val-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-val-ala.pdb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-val-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-val-ala.rib" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all_RB.db" afterPath="$PROJECT_DIR$/all_RB.db" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all_coh.dnd" afterPath="$PROJECT_DIR$/all_coh.dnd" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all_coh.fasta" afterPath="$PROJECT_DIR$/all_coh.fasta" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all_coh.fasta_aln" afterPath="$PROJECT_DIR$/all_coh.fasta_aln" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all_doc.dnd" afterPath="$PROJECT_DIR$/all_doc.dnd" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all_doc.fasta" afterPath="$PROJECT_DIR$/all_doc.fasta" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all_doc.fasta_aln" afterPath="$PROJECT_DIR$/all_doc.fasta_aln" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/cmdline.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/cmdline.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/common.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/common.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/container.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/container.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/crdfrmt.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/crdfrmt.f" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/doc_revert_to_WT.py" afterPath="$PROJECT_DIR$/doc_revert_to_WT.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/encodings.xml" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/gen_input.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/gen_input.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/geometry.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/geometry.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/interface.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/interface.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/job_makers.iml" afterPath="$PROJECT_DIR$/.idea/job_makers.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/mkwij.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/mkwij.f" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/development/pdb_template.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/development/pdb_template.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/polar.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/polar.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/polar_param.txt" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/polar_param.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/prescan.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/prescan.f" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/satkelni.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/satkelni.f" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/scopes/scope_settings.xml" afterPath="$PROJECT_DIR$/.idea/scopes/scope_settings.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/split_list_random.py" afterPath="$PROJECT_DIR$/split_list_random.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/statacc.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/statacc.f" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/t_coffee.err" afterPath="$PROJECT_DIR$/t_coffee.err" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/t_coffee.out" afterPath="$PROJECT_DIR$/t_coffee.out" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/development/to-do" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/development/to-do" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+    </list>
     <ignored path="job_makers.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -23,28 +175,12 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="doc_analysis.py" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/doc_analysis.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1920">
-              <caret line="0" column="21" selection-start-line="0" selection-start-column="21" selection-end-line="0" selection-end-column="21" />
-              <folding>
-                <element signature="e#49#1861#0" expanded="true" />
-                <element signature="e#5036#7083#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="DoCohJobMaker_options.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/DoCohJobMaker_options.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="240" max-vertical-offset="4580">
+            <state vertical-scroll-proportion="0.0" vertical-offset="620" max-vertical-offset="20320">
               <caret line="31" column="61" selection-start-line="31" selection-start-column="61" selection-end-line="31" selection-end-column="61" />
-              <folding>
-                <element signature="e#12683#17334#0" expanded="true" />
-                <element signature="e#50551#53087#0" expanded="true" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -52,20 +188,8 @@
       <file leaf-file-name="DoCohJobber.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/DoCohJobber.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2780">
+            <state vertical-scroll-proportion="0.0" vertical-offset="140" max-vertical-offset="2780">
               <caret line="7" column="27" selection-start-line="7" selection-start-column="27" selection-end-line="7" selection-end-column="27" />
-              <folding>
-                <element signature="e#4699#7239#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="draw_graph.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/draw_graph.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="760">
-              <caret line="4" column="19" selection-start-line="4" selection-start-column="19" selection-end-line="4" selection-end-column="19" />
               <folding />
             </state>
           </provider>
@@ -74,12 +198,34 @@
       <file leaf-file-name="split_list_random.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/split_list_random.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1020">
-              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="21" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="13" max-vertical-offset="920">
+              <caret line="11" column="14" selection-start-line="11" selection-start-column="14" selection-end-line="11" selection-end-column="14" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MyPDB.py" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/MyPDB.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.11025358" vertical-offset="0" max-vertical-offset="2740">
+              <caret line="34" column="52" selection-start-line="34" selection-start-column="52" selection-end-line="34" selection-end-column="52" />
               <folding>
-                <element signature="e#38#990#0" expanded="true" />
-                <element signature="e#1023#1111#0" expanded="true" />
-                <element signature="e#1141#1249#0" expanded="true" />
+                <element signature="e#306#1440#0" expanded="false" />
+                <element signature="e#369#497#0" expanded="true" />
+                <element signature="e#531#687#0" expanded="true" />
+                <element signature="e#730#754#0" expanded="true" />
+                <element signature="e#788#843#0" expanded="true" />
+                <element signature="e#885#920#0" expanded="true" />
+                <element signature="e#960#1440#0" expanded="true" />
+                <element signature="e#1528#1640#0" expanded="true" />
+                <element signature="e#1674#1752#0" expanded="true" />
+                <element signature="e#1795#1821#0" expanded="true" />
+                <element signature="e#1855#1912#0" expanded="true" />
+                <element signature="e#1958#2035#0" expanded="true" />
+                <element signature="e#2086#2261#0" expanded="true" />
+                <element signature="e#3149#3639#0" expanded="true" />
+                <element signature="e#5102#5509#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -88,13 +234,9 @@
       <file leaf-file-name="doc_revert_to_WT.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/doc_revert_to_WT.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2840">
-              <caret line="0" column="21" selection-start-line="0" selection-start-column="21" selection-end-line="0" selection-end-column="21" />
-              <folding>
-                <element signature="e#38#5776#0" expanded="true" />
-                <element signature="e#5812#6632#0" expanded="true" />
-                <element signature="e#6670#6921#0" expanded="true" />
-              </folding>
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="800">
+              <caret line="106" column="19" selection-start-line="106" selection-start-column="19" selection-end-line="106" selection-end-column="19" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -102,11 +244,9 @@
       <file leaf-file-name="fleish_sub_python_msa2cst.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/fleish_sub_python_msa2cst.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="760">
+            <state vertical-scroll-proportion="0.0" vertical-offset="20" max-vertical-offset="760">
               <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-              <folding>
-                <element signature="e#39#1725#0" expanded="true" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -114,13 +254,9 @@
       <file leaf-file-name="rosetta_score_files.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/rosetta_score_files.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1140">
+            <state vertical-scroll-proportion="0.0" vertical-offset="200" max-vertical-offset="1660">
               <caret line="10" column="20" selection-start-line="10" selection-start-column="20" selection-end-line="10" selection-end-column="20" />
-              <folding>
-                <element signature="e#97#586#0" expanded="true" />
-                <element signature="e#634#1476#0" expanded="true" />
-                <element signature="e#3067#3499#0" expanded="true" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -138,11 +274,9 @@
       <file leaf-file-name="best_n_structures.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/best_n_structures.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="480">
+            <state vertical-scroll-proportion="0.0" vertical-offset="340" max-vertical-offset="480">
               <caret line="17" column="24" selection-start-line="17" selection-start-column="24" selection-end-line="17" selection-end-column="24" />
-              <folding>
-                <element signature="e#22#37#0" expanded="true" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -197,21 +331,23 @@
         <option value="$PROJECT_DIR$/seq_manager.py" />
         <option value="$PROJECT_DIR$/doc_analysis.py" />
         <option value="$PROJECT_DIR$/draw_graph.py" />
-        <option value="$PROJECT_DIR$/split_list_random.py" />
         <option value="$PROJECT_DIR$/DoCohJobMaker_options.py" />
         <option value="$PROJECT_DIR$/DoCohJobber.py" />
         <option value="$PROJECT_DIR$/fleish_sub_python_msa2cst.py" />
-        <option value="$PROJECT_DIR$/doc_revert_to_WT.py" />
         <option value="$PROJECT_DIR$/rosetta_score_files.py" />
         <option value="$PROJECT_DIR$/best_n_structures.py" />
         <option value="$PROJECT_DIR$/extract_best_purples.py" />
+        <option value="$PROJECT_DIR$/doc_revert_to_WT.py" />
+        <option value="$PROJECT_DIR$/split_list_random.py" />
+        <option value="$PROJECT_DIR$/MyPDB.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
+    <option name="x" value="-2" />
     <option name="y" value="23" />
     <option name="width" value="1920" />
-    <option name="height" value="1057" />
+    <option name="height" value="1053" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -302,70 +438,7 @@
       <recent name="$PROJECT_DIR$/" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.doc_revert_to_WT">
-    <configuration default="false" name="Doctest gap_in_essential" type="tests" factoryName="Doctests" temporary="true" nameIsGenerated="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="job_makers" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/doc_analysis.py" />
-      <option name="CLASS_NAME" value="" />
-      <option name="METHOD_NAME" value="gap_in_essential" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_FUNCTION" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method />
-    </configuration>
-    <configuration default="false" name="Doctest test_helices_seq" type="tests" factoryName="Doctests" temporary="true" nameIsGenerated="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="job_makers" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/doc_analysis.py" />
-      <option name="CLASS_NAME" value="" />
-      <option name="METHOD_NAME" value="test_helices_seq" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_FUNCTION" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method />
-    </configuration>
-    <configuration default="false" name="Doctest aln_identity" type="tests" factoryName="Doctests" temporary="true" nameIsGenerated="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="job_makers" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/seq_manager.py" />
-      <option name="CLASS_NAME" value="" />
-      <option name="METHOD_NAME" value="aln_identity" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_FUNCTION" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method />
-    </configuration>
+  <component name="RunManager" selected="Python tests.Doctest Residue.min_distance_res">
     <configuration default="false" name="doc_revert_to_WT" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -380,7 +453,9 @@
       <module name="job_makers" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/doc_revert_to_WT.py" />
       <option name="PARAMETERS" value="" />
+      <RunnerSettings RunnerId="PyDebugRunner" />
       <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PyDebugRunner" />
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method />
     </configuration>
@@ -399,6 +474,66 @@
       <option name="METHOD_NAME" value="replace_by_index" />
       <option name="FOLDER_NAME" value="" />
       <option name="TEST_TYPE" value="TEST_FUNCTION" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="MyPDB" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="job_makers" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MyPDB.py" />
+      <option name="PARAMETERS" value="" />
+      <RunnerSettings RunnerId="PyDebugRunner" />
+      <ConfigurationWrapper RunnerId="PyDebugRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Doctest Atom.distance" type="tests" factoryName="Doctests" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="job_makers" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MyPDB.py" />
+      <option name="CLASS_NAME" value="Atom" />
+      <option name="METHOD_NAME" value="distance" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_METHOD" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Doctest Residue.min_distance_res" type="tests" factoryName="Doctests" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="job_makers" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MyPDB.py" />
+      <option name="CLASS_NAME" value="Residue" />
+      <option name="METHOD_NAME" value="min_distance_res" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_METHOD" />
       <option name="PATTERN" value="" />
       <option name="USE_PATTERN" value="false" />
       <RunnerSettings RunnerId="PythonRunner" />
@@ -527,19 +662,19 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python tests.Doctest gap_in_essential" />
-      <item index="1" class="java.lang.String" itemvalue="Python tests.Doctest test_helices_seq" />
-      <item index="2" class="java.lang.String" itemvalue="Python tests.Doctest aln_identity" />
-      <item index="3" class="java.lang.String" itemvalue="Python.doc_revert_to_WT" />
-      <item index="4" class="java.lang.String" itemvalue="Python tests.Doctest replace_by_index" />
+      <item index="0" class="java.lang.String" itemvalue="Python.doc_revert_to_WT" />
+      <item index="1" class="java.lang.String" itemvalue="Python tests.Doctest replace_by_index" />
+      <item index="2" class="java.lang.String" itemvalue="Python.MyPDB" />
+      <item index="3" class="java.lang.String" itemvalue="Python tests.Doctest Atom.distance" />
+      <item index="4" class="java.lang.String" itemvalue="Python tests.Doctest Residue.min_distance_res" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.doc_revert_to_WT" />
-        <item index="1" class="java.lang.String" itemvalue="Python tests.Doctest replace_by_index" />
-        <item index="2" class="java.lang.String" itemvalue="Python tests.Doctest aln_identity" />
-        <item index="3" class="java.lang.String" itemvalue="Python tests.Doctest test_helices_seq" />
-        <item index="4" class="java.lang.String" itemvalue="Python tests.Doctest gap_in_essential" />
+        <item index="0" class="java.lang.String" itemvalue="Python tests.Doctest Residue.min_distance_res" />
+        <item index="1" class="java.lang.String" itemvalue="Python tests.Doctest Atom.distance" />
+        <item index="2" class="java.lang.String" itemvalue="Python.MyPDB" />
+        <item index="3" class="java.lang.String" itemvalue="Python.doc_revert_to_WT" />
+        <item index="4" class="java.lang.String" itemvalue="Python tests.Doctest replace_by_index" />
       </list>
     </recent_temporary>
   </component>
@@ -581,10 +716,9 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1920" height="1057" extended-state="6" />
+    <frame x="-2" y="23" width="1920" height="1053" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32712215" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32941177" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -593,12 +727,13 @@
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.37380192" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3721925" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
@@ -654,32 +789,16 @@
           <line>109</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/split_list_random.py</url>
+          <line>30</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
       </breakpoints>
-      <option name="time" value="4" />
+      <option name="time" value="6" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/DoCohJobMaker_options.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="4160">
-          <caret line="571" column="54" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/whose_running.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="333" max-vertical-offset="1240">
-          <caret line="56" column="98" selection-start-line="55" selection-start-column="4" selection-end-line="56" selection-end-column="98" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lsf_status.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.4189636" vertical-offset="0" max-vertical-offset="907">
-          <caret line="19" column="65" selection-start-line="19" selection-start-column="65" selection-end-line="19" selection-end-column="65" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/stop_at_purples.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="638" max-vertical-offset="1880">
@@ -870,16 +989,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/Library/Caches/PyCharm30/python_stubs/-2131660280/__builtin__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7298787" vertical-offset="1958" max-vertical-offset="39660">
-          <caret line="467" column="0" selection-start-line="467" selection-start-column="0" selection-end-line="467" selection-end-column="0" />
-          <folding>
-            <element signature="e#13676#13924#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/RB_out_analysis.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="280">
@@ -905,7 +1014,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="600">
           <caret line="0" column="21" selection-start-line="0" selection-start-column="21" selection-end-line="0" selection-end-column="21" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -913,7 +1021,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1680">
           <caret line="8" column="10" selection-start-line="0" selection-start-column="0" selection-end-line="200" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -921,7 +1028,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1080">
           <caret line="0" column="21" selection-start-line="0" selection-start-column="21" selection-end-line="0" selection-end-column="21" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -929,7 +1035,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="540">
           <caret line="0" column="21" selection-start-line="0" selection-start-column="21" selection-end-line="0" selection-end-column="21" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -937,7 +1042,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="800">
           <caret line="15" column="32" selection-start-line="15" selection-start-column="32" selection-end-line="15" selection-end-column="32" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -946,7 +1050,7 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="207" max-vertical-offset="1760">
           <caret line="60" column="32" selection-start-line="60" selection-start-column="32" selection-end-line="60" selection-end-column="32" />
           <folding>
-            <element signature="e#8541#8653#0" expanded="true" />
+            <element signature="e#8541#8653#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -955,6 +1059,35 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="760">
           <caret line="4" column="19" selection-start-line="4" selection-start-column="19" selection-end-line="4" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/how_many_purples.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.074487895" vertical-offset="0" max-vertical-offset="537">
+          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/t_coffee.err">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-27.975792" vertical-offset="15023" max-vertical-offset="15560">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/doc_analysis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1920">
+          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DoCohJobMaker_options.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="240" max-vertical-offset="4580">
+          <caret line="31" column="61" selection-start-line="31" selection-start-column="61" selection-end-line="31" selection-end-column="61" />
           <folding />
         </state>
       </provider>
@@ -963,51 +1096,23 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2780">
           <caret line="7" column="27" selection-start-line="7" selection-start-column="27" selection-end-line="7" selection-end-column="27" />
-          <folding>
-            <element signature="e#4699#7239#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/how_many_purples.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.074487895" vertical-offset="0" max-vertical-offset="537">
-          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/split_list_random.py">
+    <entry file="file://$PROJECT_DIR$/fleish_sub_python_msa2cst.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1020">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="21" />
-          <folding>
-            <element signature="e#38#990#0" expanded="true" />
-            <element signature="e#1023#1111#0" expanded="true" />
-            <element signature="e#1141#1249#0" expanded="true" />
-          </folding>
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="760">
+          <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/doc_revert_to_WT.py">
+    <entry file="file://$PROJECT_DIR$/rosetta_score_files.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2840">
-          <caret line="0" column="21" selection-start-line="0" selection-start-column="21" selection-end-line="0" selection-end-column="21" />
-          <folding>
-            <element signature="e#38#5776#0" expanded="true" />
-            <element signature="e#5812#6632#0" expanded="true" />
-            <element signature="e#6670#6921#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/best_n_structures.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="480">
-          <caret line="17" column="24" selection-start-line="17" selection-start-column="24" selection-end-line="17" selection-end-column="24" />
-          <folding>
-            <element signature="e#22#37#0" expanded="true" />
-          </folding>
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1140">
+          <caret line="10" column="20" selection-start-line="10" selection-start-column="20" selection-end-line="10" selection-end-column="20" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1019,46 +1124,71 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/rosetta_score_files.py">
+    <entry file="file://$PROJECT_DIR$/best_n_structures.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1140">
-          <caret line="10" column="20" selection-start-line="10" selection-start-column="20" selection-end-line="10" selection-end-column="20" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="480">
+          <caret line="17" column="24" selection-start-line="17" selection-start-column="24" selection-end-line="17" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="8483" max-vertical-offset="10040">
+          <caret line="1732" column="0" selection-start-line="1732" selection-start-column="0" selection-end-line="1733" selection-end-column="0" />
           <folding>
-            <element signature="e#97#586#0" expanded="true" />
-            <element signature="e#634#1476#0" expanded="true" />
-            <element signature="e#3067#3499#0" expanded="true" />
+            <element signature="e#48587#51247#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DoCohJobMaker_options.py">
+    <entry file="file://$USER_HOME$/Library/Caches/PyCharm30/python_stubs/-2131660280/__builtin__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="240" max-vertical-offset="4580">
-          <caret line="31" column="61" selection-start-line="31" selection-start-column="61" selection-end-line="31" selection-end-column="61" />
+        <state vertical-scroll-proportion="0.5769231" vertical-offset="16690" max-vertical-offset="39920">
+          <caret line="2503" column="19" selection-start-line="2503" selection-start-column="19" selection-end-line="2503" selection-end-column="19" />
           <folding>
-            <element signature="e#12683#17334#0" expanded="true" />
-            <element signature="e#50551#53087#0" expanded="true" />
+            <element signature="e#13676#13924#0" expanded="true" />
+            <element signature="e#88056#88561#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fleish_sub_python_msa2cst.py">
+    <entry file="file://$PROJECT_DIR$/doc_revert_to_WT.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="760">
-          <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-          <folding>
-            <element signature="e#39#1725#0" expanded="true" />
-          </folding>
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="800">
+          <caret line="106" column="19" selection-start-line="106" selection-start-column="19" selection-end-line="106" selection-end-column="19" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/doc_analysis.py">
+    <entry file="file://$PROJECT_DIR$/split_list_random.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1920">
-          <caret line="0" column="21" selection-start-line="0" selection-start-column="21" selection-end-line="0" selection-end-column="21" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="13" max-vertical-offset="920">
+          <caret line="11" column="14" selection-start-line="11" selection-start-column="14" selection-end-line="11" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MyPDB.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.11025358" vertical-offset="0" max-vertical-offset="2740">
+          <caret line="34" column="52" selection-start-line="34" selection-start-column="52" selection-end-line="34" selection-end-column="52" />
           <folding>
-            <element signature="e#49#1861#0" expanded="true" />
-            <element signature="e#5036#7083#0" expanded="true" />
+            <element signature="e#306#1440#0" expanded="false" />
+            <element signature="e#369#497#0" expanded="true" />
+            <element signature="e#531#687#0" expanded="true" />
+            <element signature="e#730#754#0" expanded="true" />
+            <element signature="e#788#843#0" expanded="true" />
+            <element signature="e#885#920#0" expanded="true" />
+            <element signature="e#960#1440#0" expanded="true" />
+            <element signature="e#1528#1640#0" expanded="true" />
+            <element signature="e#1674#1752#0" expanded="true" />
+            <element signature="e#1795#1821#0" expanded="true" />
+            <element signature="e#1855#1912#0" expanded="true" />
+            <element signature="e#1958#2035#0" expanded="true" />
+            <element signature="e#2086#2261#0" expanded="true" />
+            <element signature="e#3149#3639#0" expanded="true" />
+            <element signature="e#5102#5509#0" expanded="true" />
           </folding>
         </state>
       </provider>
