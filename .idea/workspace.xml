@@ -2,156 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ae6ef3d4-3da6-4131-a373-88ca3166d1ef" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/MyPDB.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/-m.rmsd" afterPath="$PROJECT_DIR$/-m.rmsd" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/._COPYING" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/._COPYING" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._Makefile" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._Makefile" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/._README" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/._README" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._README" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._README" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-ala-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-ala-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-arg-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-arg-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-asn-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-asn-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-asp-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-asp-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-cys-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-cys-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-gln-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-gln-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-glu-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-glu-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-gly-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-gly-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-his-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-his-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-ile-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-ile-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-leu-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-leu-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-lys-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-lys-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-met-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-met-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-phe-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-phe-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-pro-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-pro-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-ser-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-ser-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-thr-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-thr-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-trp-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-trp-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-tyr-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-tyr-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-val-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/._ala-val-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._crdfrmt.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._crdfrmt.f" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._mkwij.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._mkwij.f" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._prescan.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._prescan.f" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._satkelni.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._satkelni.f" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._statacc.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/._statacc.f" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/development/._to-do" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/development/._to-do" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/general_scripts" afterPath="$PROJECT_DIR$/general_scripts" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1c" afterPath="$PROJECT_DIR$/pdbTools_0.2.1c" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/.___init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/.___init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/.___init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/.___init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/.___init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/.___init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/.___init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/.___init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-ala-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-ala-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-arg-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-arg-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-asn-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-asn-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-asp-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-asp-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-cys-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-cys-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-gln-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-gln-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-glu-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-glu-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-gly-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-gly-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-his-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-his-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-ile-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-ile-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-leu-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-leu-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-lys-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-lys-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-met-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-met-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-phe-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-phe-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-pro-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-pro-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-ser-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-ser-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-thr-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-thr-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-trp-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-trp-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-tyr-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-tyr-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-val-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/._ala-val-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/._cmdline.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/._cmdline.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/._cohesins_from_rachel.fasta" afterPath="$PROJECT_DIR$/._cohesins_from_rachel.fasta" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/._common.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/._common.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/._container.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/._container.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/._dockerins_from_rachel.fasta" afterPath="$PROJECT_DIR$/._dockerins_from_rachel.fasta" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/._gen_input.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/._gen_input.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/._geometry.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/._geometry.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/._interface.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/._interface.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/development/._pdb_template.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/development/._pdb_template.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/._polar.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/._polar.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/._polar_param.txt" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/._polar_param.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/.name" afterPath="$PROJECT_DIR$/.idea/.name" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/COPYING" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/COPYING" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/Makefile" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/Makefile" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/README" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/README" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/README" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/README" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/__init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/__init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/__init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/__init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/__init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/__init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/__init__.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/__init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-ala-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-ala-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-ala-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-ala-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-arg-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-arg-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-arg-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-arg-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-asn-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-asn-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-asn-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-asn-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-asp-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-asp-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-asp-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-asp-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-cys-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-cys-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-cys-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-cys-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-gln-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-gln-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-gln-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-gln-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-glu-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-glu-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-glu-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-glu-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-gly-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-gly-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-gly-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-gly-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-his-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-his-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-his-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-his-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-ile-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-ile-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-ile-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-ile-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-leu-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-leu-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-leu-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-leu-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-lys-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-lys-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-lys-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-lys-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-met-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-met-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-met-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-met-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-phe-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-phe-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-phe-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-phe-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-pro-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-pro-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-pro-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-pro-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-ser-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-ser-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-ser-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-ser-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-thr-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-thr-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-thr-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-thr-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-trp-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-trp-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-trp-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-trp-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-tyr-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-tyr-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-tyr-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-tyr-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-val-ala.pdb" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/ala-val-ala.pdb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-val-ala.rib" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/peptides/rib/ala-val-ala.rib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all_RB.db" afterPath="$PROJECT_DIR$/all_RB.db" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all_coh.dnd" afterPath="$PROJECT_DIR$/all_coh.dnd" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all_coh.fasta" afterPath="$PROJECT_DIR$/all_coh.fasta" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all_coh.fasta_aln" afterPath="$PROJECT_DIR$/all_coh.fasta_aln" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all_doc.dnd" afterPath="$PROJECT_DIR$/all_doc.dnd" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all_doc.fasta" afterPath="$PROJECT_DIR$/all_doc.fasta" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/all_doc.fasta_aln" afterPath="$PROJECT_DIR$/all_doc.fasta_aln" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/cmdline.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/cmdline.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/common.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/common.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/container.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/container.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/crdfrmt.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/crdfrmt.f" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/doc_revert_to_WT.py" afterPath="$PROJECT_DIR$/doc_revert_to_WT.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/encodings.xml" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/gen_input.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/gen_input.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/helper/geometry.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/helper/geometry.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/interface.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/charmm/interface.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/job_makers.iml" afterPath="$PROJECT_DIR$/.idea/job_makers.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/mkwij.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/mkwij.f" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/development/pdb_template.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/development/pdb_template.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/polar.py" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/polar.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/polar_param.txt" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/pdb_data/polar_param.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/prescan.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/prescan.f" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/satkelni.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/satkelni.f" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/scopes/scope_settings.xml" afterPath="$PROJECT_DIR$/.idea/scopes/scope_settings.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/split_list_random.py" afterPath="$PROJECT_DIR$/split_list_random.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/satk/statacc.f" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/satk/statacc.f" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/t_coffee.err" afterPath="$PROJECT_DIR$/t_coffee.err" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/t_coffee.out" afterPath="$PROJECT_DIR$/t_coffee.out" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pdbTools_0.2.1/development/to-do" afterPath="$PROJECT_DIR$/pdbTools_0.2.1/development/to-do" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MyPDB.py" afterPath="$PROJECT_DIR$/MyPDB.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="job_makers.iws" />
@@ -198,7 +50,7 @@
       <file leaf-file-name="split_list_random.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/split_list_random.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="13" max-vertical-offset="920">
+            <state vertical-scroll-proportion="0.0" vertical-offset="220" max-vertical-offset="1040">
               <caret line="11" column="14" selection-start-line="11" selection-start-column="14" selection-end-line="11" selection-end-column="14" />
               <folding />
             </state>
@@ -208,10 +60,9 @@
       <file leaf-file-name="MyPDB.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/MyPDB.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.11025358" vertical-offset="0" max-vertical-offset="2740">
-              <caret line="34" column="52" selection-start-line="34" selection-start-column="52" selection-end-line="34" selection-end-column="52" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="8400" max-vertical-offset="9920">
+              <caret line="420" column="7" selection-start-line="420" selection-start-column="7" selection-end-line="420" selection-end-column="7" />
               <folding>
-                <element signature="e#306#1440#0" expanded="false" />
                 <element signature="e#369#497#0" expanded="true" />
                 <element signature="e#531#687#0" expanded="true" />
                 <element signature="e#730#754#0" expanded="true" />
@@ -224,8 +75,42 @@
                 <element signature="e#1855#1912#0" expanded="true" />
                 <element signature="e#1958#2035#0" expanded="true" />
                 <element signature="e#2086#2261#0" expanded="true" />
-                <element signature="e#3149#3639#0" expanded="true" />
-                <element signature="e#5102#5509#0" expanded="true" />
+                <element signature="e#2291#2318#0" expanded="true" />
+                <element signature="e#2350#2379#0" expanded="true" />
+                <element signature="e#2408#2857#0" expanded="true" />
+                <element signature="e#2964#3299#0" expanded="true" />
+                <element signature="e#3333#3468#0" expanded="true" />
+                <element signature="e#3511#3534#0" expanded="true" />
+                <element signature="e#3568#3622#0" expanded="true" />
+                <element signature="e#3652#3676#0" expanded="true" />
+                <element signature="e#3716#3744#0" expanded="true" />
+                <element signature="e#3793#4283#0" expanded="true" />
+                <element signature="e#4322#4402#0" expanded="true" />
+                <element signature="e#4441#4521#0" expanded="true" />
+                <element signature="e#4564#4737#0" expanded="true" />
+                <element signature="e#5023#5506#0" expanded="true" />
+                <element signature="e#5540#5847#0" expanded="true" />
+                <element signature="e#5884#6197#0" expanded="true" />
+                <element signature="e#6238#6645#0" expanded="true" />
+                <element signature="e#6717#6765#0" expanded="true" />
+                <element signature="e#6798#6850#0" expanded="true" />
+                <element signature="e#6884#6930#0" expanded="true" />
+                <element signature="e#6969#7038#0" expanded="true" />
+                <element signature="e#7078#7397#0" expanded="true" />
+                <element signature="e#7430#7673#0" expanded="true" />
+                <element signature="e#7713#7777#0" expanded="true" />
+                <element signature="e#7815#8201#0" expanded="true" />
+                <element signature="e#8237#8492#0" expanded="true" />
+                <element signature="e#8522#8784#0" expanded="true" />
+                <element signature="e#8825#9233#0" expanded="true" />
+                <element signature="e#9284#9891#0" expanded="true" />
+                <element signature="e#9942#10435#0" expanded="true" />
+                <element signature="e#10472#10983#0" expanded="true" />
+                <element signature="e#11012#11178#0" expanded="true" />
+                <element signature="e#11220#12042#0" expanded="true" />
+                <element signature="e#12079#12267#0" expanded="true" />
+                <element signature="e#12319#12459#0" expanded="true" />
+                <element signature="e#12493#12991#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -234,7 +119,7 @@
       <file leaf-file-name="doc_revert_to_WT.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/doc_revert_to_WT.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="800">
+            <state vertical-scroll-proportion="0.0" vertical-offset="2120" max-vertical-offset="2900">
               <caret line="106" column="19" selection-start-line="106" selection-start-column="19" selection-end-line="106" selection-end-column="19" />
               <folding />
             </state>
@@ -344,7 +229,6 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-2" />
     <option name="y" value="23" />
     <option name="width" value="1920" />
     <option name="height" value="1053" />
@@ -438,28 +322,8 @@
       <recent name="$PROJECT_DIR$/" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Doctest Residue.min_distance_res">
-    <configuration default="false" name="doc_revert_to_WT" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="job_makers" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/doc_revert_to_WT.py" />
-      <option name="PARAMETERS" value="" />
-      <RunnerSettings RunnerId="PyDebugRunner" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PyDebugRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method />
-    </configuration>
-    <configuration default="false" name="Doctest replace_by_index" type="tests" factoryName="Doctests" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python tests.Doctest is_point_infront_points_vec">
+    <configuration default="false" name="Doctest XYZ.dot" type="tests" factoryName="Doctests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs />
@@ -469,9 +333,72 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="job_makers" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/doc_revert_to_WT.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MyPDB.py" />
+      <option name="CLASS_NAME" value="XYZ" />
+      <option name="METHOD_NAME" value="dot" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_METHOD" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Doctest XYZ.__abs__" type="tests" factoryName="Doctests" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="job_makers" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MyPDB.py" />
+      <option name="CLASS_NAME" value="XYZ" />
+      <option name="METHOD_NAME" value="__abs__" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_METHOD" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Doctest XYZ.unit" type="tests" factoryName="Doctests" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="job_makers" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MyPDB.py" />
+      <option name="CLASS_NAME" value="XYZ" />
+      <option name="METHOD_NAME" value="unit" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_METHOD" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Doctest distance_two_point_to_point" type="tests" factoryName="Doctests" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="job_makers" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MyPDB.py" />
       <option name="CLASS_NAME" value="" />
-      <option name="METHOD_NAME" value="replace_by_index" />
+      <option name="METHOD_NAME" value="distance_two_point_to_point" />
       <option name="FOLDER_NAME" value="" />
       <option name="TEST_TYPE" value="TEST_FUNCTION" />
       <option name="PATTERN" value="" />
@@ -480,25 +407,7 @@
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method />
     </configuration>
-    <configuration default="false" name="MyPDB" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="job_makers" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MyPDB.py" />
-      <option name="PARAMETERS" value="" />
-      <RunnerSettings RunnerId="PyDebugRunner" />
-      <ConfigurationWrapper RunnerId="PyDebugRunner" />
-      <method />
-    </configuration>
-    <configuration default="false" name="Doctest Atom.distance" type="tests" factoryName="Doctests" temporary="true" nameIsGenerated="true">
+    <configuration default="false" name="Doctest is_point_infront_points_vec" type="tests" factoryName="Doctests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs />
@@ -509,31 +418,10 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="job_makers" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MyPDB.py" />
-      <option name="CLASS_NAME" value="Atom" />
-      <option name="METHOD_NAME" value="distance" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="is_point_infront_points_vec" />
       <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_METHOD" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method />
-    </configuration>
-    <configuration default="false" name="Doctest Residue.min_distance_res" type="tests" factoryName="Doctests" temporary="true" nameIsGenerated="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="job_makers" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MyPDB.py" />
-      <option name="CLASS_NAME" value="Residue" />
-      <option name="METHOD_NAME" value="min_distance_res" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_METHOD" />
+      <option name="TEST_TYPE" value="TEST_FUNCTION" />
       <option name="PATTERN" value="" />
       <option name="USE_PATTERN" value="false" />
       <RunnerSettings RunnerId="PythonRunner" />
@@ -662,19 +550,19 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.doc_revert_to_WT" />
-      <item index="1" class="java.lang.String" itemvalue="Python tests.Doctest replace_by_index" />
-      <item index="2" class="java.lang.String" itemvalue="Python.MyPDB" />
-      <item index="3" class="java.lang.String" itemvalue="Python tests.Doctest Atom.distance" />
-      <item index="4" class="java.lang.String" itemvalue="Python tests.Doctest Residue.min_distance_res" />
+      <item index="0" class="java.lang.String" itemvalue="Python tests.Doctest XYZ.dot" />
+      <item index="1" class="java.lang.String" itemvalue="Python tests.Doctest XYZ.__abs__" />
+      <item index="2" class="java.lang.String" itemvalue="Python tests.Doctest XYZ.unit" />
+      <item index="3" class="java.lang.String" itemvalue="Python tests.Doctest distance_two_point_to_point" />
+      <item index="4" class="java.lang.String" itemvalue="Python tests.Doctest is_point_infront_points_vec" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python tests.Doctest Residue.min_distance_res" />
-        <item index="1" class="java.lang.String" itemvalue="Python tests.Doctest Atom.distance" />
-        <item index="2" class="java.lang.String" itemvalue="Python.MyPDB" />
-        <item index="3" class="java.lang.String" itemvalue="Python.doc_revert_to_WT" />
-        <item index="4" class="java.lang.String" itemvalue="Python tests.Doctest replace_by_index" />
+        <item index="0" class="java.lang.String" itemvalue="Python tests.Doctest is_point_infront_points_vec" />
+        <item index="1" class="java.lang.String" itemvalue="Python tests.Doctest distance_two_point_to_point" />
+        <item index="2" class="java.lang.String" itemvalue="Python tests.Doctest XYZ.unit" />
+        <item index="3" class="java.lang.String" itemvalue="Python tests.Doctest XYZ.__abs__" />
+        <item index="4" class="java.lang.String" itemvalue="Python tests.Doctest XYZ.dot" />
       </list>
     </recent_temporary>
   </component>
@@ -692,7 +580,11 @@
       <created>1440605771560</created>
       <updated>1440605771560</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="MyPDB is now working....">
+      <created>1440700521832</created>
+      <updated>1440700521832</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -716,14 +608,14 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-2" y="23" width="1920" height="1053" extended-state="6" />
-    <editor active="true" />
+    <frame x="0" y="23" width="1920" height="1053" extended-state="6" />
+    <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32712215" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32941177" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2492163" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.20537125" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.20537125" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -753,9 +645,9 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2492163" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.20597585" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.37787056" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.37787056" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
     </layout-to-restore>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -774,7 +666,8 @@
       <TodoPanelSettings />
     </option>
     <MESSAGE value="first commit..." />
-    <option name="LAST_COMMIT_MESSAGE" value="first commit..." />
+    <MESSAGE value="MyPDB is now working...." />
+    <option name="LAST_COMMIT_MESSAGE" value="MyPDB is now working...." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1080,7 +973,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1920">
           <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1171,10 +1063,9 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/MyPDB.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.11025358" vertical-offset="0" max-vertical-offset="2740">
-          <caret line="34" column="52" selection-start-line="34" selection-start-column="52" selection-end-line="34" selection-end-column="52" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="8400" max-vertical-offset="9920">
+          <caret line="420" column="7" selection-start-line="420" selection-start-column="7" selection-end-line="420" selection-end-column="7" />
           <folding>
-            <element signature="e#306#1440#0" expanded="false" />
             <element signature="e#369#497#0" expanded="true" />
             <element signature="e#531#687#0" expanded="true" />
             <element signature="e#730#754#0" expanded="true" />
@@ -1187,8 +1078,42 @@
             <element signature="e#1855#1912#0" expanded="true" />
             <element signature="e#1958#2035#0" expanded="true" />
             <element signature="e#2086#2261#0" expanded="true" />
-            <element signature="e#3149#3639#0" expanded="true" />
-            <element signature="e#5102#5509#0" expanded="true" />
+            <element signature="e#2291#2318#0" expanded="true" />
+            <element signature="e#2350#2379#0" expanded="true" />
+            <element signature="e#2408#2857#0" expanded="true" />
+            <element signature="e#2964#3299#0" expanded="true" />
+            <element signature="e#3333#3468#0" expanded="true" />
+            <element signature="e#3511#3534#0" expanded="true" />
+            <element signature="e#3568#3622#0" expanded="true" />
+            <element signature="e#3652#3676#0" expanded="true" />
+            <element signature="e#3716#3744#0" expanded="true" />
+            <element signature="e#3793#4283#0" expanded="true" />
+            <element signature="e#4322#4402#0" expanded="true" />
+            <element signature="e#4441#4521#0" expanded="true" />
+            <element signature="e#4564#4737#0" expanded="true" />
+            <element signature="e#5023#5506#0" expanded="true" />
+            <element signature="e#5540#5847#0" expanded="true" />
+            <element signature="e#5884#6197#0" expanded="true" />
+            <element signature="e#6238#6645#0" expanded="true" />
+            <element signature="e#6717#6765#0" expanded="true" />
+            <element signature="e#6798#6850#0" expanded="true" />
+            <element signature="e#6884#6930#0" expanded="true" />
+            <element signature="e#6969#7038#0" expanded="true" />
+            <element signature="e#7078#7397#0" expanded="true" />
+            <element signature="e#7430#7673#0" expanded="true" />
+            <element signature="e#7713#7777#0" expanded="true" />
+            <element signature="e#7815#8201#0" expanded="true" />
+            <element signature="e#8237#8492#0" expanded="true" />
+            <element signature="e#8522#8784#0" expanded="true" />
+            <element signature="e#8825#9233#0" expanded="true" />
+            <element signature="e#9284#9891#0" expanded="true" />
+            <element signature="e#9942#10435#0" expanded="true" />
+            <element signature="e#10472#10983#0" expanded="true" />
+            <element signature="e#11012#11178#0" expanded="true" />
+            <element signature="e#11220#12042#0" expanded="true" />
+            <element signature="e#12079#12267#0" expanded="true" />
+            <element signature="e#12319#12459#0" expanded="true" />
+            <element signature="e#12493#12991#0" expanded="true" />
           </folding>
         </state>
       </provider>
