@@ -3,12 +3,15 @@ import pandas as pd
 import numpy as np
 import sys
 from sklearn.tree import DecisionTreeClassifier, export_graphviz
-from _binding_data import binding_data
+import argparse
+from pprint import pprint
+
 
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from numpy import array, arange
 
+from _binding_data import binding_data
 from seq_funcs import read_multi_fastas
 from AASeq import AASeq
 
@@ -21,18 +24,8 @@ from AASeq import AASeq
 
 aas = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
 aas_dict = {aa: i+1 for i, aa in enumerate(aas)}
-coh_core_aas = ['A', 'G', 'I', 'L', 'S', 'T', 'V']
+coh_core_aas = ['A', 'G', 'I', 'L', 'S', 'T', 'V'] # these are the residues that show up in the crystalised dimers
 doc_core_aas = ['A', 'C', 'F', 'I', 'L', 'V', 'Y']
-
-types = ['p', 'n', 'o', 'h']
-types_dict = {t: i+1 for i, t in enumerate(types)}
-rim_types_to_binary = {'p': [1, 0, 0, 0], 'n': [0, 1, 0, 0], 'o': [0, 0, 1, 0], 'h': [0, 0, 0, 1], '-': [0, 0, 0, 0]}
-type_to_res = {'p': ['K', 'R', 'H'], 'n': ['D', 'E'], 'o': ['N', 'Q', 'T', 'S', 'C'],
-               'h': ['L', 'I', 'M', 'V', 'A', 'F', 'W', 'Y', 'P', 'G'], 'NA': ['-']}
-
-doc_len_reduction = {'2b59': 96, '2ozn': 81}
-
-decision_tree_root = '/home/labs/fleishman/jonathaw/decision_tree/'
 
 ordered_positions = {'coh': ['coh_core_1', 'coh_core_2', 'coh_rim_1', 'coh_rim_2', 'coh_rim_3', 'coh_rim_4',
                              'coh_rim_5', 'coh_rim_6', 'coh_rim_7', 'coh_rim_8', 'coh_rim_9', 'coh_rim_10',
@@ -42,37 +35,146 @@ ordered_positions = {'coh': ['coh_core_1', 'coh_core_2', 'coh_rim_1', 'coh_rim_2
                              'doc_rim_4', 'doc_rim_5', 'doc_rim_6', 'doc_rim_7', 'doc_rim_8', 'doc_rim_9', 'doc_rim_10']
                      }
 
+types = ['p', 'n', 'o', 'h']
+
+columns = ['coh_name', 'doc_name', 'coh_seq', 'doc_seq'] + \
+              ['%s_%s' % (typ, aa) for typ in ordered_positions['coh'] if 'core' in typ for aa in coh_core_aas] + \
+              ['%s_%s' % (typ, aa) for typ in ordered_positions['coh'] if 'rim' in typ for aa in types] + \
+              ['%s_%s' % (typ, aa) for typ in ordered_positions['doc'] if 'core' in typ for aa in doc_core_aas] + \
+              ['%s_%s' % (typ, aa) for typ in ordered_positions['doc'] if 'rim' in typ for aa in types] + ['binders']
+
+
+types_dict = {t: i+1 for i, t in enumerate(types)}
+rim_types_to_binary = {'p': [1, 0, 0, 0], 'n': [0, 1, 0, 0], 'o': [0, 0, 1, 0], 'h': [0, 0, 0, 1], '-': [0, 0, 0, 0]}
+type_to_res = {'p': ['K', 'R', 'H'], 'n': ['D', 'E'], 'o': ['N', 'Q', 'T', 'S', 'C'],
+               'h': ['L', 'I', 'M', 'V', 'A', 'F', 'W', 'Y', 'P', 'G'], 'NA': ['-']}
+
+doc_len_reduction = {'2b59': 96, '2ozn': 81}
+
+decision_tree_root = '/home/labs/fleishman/jonathaw/decision_tree/'
+design_data_root = '/home/labs/fleishman/jonathaw/decision_tree/design_data/'
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-mode')
+    args = vars(parser.parse_args())
+
     data_df = parse_binding_data()
     prepared_df, identities_df = prepare_data(data_df)
-    # validate_data_frame(data_df, prepared_df)
     decision_tree, features = create_decision_tree(prepared_df)
 
-    # print(identities_df)
-    analyse_identity_df(identities_df)
-    sys.exit()
+    if args['mode'] == 'k_fold':
+        k_fold_test(prepared_df)
 
-    with open('decision_tree.dot', 'w') as fout:
-        print('creating decision tree.dot')
-        export_graphviz(decision_tree, out_file=fout, feature_names=features)
+    elif args['mode'] == 'validate_df':
+        validate_data_frame(data_df, prepared_df)
 
-    compare_observed_to_predicted(decision_tree, data_df, prepared_df[features])
+    elif args['mode'] == 'analyse_identities_df':
+        analyse_identity_df(identities_df)
+
+    elif args['mode'] == 'create_dt':
+        with open('decision_tree.dot', 'w') as fout:
+            print('creating decision tree.dot')
+            export_graphviz(decision_tree, out_file=fout, feature_names=features)
+            compare_observed_to_predicted(decision_tree, data_df, prepared_df[features])
+
+    elif args['mode'] == 'follow':
+        seq_to_follow(prepared_df, '2b59', '2b59')
+
+    elif args['mode'] == 'predict_all_designs':
+        print('getting design sequences')
+        design_df = get_design_data()
+        print('making prediction')
+        design_df['predict'] = decision_tree.predict(design_df[features])
+        with open(design_data_root+'diagonal_prediciton.txt', 'w+') as fout:
+            pd.set_option('display.max_rows', 9999999999999999999)
+            fout.write(str(design_df.loc[design_df['predict'] == 1]['coh_name']))
+
+    else:
+        print('no mode found')
 
 
-def create_decision_tree(df: pd.DataFrame) -> DecisionTreeClassifier:
+def get_design_data():
+    """
+    :return: goes over all designed coh-doc pairs and returns a DF similar to the one used to create the decision tree
+    """
+    dsn_cohs = read_multi_fastas(design_data_root+'all_designed_cohs.fasta', suffix_to_remove='.')
+    dsn_docs = read_multi_fastas(design_data_root+'all_designed_docs.fasta', suffix_to_remove='.')
+    df_ = pd.DataFrame(columns=columns, index=range(1, len(list(dsn_cohs.keys()))))
+
+    interface_positions = parse_interface_positions()
+
+    for i, doc_seq in enumerate(list(dsn_docs.values())):
+        coh_seq = dsn_cohs[doc_seq.name]
+        doc_model = doc_seq.name.split('A_')[1].split('_')[0]
+        coh_identities = {typ: coh_seq[pos] for typ, pos in interface_positions['coh']['1ohz'].items()}
+        doc_identities = {typ: doc_seq[pos] for typ, pos in interface_positions['doc'][doc_model].items()}
+
+        coh_core = [core_res_to_identity(coh_identities[v], 'coh') for v in ordered_positions['coh'] if 'core' in v]
+        coh_rim = [rim_res_to_type_binary(coh_identities[v]) for v in ordered_positions['coh'] if 'rim' in v]
+        doc_core = [core_res_to_identity(doc_identities[v], 'doc') for v in ordered_positions['doc'] if 'core' in v]
+        doc_rim = [rim_res_to_type_binary(doc_identities[v]) for v in ordered_positions['doc'] if 'rim' in v]
+
+        coh_core_list, coh_rim_list = [], []
+        [coh_core_list.append(a) for b in coh_core for a in b]
+        [coh_rim_list.append(a) for b in coh_rim for a in b]
+
+        doc_core_list, doc_rim_list = [], []
+        [doc_core_list.append(a) for b in doc_core for a in b]
+        [doc_rim_list.append(a) for b in doc_rim for a in b]
+
+        df_.loc[i+1] = [coh_seq.name, doc_seq.name, 0, 0] + coh_core_list + coh_rim_list + \
+                        doc_core_list + doc_rim_list + [None]
+
+    return df_
+
+
+def seq_to_follow(df: pd.DataFrame, coh_name: str, doc_name: str) -> None:
+    row = df.loc[df.coh_name == coh_name]# and df.doc_name == doc_name]
+    row_dict = row_to_dict(row)
+    for k, v in sorted(row_dict.items()):
+        print(k, v)
+
+
+def row_to_dict(row: pd.DataFrame) -> dict:
+    inter_dict = parse_interface_positions()
+    res = {'_'.join(col.split('_')[:-1]): col[-1] for col in row if row.iloc[0][col] == 1 and col != 'binders'}
+    return res
+
+
+def k_fold_test(df_: pd.DataFrame, k: int=4, n: int=1000):
+    df = df_.copy()
+    study_len = int((k-1)*np.floor(len(df.index)/k))
+    tps, tns, fps, fns = [], [], [], []
+    for i in range(n):
+        df = df.reindex(np.random.permutation(df.index))
+        dt, features = create_decision_tree(df[:study_len], verbose=False)
+
+        TP, TN, FP, FN = compare_observed_to_predicted(dt, df[study_len+1:], df[study_len+1:][features], show=False)
+        tps.append(TP)
+        tns.append(TN)
+        fps.append(FP)
+        fns.append(FN)
+    print('using k=%i over %i trials:\n' % (k, n))
+    print('true positive %2.3f true negative %2.3f' % (np.mean(tps), np.mean(tns)))
+    print('false positive %2.3f fasle negative %2.3f' % (np.mean(fps), np.mean(fns)))
+
+
+def create_decision_tree(df: pd.DataFrame, verbose=True) -> DecisionTreeClassifier:
     features = list(df.columns[4:-1])
 
     X = df[features]
     y = df['binders']
 
-    print('fitting tree')
-    dt = DecisionTreeClassifier()#min_samples_split=5)#, random_state=99)
+    if verbose:
+        print('fitting tree')
+    dt = DecisionTreeClassifier(min_samples_split=5)#, random_state=99)
     dt.fit(X, y)
     return dt, features
 
 
-def compare_observed_to_predicted(dt: DecisionTreeClassifier, data_df: pd.DataFrame, X) -> None:
+def compare_observed_to_predicted(dt: DecisionTreeClassifier, data_df: pd.DataFrame, X, show=True) \
+        -> (int, int, int, int):
     """
     :param dt: decision tree
     :param data_df: binding data
@@ -84,14 +186,23 @@ def compare_observed_to_predicted(dt: DecisionTreeClassifier, data_df: pd.DataFr
 
     predict = data_df[[0, 1, -2, -1]]
     df = pd.DataFrame(index=set(data_df.doc_name), columns=set(data_df.coh_name))
-    total = 0
-    for i in range(1, len(predict.index)+1):
+    total, false_positive, false_negative, true_positive, true_negative = 0, 0, 0, 0, 0
+    # for i in range(1, len(predict.index)+1):
+    for i in predict.index:
         row = predict.loc[i]
         df[row.coh_name][row.doc_name] = obs_pre[row.binders][row.prediction]
+
+        true_positive += 1 if obs_pre[row.binders][row.prediction] == 1 else 0
+        true_negative += 1 if obs_pre[row.binders][row.prediction] == 0 else 0
+        false_positive += 1 if obs_pre[row.binders][row.prediction] == 2 else 0
+        false_negative += 1 if obs_pre[row.binders][row.prediction] == 3 else 0
+
         if row.binders in [True, False]:
             total += 1
-    print('found a total of %i entries with known binding' % total)
-    show_predcition_matrix(df)
+    if show:
+        print('found a total of %i entries with known binding' % total)
+        show_predcition_matrix(df)
+    return true_positive, true_negative, false_positive, false_negative
 
 
 def show_predcition_matrix(prediction: pd.DataFrame) -> None:
@@ -197,7 +308,7 @@ def validate_data_frame(data_df: pd.DataFrame, prepared_df: pd.DataFrame) -> Non
     print('your df is validated')
 
 
-def row_to_dict(row) -> dict:
+def row_to_dict_old(row) -> dict:
     """
     :param row: row from binary data frame
     :return: dictionary portrayng the row
@@ -237,27 +348,16 @@ def prepare_data(in_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame):
     validate_aligned_non_aligned_interface_positions(interface_positions['coh'], cohs, cohs_non_aln)
     validate_aligned_non_aligned_interface_positions(interface_positions['doc'], docs, docs_non_aln)
 
-    # coh_1ohz = cohs['1OHZ']
-    # doc_1ohz = docs['1OHZ']
-    # coh_poses = [coh_1ohz.non_aligned_position_at_aligned(p) for p in coh_poses_1ohz]
-    # doc_poses = [doc_1ohz.non_aligned_position_at_aligned(p) for p in doc_poses_1ohz]
     coh_crys_seqs = [c for c in cohs.values() if c.name in ['1ohz', '2b59', '2ozn', '2vn5', '2y3n', '3ul4',
                                                                     '4fl4', '4fl5', '4dh2', '4uyp', '5new']]
     doc_crys_seqs = [d for d in docs.values() if d.name in ['1ohz', '2b59', '2ozn', '2vn5', '2y3n', '3ul4',
                                                                     '4fl4', '4fl5', '4dh2', '4uyp', '5new']]
-
     # columns = ['coh_name', 'doc_name', 'coh_seq', 'doc_seq'] + \
-    #           ['coh_core_%i_%s' % (v, aa) for k, v in ordered_positions.items() if 'core' in k for aa in aas] + \
-    #           ['coh_rim_%i_%s' % (v, t) for k, v in ordered_positions.items() if 'rim' in k for t in types] + \
-    #           ['doc_core_%i_%s' % (v, aa) for k, v in ordered_positions.items() if 'core' in k for aa in aas] + \
-    #           ['doc_rim_%i_%s' % (v, t) for k, v in ordered_positions.items() if 'rim' in k for t in types] + \
-    #           ['binders']
+    #           ['%s_%s' % (typ, aa) for typ in ordered_positions['coh'] if 'core' in typ for aa in aas] + \
+    #           ['%s_%s' % (typ, aa) for typ in ordered_positions['coh'] if 'rim' in typ for aa in types] + \
+    #           ['%s_%s' % (typ, aa) for typ in ordered_positions['doc'] if 'core' in typ for aa in aas] + \
+    #           ['%s_%s' % (typ, aa) for typ in ordered_positions['doc'] if 'rim' in typ for aa in types] + ['binders']
 
-    columns = ['coh_name', 'doc_name', 'coh_seq', 'doc_seq'] + \
-              ['%s_%s' % (typ, aa) for typ in ordered_positions['coh'] if 'core' in typ for aa in aas] + \
-              ['%s_%s' % (typ, aa) for typ in ordered_positions['coh'] if 'rim' in typ for aa in types] + \
-              ['%s_%s' % (typ, aa) for typ in ordered_positions['doc'] if 'core' in typ for aa in aas] + \
-              ['%s_%s' % (typ, aa) for typ in ordered_positions['doc'] if 'rim' in typ for aa in types] + ['binders']
     out_df = pd.DataFrame(index=range(1, len(in_df.index)), columns=columns)
 
     id_columns = ['coh_name', 'doc_name', 'coh_seq', 'doc_seq'] + ordered_positions['coh'] + ordered_positions['doc']
@@ -265,25 +365,21 @@ def prepare_data(in_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame):
 
     for i in range(1, len(in_df.index)+1):
         # find which crystal coh+doc are most similar
-        # get aligned positions accrotding to interface_positions
         similar_coh, coh_iden = highest_seq_similarity(coh_crys_seqs, in_df.loc[i]['coh_seq'])
         similar_doc, doc_iden = highest_seq_similarity(doc_crys_seqs, in_df.loc[i]['doc_seq'])
-        coh_identities = {typ: in_df.loc[i]['coh_seq'].get_aligned_positions([pos])[0] for typ, pos in coh_poses[similar_coh.name].items()}
-        doc_identities = {typ: in_df.loc[i]['doc_seq'].get_aligned_positions([pos])[0] for typ, pos in doc_poses[similar_doc.name].items()}
+
+        # get aligned positions accrotding to interface_positions
+        coh_identities = {typ: in_df.loc[i]['coh_seq'].get_aligned_positions([pos])[0] for typ, pos in
+                          coh_poses[similar_coh.name].items()}
+        doc_identities = {typ: in_df.loc[i]['doc_seq'].get_aligned_positions([pos])[0] for typ, pos in
+                          doc_poses[similar_doc.name].items()}
         # coh_ = in_df.loc[i]['coh_seq'].get_aligned_positions(coh_poses[similar_coh])
         # doc_ = in_df.loc[i]['doc_seq'].get_aligned_positions(doc_poses[similar_doc])
 
-        coh_core = [core_res_to_identity(coh_identities[v]) for v in ordered_positions['coh'] if 'core' in v]
+        coh_core = [core_res_to_identity(coh_identities[v], 'coh') for v in ordered_positions['coh'] if 'core' in v]
         coh_rim = [rim_res_to_type_binary(coh_identities[v]) for v in ordered_positions['coh'] if 'rim' in v]
-        doc_core = [core_res_to_identity(doc_identities[v]) for v in ordered_positions['doc'] if 'core' in v]
+        doc_core = [core_res_to_identity(doc_identities[v], 'doc') for v in ordered_positions['doc'] if 'core' in v]
         doc_rim = [rim_res_to_type_binary(doc_identities[v]) for v in ordered_positions['doc'] if 'rim' in v]
-        # coh_core, coh_rim = seq_to_binary(coh_, 'coh')
-        # doc_core, doc_rim = seq_to_binary(doc_, 'doc')
-
-        # print(coh_core)
-        # print(coh_rim)
-        # print(doc_core)
-        # print(doc_rim)
 
         coh_core_list, coh_rim_list = [], []
         [coh_core_list.append(a) for b in coh_core for a in b]
@@ -356,18 +452,23 @@ def rim_res_to_type_binary(res: str) -> list:
     return rim_types_to_binary[[k for k, v in type_to_res.items() if res in v][0]]
 
 
-def core_res_to_identity(res: str) -> list:
+def core_res_to_identity(res: str, coh_doc: str) -> list:
     """
     :param res: a residue
     :return: [0, 1] list portraying the residue
-    >>> core_res_to_identity('A')
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    >>> core_res_to_identity('Y')
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+    >>> core_res_to_identity('A', 'coh')
+    [1, 0, 0, 0, 0, 0, 0]
+    >>> core_res_to_identity('Y', 'coh')
+    [0, 0, 0, 0, 0, 0, 0]
     """
-    if res == '-':
-        return [0] * 20
-    return [1 if aa == res else 0 for aa in aas]
+    if coh_doc == 'coh':
+        if res == '-':
+            return [0] * len(coh_core_aas)
+        return [1 if aa == res else 0 for aa in coh_core_aas]
+    else:
+        if res == '-':
+            return [0] * len(doc_core_aas)
+        return [1 if aa == res else 0 for aa in doc_core_aas]
 
 
 def binary_to_res(binary: list) -> str:
@@ -404,11 +505,10 @@ def parse_binding_data() -> pd.DataFrame:
         for doc, res in docs_dict.items():
             result.loc[i] = [coh, doc, cohs[coh], docs[doc], vered_bind[coh][doc] == 1]
             i += 1
-    print('there are %i rows in the data' % (i-1))
     for name in ['1ohz', '2b59', '2ozn', '2vn5', '2y3n', '3ul4', '4fl4', '4fl5', '4dh2', '4uyp', '5new']:
         result.loc[i] = [name, name, cohs[name], docs[name], True]
         i += 1
-
+    print('there are %i rows in the data' % (i-1))
     return result
 
 
