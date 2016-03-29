@@ -1,4 +1,6 @@
-class Filter():
+import matplotlib.pyplot as plt
+import pandas as pd
+class Filter:
     def __init__(self, name: str, typ: str, threshold: float, limits: list, under_over: str,
                  g_name: str=None):
         self.filter_name = name
@@ -70,7 +72,7 @@ class Filter():
         self.threshold = threshold
 
 
-class RunFilters():
+class RunFilters:
     def __init__(self):
         """
 
@@ -158,3 +160,24 @@ def score2dict(file_name: str, verbose=False) -> dict:
                 results[s[fields['description']]]['total_score'] = results[s[fields['description']]]['score']
             results[s[fields['description']]]['description'] = s[fields['description']]
     return results
+
+
+def score_dict2df(sc_dict: dict) -> pd.DataFrame:
+    filters = list(sc_dict.values())[0].keys()
+    df = pd.DataFrame(columns=filters, index=sc_dict.keys())
+    for k, v in sc_dict.items():
+        for k1, v1 in v.items():
+            df[k1][k] = v1
+    return df
+
+
+def df2boxplots(sc_df: pd.DataFrame) -> None:
+    rows = 5
+    cols = (len(sc_df.keys()) / 5) + 1
+    for i, flt in enumerate(sc_df):
+        if flt == 'description':
+            continue
+        ax = plt.subplot(rows, cols, i+1)
+        plt.boxplot(sc_df[flt].tolist())
+        plt.title(flt)
+    plt.show()

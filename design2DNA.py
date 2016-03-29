@@ -3,6 +3,7 @@ import argparse
 import re
 from design2bins_by_posistions import parse_name_translation
 from seq_funcs import read_multi_fastas
+import os
 
 genetic_code = {"TTT": "F", "TTC": "F", "TTA": "L", "TTG": "L", "TCT": "S", "TCC": "s", "TCA": "S", "TCG": "S", "TAT":
                 "Y", "TAC": "Y", "TAA": "STOP", "TAG": "STOP", "TGT": "C", "TGC": "C", "TGA": "STOP", "TGG": "W",
@@ -138,6 +139,11 @@ def add_primers_to_all(args):
     for k, v in DNA_seqs.items():
         print('>%s' % k)
         print(add_primers(v.get_seq, args['type']))
+
+
+def protein2DNAWorks(aa_seq: str, restricted_seqs=['GGTCTC', 'CACCTGC']) -> str:
+
+
 
 
 if __name__ == '__main__':

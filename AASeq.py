@@ -1,5 +1,10 @@
 #!/usr/bin/env python3.5
+import math
+
 from List1 import List1
+from Bio.SeqUtils import molecular_weight
+from Bio.SeqUtils.ProtParam import ProteinAnalysis
+from Bio.Seq import Seq
 
 
 class AASeq():
@@ -56,6 +61,12 @@ class AASeq():
 
     def __contains__(self, item: str) -> bool:
         return self.seq[1:].__contains__(item)
+
+    def add_suffix(self, suffix: str) -> None:
+        self.seq += suffix
+
+    def add_prefix(self, prefix: str) -> None:
+        self.seq = '0' + prefix + self.get_seq()
 
     def index(self, aa: str) -> list:
         """
@@ -213,6 +224,40 @@ class AASeq():
         for i, aa in self.enumerate():
             identical += 1 if aa == other[i] else 0
         return float(identical) / float(len(self))
+
+    def calc_molecular_weight(self) -> float:
+        """
+        :return: protein seq molecular weight, float
+        """
+        return molecular_weight(self.get_seq(), seq_type='protein')
+
+    def calc_extinction_coefficient(self, reduced=True) -> float:
+        """
+        data and equation from http://web.expasy.org/protparam/protparam-doc.html
+        :param reduced: whether to calculate cysteins as SS bonds or not. if True then cys contribution is 0
+        :return: computed extinction coefficient
+        """
+        # AA extinction coefficients:
+        ext_tyr = 1490.
+        ext_trp = 5500.
+        ext_cystine = 125.
+
+        # number of residues:
+        num_tyr = self.seq.count('Y')
+        num_trp = self.seq.count('W')
+        num_cys = math.floor(self.seq.count('C') / 2) if not reduced else 0
+
+        return ext_tyr*num_tyr + ext_trp*num_trp + ext_cystine*num_cys
+
+    def calc_isoelectric_point(self) -> float:
+        """
+        using http://biopython.org/DIST/docs/api/Bio.SeqUtils.ProtParam-pysrc.html
+        :return: calculates the sequence's isoelectric point
+        """
+        protein_analysis = ProteinAnalysis(self.get_seq())
+        return protein_analysis.isoelectric_point()
+
+
 
 
 def compare_2_seqs(seq_1: AASeq, seq_2: AASeq, start=0) -> None:

@@ -1,10 +1,14 @@
 #!/usr/bin/env python3.5
+"""
+some use of http://chrisstrelioff.ws/sandbox/2015/06/08/decision_trees_in_python_with_scikit_learn_and_pandas.html
+"""
 import pandas as pd
 import numpy as np
 import sys
 from sklearn.tree import DecisionTreeClassifier, export_graphviz
 import argparse
-from pprint import pprint
+import pickle
+import time
 
 
 import matplotlib.pyplot as plt
@@ -54,14 +58,30 @@ doc_len_reduction = {'2b59': 96, '2ozn': 81}
 decision_tree_root = '/home/labs/fleishman/jonathaw/decision_tree/'
 design_data_root = '/home/labs/fleishman/jonathaw/decision_tree/design_data/'
 
+time_to_use = '06.1' # time.strftime("%d.%0-m")
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-mode')
+    parser.add_argument('-make_dt', type=bool, default=False)
+    parser.add_argument('-coh_name', type=str)
     args = vars(parser.parse_args())
 
-    data_df = parse_binding_data()
-    prepared_df, identities_df = prepare_data(data_df)
-    decision_tree, features = create_decision_tree(prepared_df)
+    if args['make_dt']:
+        print('making decision tree')
+        data_df = parse_binding_data()
+        prepared_df, identities_df = prepare_data(data_df)
+        decision_tree, features = create_decision_tree(prepared_df)
+        pickle.dump(decision_tree, open(decision_tree_root+'decision_tree_%s.obj' % time.strftime("%d.%0-m"), 'wb'))
+        pickle.dump(features, open(decision_tree_root+'features_%s.obj' % time.strftime("%d.%0-m"), 'wb'))
+        pickle.dump(prepared_df, open(decision_tree_root+'prepared_df_%s.obj' % time.strftime("%d.%0-m"), 'wb'))
+        pickle.dump(identities_df, open(decision_tree_root+'identities_df_%s.obj' % time.strftime("%d.%0-m"), 'wb'))
+    else:
+        print('reading decision tree')
+        decision_tree = pickle.load(open(decision_tree_root+'decision_tree_%s.obj' % time_to_use, 'rb'))
+        features = pickle.load(open(decision_tree_root+'features_%s.obj' % time_to_use, 'rb'))
+        prepared_df = pickle.load(open(decision_tree_root+'prepared_df_%s.obj' % time_to_use, 'rb'))
+        identities_df = pickle.load(open(decision_tree_root+'identities_df_%s.obj' % time_to_use, 'rb'))
 
     if args['mode'] == 'k_fold':
         k_fold_test(prepared_df)
@@ -81,7 +101,7 @@ def main():
     elif args['mode'] == 'follow':
         seq_to_follow(prepared_df, '2b59', '2b59')
 
-    elif args['mode'] == 'predict_all_designs':
+    elif args['mode'] == 'predict_all_designs_diagonal':
         print('getting design sequences')
         design_df = get_design_data()
         print('making prediction')
@@ -90,8 +110,59 @@ def main():
             pd.set_option('display.max_rows', 9999999999999999999)
             fout.write(str(design_df.loc[design_df['predict'] == 1]['coh_name']))
 
+    elif args['mode'] == 'pickle_design_sequences':
+        dsn_cohs = read_multi_fastas(design_data_root+'all_designed_cohs.fasta', suffix_to_remove='.')
+        dsn_docs = read_multi_fastas(design_data_root+'all_designed_docs.fasta', suffix_to_remove='.')
+        pickle.dump(dsn_cohs, open(design_data_root+'dsn_cohs_%s.obj' % time.strftime("%d.%0-m"), 'wb'))
+        pickle.dump(dsn_docs, open(design_data_root+'dsn_docs_%s.obj' % time.strftime("%d.%0-m"), 'wb'))
+
+    elif args['mode'] == 'predict_by_coh':
+        design_df = get_design_data_coh_vs_all(args['coh_name'])
+        print('predicting!!')
+        design_df['predict'] = decision_tree.predict(design_df[features])
+        with open(design_data_root+'all_vs_all_decision_tree_6Jan/'
+                          +args['coh_name']+'.txt', 'w+') as fout:
+            pd.set_option('display.max_rows', len(design_df))
+            fout.write(str(design_df[[0, 1, -1]])+'\n')
+            pd.reset_option('display.max_rows')
+
     else:
         print('no mode found')
+
+
+def get_design_data_coh_vs_all(coh_name: str) -> pd.DataFrame:
+    """
+    :return: goes over all designed coh-doc pairs and returns a DF similar to the one used to create the decision tree
+    """
+    dsn_cohs = pickle.load(open(design_data_root+'dsn_cohs_%s.obj' % time_to_use, 'rb'))
+    dsn_docs = pickle.load(open(design_data_root+'dsn_docs_%s.obj' % time_to_use, 'rb'))
+
+    coh_seq = dsn_cohs[coh_name]
+    df_ = pd.DataFrame(columns=columns, index=range(1, len(list(dsn_docs.keys()))))
+
+    interface_positions = parse_interface_positions()
+
+    for i, doc_seq in enumerate(list(dsn_docs.values())):
+        doc_model = doc_seq.name.split('A_')[1].split('_')[0]
+        coh_identities = {typ: coh_seq[pos] for typ, pos in interface_positions['coh']['1ohz'].items()}
+        doc_identities = {typ: doc_seq[pos] for typ, pos in interface_positions['doc'][doc_model].items()}
+
+        coh_core = [core_res_to_identity(coh_identities[v], 'coh') for v in ordered_positions['coh'] if 'core' in v]
+        coh_rim = [rim_res_to_type_binary(coh_identities[v]) for v in ordered_positions['coh'] if 'rim' in v]
+        doc_core = [core_res_to_identity(doc_identities[v], 'doc') for v in ordered_positions['doc'] if 'core' in v]
+        doc_rim = [rim_res_to_type_binary(doc_identities[v]) for v in ordered_positions['doc'] if 'rim' in v]
+
+        coh_core_list, coh_rim_list = [], []
+        [coh_core_list.append(a) for b in coh_core for a in b]
+        [coh_rim_list.append(a) for b in coh_rim for a in b]
+
+        doc_core_list, doc_rim_list = [], []
+        [doc_core_list.append(a) for b in doc_core for a in b]
+        [doc_rim_list.append(a) for b in doc_rim for a in b]
+
+        df_.loc[i+1] = [coh_seq.name, doc_seq.name, 0, 0] + coh_core_list + coh_rim_list + \
+                        doc_core_list + doc_rim_list + [None]
+    return df_
 
 
 def get_design_data():

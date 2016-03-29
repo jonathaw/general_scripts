@@ -2,6 +2,7 @@
 a class for making log files, during stdout print
 """
 import os
+import colorama
 
 
 class Logger():
@@ -14,7 +15,7 @@ class Logger():
 
     def log(self, string, to_print=True):
         if to_print:
-            print(string)
+            print(colorama.Fore.RED + colorama.Back.GREEN + string.rstrip() + colorama.Style.RESET_ALL)
         self.log_file.write(string+'\n')
 
     def close(self):

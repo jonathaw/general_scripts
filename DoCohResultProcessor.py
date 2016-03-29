@@ -9,10 +9,12 @@ from matplotlib.font_manager import FontProperties
 import matplotlib.pyplot as plt
 import matplotlib
 from pandas import DataFrame, Series
+import pandas as pd
 from collections import OrderedDict
 import os
 import re
 import random
+import sys
 
 matplotlib.rc_context(fname="/home/labs/fleishman/jonathaw/.matplotlib/publishable_matplotlibrc")
 
@@ -780,6 +782,68 @@ def analyse_minidiagonal(args):
     print('%i passed minidiagonal' % counter)
 
 
+def postdictions_summary(args):
+    from matplotlib import colors
+    from _binding_data import binding_data
+    obs_pre = {False: {False: 0, True: 2}, True: {False: 3, True: 1}}
+    binding_dict = binding_data()
+    results_root = '/home/labs/fleishman/jonathaw/no_backup/postdiction_new/results/'
+    # run_filters = generate_run_filters(args={'ddg': -16, 'sasa': 1200, 'shape': 0.5, 'packstat': 0.5, 'buried_2': 30,
+    #                                          'hbonds': 12})
+    # args_ = {'ddg': 12, 'sasa': 1400, 'shape': 0.45, 'packstat': 0.45, 'buried_2': 2, 'hbonds': 4}
+    # args_ = {'ddg': 14, 'sasa': 1400, 'shape': 0.6, 'packstat': 0.6, 'buried_2': 2, 'hbonds': 4} # harsh
+    args_ = {'ddg': 16, 'sasa': 1400, 'shape': 0.6, 'packstat': 0.6, 'buried_2': 2, 'hbonds': 6}
+    run_filters = generate_run_filters(args_)
+    sc_files = [a for a in os.listdir(results_root) if '.score' in a]
+
+    results, cohs, docs = {}, [], []
+    bar_width = len(sc_files)
+    sys.stdout.write("{%s}" % (" " * bar_width))
+    sys.stdout.flush()
+    sys.stdout.write("\b" * (bar_width+1))
+    for sc_file in sc_files:
+        sc_dict = score2dict(results_root+sc_file)
+        passed, failed = all_who_pass_run_filters(args, sc_dict, run_filters)
+        coh_name = sc_file.split('all_')[1].split('_on_')[0]
+        doc_name = re.split(pattern='_[0-9]{1,2}\.[0-9]{1,2}\.score', string=sc_file.split('_on_')[1])[0]
+        # print(len(passed), coh_name, doc_name, binding_dict[coh_name][doc_name])
+        if coh_name not in results.keys():
+            results[coh_name] = {}
+            cohs.append(coh_name)
+        if doc_name not in docs:
+            docs.append(doc_name)
+        results[coh_name][doc_name] = obs_pre[binding_dict[coh_name][doc_name]][len(passed) >= 10]
+        sys.stdout.write("%s" % random.choice(['!', '@', '#', '$', '%', '^', '&', '*', '(', ')']))
+        sys.stdout.flush()
+    sys.stdout.write("}\n")
+
+    # move data to data frame
+    df = pd.DataFrame(columns=sorted(docs), index=sorted(cohs), data=-100)
+    for coh, doc_dict in results.items():
+        for doc, res in doc_dict.items():
+            df[doc][coh] = res
+
+    df = df.transpose()
+    print(df)
+    axis = plt.gca()
+    cmap = colors.ListedColormap(['white', 'red', 'blue', 'green', 'yellow'])
+    bounds = [-101, -0.5, 0.5, 1.5, 2.5, 3.5]
+    norm = colors.BoundaryNorm(bounds, cmap.N)
+    heatmap = plt.pcolor(np.array(df), cmap=cmap, norm=norm, edgecolors='k', linewidth=2)
+    plt.yticks(np.arange(0.5, len(df.index), 1), [official_names(a) for a in df.index])
+    plt.xticks(np.arange(0.5, len(df.columns), 1), [official_names(a) for a in df.columns], rotation=70)
+    axis.set_aspect('equal')
+
+    legend = plt.colorbar(heatmap)
+    # legend.ax.set_yticklabels(['NA', 'TN', 'TP', 'FP', 'FN'])
+    legend.ax.get_yaxis().set_ticks([])
+    for j, lab in enumerate(['NA', 'TN', 'TP', 'FP', 'FN']):
+        legend.ax.text(.5, (2 * j + 1) / 10.0, lab, ha='center', va='center')
+    legend.ax.get_yaxis().labelpad = 15
+    plt.suptitle(str(args_))
+    plt.show()
+
+
 def prism(args):
     run_filters = generate_run_filters(args={'ddg': 16.0, 'sasa': 1200, 'shape': 0.6, 'packstat': 0.6, 'buried_2': 3,
                                              'hbonds': 10})
@@ -941,6 +1005,9 @@ if __name__ == '__main__':
 
     elif args['mode'] == 'prediction_results':
         prediction_results(args)
+
+    elif args['mode'] == 'postdictions_summary':
+        postdictions_summary(args)
 
     else:
         print('no mode found')
