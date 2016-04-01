@@ -21,7 +21,7 @@ from Equation import Expression
 from RosettaFilter import score2dict, score_dict2df, df2boxplots
 from Logger import Logger
 
-mpl.rc_context(fname="/home/labs/fleishman/jonathaw/.matplotlib/publishable_matplotlibrc")
+# mpl.rc_context(fname="/home/labs/fleishman/jonathaw/.matplotlib/publishable_matplotlibrc")
 lsf_username = 'jonatha'
 pwd = os.getcwd()+'/'
 all_configurations_path = pwd+'all_configs/'
@@ -29,10 +29,11 @@ all_configurations_path = pwd+'all_configs/'
 rosetta_executables_path = '/home/labs/fleishman/jonathaw/Rosetta/main/source/bin/'
 rosetta_script_exec_path = 'rosetta_scripts.default.linuxgccrelease'
 rosetta_database_path = '/home/labs/fleishman/jonathaw/Rosetta/main/database/'
+rosetta_membranepotential_path = rosetta_database_path + 'scoring/score_functions/MembranePotential/'
 protocols_path = '/home/labs/fleishman/jonathaw/elazaridis/protocols/'
 polyval_file_path = '/home/labs/fleishman/jonathaw/membrane_prediciton/mother_fucker_MET_LUE_VAL_sym_k_neg.txt' #'''polyval_21_5_15.txt'
 MPMutateRelax = 'MPMutateRelax.xml'
-MPFilterScan = 'MPFilterScan.xml'
+MPFilterScan = 'MPFilterScan_ELazaridis.xml'
 
 num_As = 26
 name = 'polyA'
@@ -50,6 +51,9 @@ aas_3_1 = {'ALA': 'A', 'CYS': 'C', 'ASP': 'D', 'GLU': 'E', 'PHE': 'F', 'GLY': 'G
            'TRP': 'W', 'TYR': 'Y'}
 aas_1_3 = {v: k for k, v in aas_3_1.items()}
 AAs = list('ACDEFGHIKLMNPQRSTVWY')
+
+color_map = {'full': 'blue', 'no_Menv': 'grey', 'elazar': 'red', 'ResSolv': 'purple', 'diff_ips': 'orange'}
+rmsd_iter = {aa: [] for aa in AAs}
 
 
 class PoZEnergy:
@@ -78,6 +82,28 @@ class InsertionProfile:
         self.residue_num = residue_num
         self.pos_score = pos_score
         self.poz_energy = pos_energy_dict_to_PoZEnergy_list(pos_score)
+        self.polynom = np.polyfit(Z, [x.energy for x in self.poz_energy], 4)
+
+    def polynom_at_z(self, z: float) -> float:
+        """
+        returns the polynoms value at z
+        """
+        return np.polyval(self.polynom, z)
+
+    def format_polyval(self):
+        """
+        print the polyval values for table
+        """
+        return ' '.join([str(a) for a in self.polynom])
+
+    def rmsd_ips(self, other) -> float:
+        """
+        retruns the difference between the IPs calculated as by RMSD over Z
+        """
+        res = 0.0
+        for z in Z:
+            res += (self.polynom_at_z(z) - other.polynom_at_z(z))**2
+        return np.sqrt(np.mean(res))
 
 
 def pos_energy_dict_to_PoZEnergy_list(pos_energy_dict: dict) -> list():
@@ -96,46 +122,108 @@ def subtract_IP_from_IP(ip1: InsertionProfile, ip2: InsertionProfile) -> Inserti
 
 
 def main():
-    global polyA_total_mean, logger
-    logger = Logger('elazaridis_%s.log' % time.strftime("%H_%M_%d_%b"))
     # create files for running benchmark
-    # create_polyA_fasta()
-    # sequence_to_idealized_helix()
-    # create_spanfile()
-    # trunctate_2nd_mem_res()
+    if args['full']:
+        create_polyA_fasta()
+        sequence_to_idealized_helix()
+        create_spanfile()
+        trunctate_2nd_mem_res()
 
-    # run the benchmark
-    # run_polyA_score_benchmark()
+    elazar_ips = create_elazar_ips()
 
-    # analyse benchmark
-    # polyA_bench_sc = score_dict2df(score2dict('%spolyA_benchmark.score' % pwd))
-    # polyA_total_mean = np.mean(polyA_bench_sc['score'].tolist())
-    # polyA_total_std = np.std(polyA_bench_sc['score'].tolist())
-    # logger.log('average polyA total score %.3f with std %.3f' % (polyA_total_mean, polyA_total_std))
+    # empty IPs for later
+    MPResSolv_remade_ips = {aa: InsertionProfile(aa, pos_score={x: 0 for x in range(1, num_As+1)}) for aa in AAs}
 
-    # run filterscan, and analyse results
+    # first FilterScan run. using null ResSolv
     all_cnfgs_df = filterscan_analysis()
     full_ips = create_insertion_profiles(all_cnfgs_df, 'full_normed')
     noMenv_ips = create_insertion_profiles(all_cnfgs_df, 'noMenv_normed')
-    elazar_ips = create_elazar_ips()
+    MPResSolv_ips = create_insertion_profiles(all_cnfgs_df, 'ResSolv_normed')
+
+    # calc the difference InsertionProfiles between Elazar and Rosetta. assign them as the polynom table
     diff_ips = {k: subtract_IP_from_IP(elazar_ips[k], noMenv_ips[k]) for k in AAs}
-    draw_filterscan_profiles(full_ips, noMenv_ips, elazar_ips, diff_ips)
-    # run_all_configurations()
-    # analyse_all_configuration()
+    create_polyval_table(diff_ips, 'ELazaridis_0.txt')
+
+    # analyse Rosetta again.
+    all_cnfgs_df = filterscan_analysis()
+    MPResSolv_current_ips = create_insertion_profiles(all_cnfgs_df, 'ResSolv_normed')
 
 
-def draw_filterscan_profiles(full_ips, noMenv_ips, elazar_ips, diff_ips) -> None:
+    # if args['show_fig']:
+    #     draw_filterscan_profiles(OrderedDict({'full': full_ips, 'no_Menv': noMenv_ips, 'ResSolv': MPResSolv_ips,
+    #                                           'diff_ips': diff_ips, 'elazar': elazar_ips}))
+
+    for aa in AAs:
+        rmsd = elazar_ips[aa].rmsd_ips(MPResSolv_current_ips[aa])
+        rmsd_iter[aa].append(rmsd)
+        logger.log('the RMSD between Elazar and ResSolv for %s is %.2f' % (aa, rmsd))
+
+    # as long as one residue's RMSD is higher than 0.5, keep iterating
+    iteration_num = 1
+    while any([elazar_ips[aa].rmsd_ips(MPResSolv_ips[aa]) > 0.5 for aa in AAs]):
+        a_profiles = {aa: subtract_IP_from_IP(elazar_ips[aa], MPResSolv_current_ips[aa]) for aa in AAs}
+        new_profiles = {aa: subtract_IP_from_IP(MPResSolv_current_ips[aa], a_profiles[aa]) for aa in AAs}
+        logger.log('created new profiles by subtracting the last MPResSolv from Elazar:')
+        for aa in AAs:
+            logger.log('%s %s' % (aa, new_profiles[aa].format_polyval()))
+        create_polyval_table(new_profiles, 'ELazaridis_%i.txt' % iteration_num)
+
+        logger.log('rerunning FilterScan analysis...')
+        all_cnfgs_df = filterscan_analysis()
+        MPResSolv_current_ips = create_insertion_profiles(all_cnfgs_df, 'ResSolv_normed')
+
+        for aa in AAs:
+            rmsd = elazar_ips[aa].rmsd_ips(MPResSolv_current_ips[aa])
+            rmsd_iter[aa].append(rmsd)
+            logger.log('the RMSD between Elazar and ResSolv for %s is %.2f' % (aa, rmsd))
+
+        logger.log('finished iteration number %i' % iteration_num)
+
+        iteration_num += 1
+        if iteration_num == 3:
+            break
+
+    logger.log('throught the run, the RMSD for the AAs have changes as such:')
+    for aa in AAs:
+        logger.log('%s %r' % (aa, rmsd_iter[aa]))
+
+    draw_rmsd_plots()
+    # if args['show_fig']:
+    #     draw_filterscan_profiles(OrderedDict({'full': full_ips, 'no_Menv': noMenv_ips, 'ResSolv': MPResSolv_ips,
+    #                                           'diff_ips': diff_ips, 'elazar': elazar_ips}))
+
+
+def create_polyval_table(diff_ips: dict, file_name: str) -> None:
+    """
+    creates a file_name with polynom values for all residues:
+    A float float float float (highest power first)
+    """
+    with open(pwd+file_name, 'w+') as fout:
+        for aa in AAs:
+            fout.write('%s %s\n' % (aa, diff_ips[aa].format_polyval()))
+    logger.log('created table at %s' % pwd+file_name)
+    if args['change_rosetta_table']:
+        shutil.copy(pwd+file_name, rosetta_membranepotential_path + args['polynom_table_file_name'])
+        logger.log('copied table to %s' % rosetta_membranepotential_path + args['polynom_table_file_name'])
+
+
+def draw_filterscan_profiles(ips_dict: OrderedDict) -> None:
     """
     draws all profiles
     """
     plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.15, hspace=0.45)
     for i, aa in enumerate(AAs):
         plt.subplot(5, 4, 1+i)
-        plt.plot(Z, [x.energy for x in full_ips[aa].poz_energy], color='blue', label='full')
-        plt.plot(Z, [x.energy for x in noMenv_ips[aa].poz_energy], color='red', linestyle='dashed', label='no M env')
+        for name, ips in ips_dict.items():
+            plt.plot(Z, [x.energy for x in ips[aa].poz_energy], color=color_map[name], label=name)
+        # plt.plot(Z, [x.energy for x in full_ips[aa].poz_energy], color='blue', label='full')
+        # plt.plot(Z, [x.energy for x in noMenv_ips[aa].poz_energy], color='red', linestyle='dashed', label='no M env')
         # plt.plot(Z, [x.energy-y.energy for x, y in zip(full_ips[aa].poz_energy, noMenv_ips[aa].poz_energy)], color='green')
-        plt.plot(Z, [x.energy for x in elazar_ips[aa].poz_energy], color='black', linestyle='dashed', label='Elazar')
-        plt.plot(Z, [x.energy for x in diff_ips[aa].poz_energy], color='purple', linestyle='dashed', label='Elazar-no_Menv')
+        # plt.plot(Z, [x.energy for x in elazar_ips[aa].poz_energy], color='black', linestyle='dashed', label='Elazar')
+        # plt.plot(Z, [x.energy for x in diff_ips[aa].poz_energy], color='purple', linestyle='dashed', label='Elazar-no_Menv')
+        # plt.plot(Z, [np.polyval(diff_ips[aa].polynom, z) for z in Z], color='green', label='diff fit')
+        # plt.plot(Z, [np.polyval(MPResSolv_ips[aa].polynom, z) for z in Z], color='orange', label='diff fit')
+        # plt.plot(Z, [np.polyval(MPResSolv_remade_ips[aa].polynom, z) for z in Z], color='cyan', label='remade ResSolv')
         plt.title(aa.upper())
         if aa == 'P':
             plt.ylim([-12, 5])
@@ -143,9 +231,28 @@ def draw_filterscan_profiles(full_ips, noMenv_ips, elazar_ips, diff_ips) -> None
             plt.ylim([-5, 5])
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     file_location = '%sprofile_comparison.png' % pwd
-    plt.savefig(file_location)
+    plt.savefig(file_location, dpi=600)
     logger.log('saving profile comparison figure to %s' % file_location)
     plt.show()
+
+
+def draw_sigmoidal_profiles(elazar_ips: dict) -> None:
+    from mpl_toolkits.mplot3d import axes3d
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    x_neighbors = np.array(range(0, 41))
+    z_Z = Z
+    y_energy = [[sigmoid(n, 0.5, -4) * pze.energy for pze in elazar_ips['W'].poz_energy] for n in x_neighbors]
+    print(x_neighbors)
+    print(z_Z)
+    print(y_energy)
+
+    ax.plot_wireframe(z_Z, x_neighbors, y_energy, rstride=10, cstride=10)
+
+
+def sigmoid(x, slope: float, offset: float) -> float:
+    return 1. / (1 + np.exp(slope*x+offset))
 
 
 def create_elazar_ips() -> dict:
@@ -185,15 +292,20 @@ def filterscan_analysis() -> pd.DataFrame:
     run the FilteScan protocol on the ployA and return results in data frame
     """
     # run FilterScan protocol to create sclog files for both full and no M env score functions
-    # command = '%s%s -database %s -parser:protocol %s -s %s -mp:setup:spanfiles %s -nstruct %i -overwrite -mp:scoring:hbond -parser:script_vars mut_pos=1 mut_iden=ALA' % (rosetta_executables_path, rosetta_script_exec_path, rosetta_database_path, protocols_path + MPFilterScan, pwd + name + '.pdb', pwd + name + '.span', nstruct)
-    # logger.log('running FilterScan protocol, issuing command:\n%s' % command)
-    # os.system(command)
+    if args['full']: # -unmute core.scoring.membrane.MPResSolvEnergy
+        command = '%s%s -database %s -parser:protocol %s -s %s -mp:setup:spanfiles %s -nstruct %i -overwrite ' \
+                  '-mp:scoring:hbond -mute all' % (rosetta_executables_path, rosetta_script_exec_path,
+                                                   rosetta_database_path, protocols_path + MPFilterScan,
+                                                   pwd + name + '.pdb', pwd + name + '.span', nstruct)
+        logger.log('running FilterScan protocol, issuing command:\n%s' % command)
+        os.system(command)
 
-    # logger.log('ran FilterScan. finished at %s' % time.strftime("%H:%M_%d%b"))
+        logger.log('ran FilterScan. finished at %s' % time.strftime("%H:%M_%d%b"))
 
     # parse both sclog files to {pos: {AA: score}}
     full_fs_log = parse_filterscan_log('memb_hires_full.sclog')
     noMenv_fs_log = parse_filterscan_log('memb_hires_no_Menv.sclog')
+    MPResSolv_fs_log = parse_filterscan_log('memb_hires_ResSolv.sclog')
 
     # create DataFrame
     df = pd.DataFrame()
@@ -201,21 +313,38 @@ def filterscan_analysis() -> pd.DataFrame:
         for pos in range(7, 33+1):
             df = df.append({'pos': pos-6, 'aa': aa,
                             'full': full_fs_log[pos][aa],
-                            'noMenv': noMenv_fs_log[pos][aa]},
+                            'noMenv': noMenv_fs_log[pos][aa],
+                            'res_solv': MPResSolv_fs_log[pos][aa]},
                            ignore_index=True)
 
     # calculate polyA scores in both score funcitons
     full_A_mean = df[df['aa'] == 'A']['full'].mean()
     noMenv_A_mean = df[df['aa'] == 'A']['noMenv'].mean()
+    MPResSolv_A_mean = df[df['aa'] == 'A']['res_solv'].mean()
 
     # calcualte delta of every mutant and the polyA for both score functions
     df['full_normed'] = df['full']-full_A_mean
     df['noMenv_normed'] = df['noMenv'] - noMenv_A_mean
+    df['ResSolv_normed'] = df['res_solv'] - MPResSolv_A_mean
 
     logger.log('mean of A at full score is %f' % full_A_mean)
     logger.log('mean of A at no M env is %f' % noMenv_A_mean)
+    logger.log('mean of A at MPResSolv env is %f' % MPResSolv_A_mean)
     return df
 
+
+def draw_rmsd_plots() -> None:
+    """
+    draw the rmsd over iteration plots
+    """
+    i = 0
+    for aa, rmsd_list in rmsd_iter.items():
+        plt.subplot(5, 4, 1 + i)
+        plt.plot(range(len(rmsd_list)), rmsd_list)
+        plt.title(aa)
+
+        i += 1
+    plt.show()
 
 def parse_filterscan_log(file_name) -> dict:
     """
@@ -287,7 +416,10 @@ def MakeHydrophobicityGrade():
     :return: returns a dictionary of the polynom values for each residue
     """
     global hydrophobicity_polyval
-    hydrophobicity_grade = open(polyval_file_path, 'r')
+    try:
+        hydrophobicity_grade = open(polyval_file_path, 'r')
+    except:
+        hydrophobicity_grade = open('/Volumes/labs/fleishman/jonathaw/membrane_prediciton/mother_fucker_MET_LUE_VAL_sym_k_neg.txt', 'r')
     hydrophobicity_polyval = {}
     for line in hydrophobicity_grade:
         split = line.split()
@@ -417,7 +549,7 @@ def sequence_to_idealized_helix() -> None:
     calls the Rosetta application that turns a sequence into a membrane embedded helix pdb
     """
     os.system('%shelix_from_sequence.default.linuxgccrelease -in:file:fasta %s '
-                    '-mp:setup:transform_into_membrane 1' % (rosetta_executables_path, pwd+name+'.fa'))
+                    '-mp:setup:transform_into_membrane 1 -mute all' % (rosetta_executables_path, pwd+name+'.fa'))
     shutil.move(pwd+'helix_from_sequence.pdb', pwd+name+'.pdb')
     print('created an idealised helix from %s and put it in %s' % (name, name+'.pdb'))
 
@@ -444,9 +576,17 @@ def trunctate_2nd_mem_res() -> None:
     print('removed the second membrane residue')
 
 if __name__ == '__main__':
+    global polyA_total_mean, logger, args
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('-mode')
-    parser.add_argument('-queue', default='new-all.q')
+    parser.add_argument('-mode', default='', type=str)
+    parser.add_argument('-queue', default='new-all.q', type=str)
+    parser.add_argument('-full', default=False, type=bool)
+    parser.add_argument('-show_fig', default=False, type=bool)
+    parser.add_argument('-polynom_table_file_name', default='ELazaridis_polynom_table.txt', type=str)
+    parser.add_argument('-change_rosetta_table', default=False, type=bool)
+
+    logger = Logger('elazaridis_%s.log' % time.strftime("%H_%M_%d_%b"))
 
     args = vars(parser.parse_args())
 
@@ -472,7 +612,11 @@ if __name__ == '__main__':
         sleep_until_jobs_finish()
 
     elif args['mode'] == 'test':
-        test()
+        elazar_ips = create_elazar_ips()
+        draw_sigmoidal_profiles(elazar_ips)
+
 
     else:
         print('unknown mode')
+
+    logger.close()

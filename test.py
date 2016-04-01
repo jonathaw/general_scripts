@@ -1,22 +1,22 @@
-import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import axes3d
 import matplotlib.pyplot as plt
-
-
-def randrange(n, vmin, vmax):
-    return (vmax - vmin)*np.random.rand(n) + vmin
+import numpy as np
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-n = 100
-for c, m, zl, zh in [('r', 'o', -50, -25), ('b', '^', -30, -5)]:
-    xs = randrange(n, 23, 32)
-    ys = randrange(n, 0, 100)
-    zs = randrange(n, zl, zh)
-    ax.scatter(xs, ys, zs, c=c, marker=m)
+# X, Y, Z = axes3d.get_test_data(0.05)
+#
+# print('X', X, type(X))
+# print('Y', Y)
+# print('Z', Z)
 
-ax.set_xlabel('X Label')
-ax.set_ylabel('Y Label')
-ax.set_zlabel('Z Label')
 
+X = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+Y = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+Z = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+
+ax.plot_wireframe(X, Y, Z, rstride=10, cstride=10)
+# plt.zlabel('Z')
+plt.xlabel('X')
+plt.ylabel('Y')
 plt.show()
