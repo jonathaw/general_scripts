@@ -15,7 +15,7 @@ class Logger():
 
     def log(self, string, to_print=True):
         if to_print:
-            print(colorama.Fore.RED + colorama.Back.GREEN + string.rstrip() + colorama.Style.RESET_ALL)
+            print(colorama.Fore.RED + colorama.Back.GREEN + string + colorama.Style.RESET_ALL)
         self.log_file.write(string+'\n')
 
     def close(self):

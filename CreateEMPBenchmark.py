@@ -40,7 +40,7 @@ from Equation import Expression
 from RosettaFilter import score2dict, score_dict2df, df2boxplots
 from Logger import Logger
 
-# mpl.rc_context(fname="/home/labs/fleishman/jonathaw/.matplotlib/publishable_matplotlibrc")
+mpl.rc_context(fname="/home/labs/fleishman/jonathaw/.matplotlib/publishable_matplotlibrc")
 LSF_USERNAME = 'jonatha'
 PWD = os.getcwd() + '/'
 all_configurations_path = PWD + 'all_configs/'
@@ -53,16 +53,17 @@ PROTOCOLS_PATH = '/home/labs/fleishman/jonathaw/elazaridis/protocols/'
 ELAZAR_POLYVAL_PATH = '/home/labs/fleishman/jonathaw/membrane_prediciton/mother_fucker_MET_LUE_VAL_sym_k_neg.txt' #'''polyval_21_5_15.txt'
 MPMutateRelax_XML = 'MPMutateRelax.xml'
 MPFilterScan_XML = 'MPFilterScan_ELazaridis.xml'
+MPFilterScanDifferentSF = 'MPFilterScanDifferentSF.xml'
 
 RMSD_THRESHOLD = 0.5
 NUM_AAS = 26
 POLY_A_NAME = 'polyA'
-nstruct = 1 #0
-membrane_half_depth = 15
-lazaridis_poly_deg = 4
-flank_size = 6
-Z = np.linspace(-membrane_half_depth, membrane_half_depth, num=NUM_AAS)
-pos_z_dict = {i+1: z for i, z in enumerate(Z)}
+NSTRUCT = 1 #0
+MEMBRANE_HALF_WIDTH = 15
+LAZARIDIS_POLY_DEG = 4
+FLANK_SIZE = 6
+Z = np.linspace(-MEMBRANE_HALF_WIDTH, MEMBRANE_HALF_WIDTH, num=NUM_AAS)
+POS_Z_DICT = {i + 1: z for i, z in enumerate(Z)}
 
 aas_names = ['ALA', 'CYS', 'ASP', 'GLU', 'PHE', 'GLY', 'HIS', 'ILE', 'LYS', 'LEU', 'MET', 'ASN', 'PRO', 'GLN', 'ARG',
              'SER', 'THR', 'VAL', 'TRP', 'TYR']
@@ -72,11 +73,14 @@ aas_3_1 = {'ALA': 'A', 'CYS': 'C', 'ASP': 'D', 'GLU': 'E', 'PHE': 'F', 'GLY': 'G
 aas_1_3 = {v: k for k, v in aas_3_1.items()}
 AAs = list('ACDEFGHIKLMNPQRSTVWY')
 
-color_map = {'full': 'blue', 'no_Menv': 'grey', 'elazar': 'red', 'ResSolv': 'purple', 'diff_ips': 'orange'}
-rmsd_iter = {aa: [] for aa in AAs}
+COLOR_MAP = {'full': 'blue', 'no_Menv': 'grey', 'elazar': 'red', 'ResSolv': 'purple', 'diff_ips': 'orange'}
+RMSD_ITERATIONS = {aa: [] for aa in AAs}
 
 
 class PoZEnergy:
+    """
+    container for sequence position, membrane depth and energy. simplifies code.
+    """
     def __init__(self, pos: int, z: float, energy: float):
         self.pos = pos
         self.z = z
@@ -93,7 +97,12 @@ class PoZEnergy:
 
 
 class InsertionProfile:
-    def __init__(self, aa: str, pos_score: dict, membrane_half_depth: int=membrane_half_depth, residue_num: int=NUM_AAS):
+    """
+    a single residue insertion profile described by either a sorted list of PoZEnergy instances (poz_energy) or by
+    polynum
+    """
+    def __init__(self, aa: str, pos_score: dict, membrane_half_depth: int=MEMBRANE_HALF_WIDTH,
+                 residue_num: int=NUM_AAS):
         """
 
         """
@@ -102,7 +111,17 @@ class InsertionProfile:
         self.residue_num = residue_num
         self.pos_score = pos_score
         self.poz_energy = pos_energy_dict_to_PoZEnergy_list(pos_score)
-        self.polynom = np.polyfit(Z, [x.energy for x in self.poz_energy], 4)
+        self.polynom = np.polyfit(Z, [x.energy for x in self.poz_energy], LAZARIDIS_POLY_DEG)
+
+    def __repr__(self):
+        res = '<InsertionProfile for %s>\n' % self.AA
+        res += '\t<poz_energy>\n'
+        for a in self.poz_energy:
+            res += '\t\t<%s/>\n' % a
+        res += '\t<poz_energy/>\n'
+        res += '<polynom: %.2f*z^4 + %.2f*z^3 %.2f*z^2 %.2f*z + %.2f />' % self.polynom
+        res += '<InsertionProfile for %s/>\n' % self.AA
+        return res
 
     def polynom_at_z(self, z: float) -> float:
         """
@@ -132,7 +151,7 @@ def pos_energy_dict_to_PoZEnergy_list(pos_energy_dict: dict) -> list():
     """
     result = []
     for pos in range(1, NUM_AAS+1):
-        result.append(PoZEnergy(pos, pos_z_dict[pos], pos_energy_dict[pos]))
+        result.append(PoZEnergy(pos, POS_Z_DICT[pos], pos_energy_dict[pos]))
     return result
 
 
@@ -151,41 +170,33 @@ def main():
 
     elazar_ips = create_elazar_ips()
 
-    # empty IPs for later
-    # MPResSolv_remade_ips = {aa: InsertionProfile(aa, pos_score={x: 0 for x in range(1, NUM_AAS + 1)}) for aa in AAs}
-
     # first FilterScan run. using null ResSolv
-    all_cnfgs_df = filterscan_analysis()
-    full_ips = create_insertion_profiles(all_cnfgs_df, 'full_normed')
-    noMenv_ips = create_insertion_profiles(all_cnfgs_df, 'noMenv_normed')
-    # MPResSolv_ips = create_insertion_profiles(all_cnfgs_df, 'ResSolv_normed')
+    full_ips = filterscan_analysis_energy_func('full')
+    noMenv_ips = filterscan_analysis_energy_func('noMenv')
 
     # calc the difference InsertionProfiles between Elazar and Rosetta. assign them as the polynom table
     diff_ips = {k: subtract_IP_from_IP(elazar_ips[k], noMenv_ips[k]) for k in AAs}
     create_polyval_table(diff_ips, 'ELazaridis_0.txt')
 
     # analyse Rosetta again.
-    all_cnfgs_df = filterscan_analysis()
-    MPResSolv_current_ips = create_insertion_profiles(all_cnfgs_df, 'ResSolv_normed')
+    MPResSolv_current_ips = filterscan_analysis_energy_func('ResSolv')
 
-
-    # if args['show_fig']:
-    #     draw_filterscan_profiles(OrderedDict({'full': full_ips, 'no_Menv': noMenv_ips, 'ResSolv': MPResSolv_ips,
-    #                                           'diff_ips': diff_ips, 'elazar': elazar_ips}))
+    draw_filterscan_profiles(OrderedDict({'full': full_ips, 'no_Menv': noMenv_ips, 'ResSolv': MPResSolv_current_ips,
+                                          'diff_ips': diff_ips, 'elazar': elazar_ips}))
 
     for aa in AAs:
         rmsd = elazar_ips[aa].rmsd_ips(MPResSolv_current_ips[aa])
-        rmsd_iter[aa].append(rmsd)
+        RMSD_ITERATIONS[aa].append(rmsd)
         logger.log('the RMSD between Elazar and ResSolv for %s is %.2f' % (aa, rmsd))
 
-    # as long as one residue's RMSD is higher than 0.5, keep iterating
+    # as long as one residue's RMSD is higher than threshold, keep iterating
     iteration_num = 1
     while any([elazar_ips[aa].rmsd_ips(MPResSolv_current_ips[aa]) > RMSD_THRESHOLD for aa in AAs]):
         # polynom arithmetics to calibrate the polynoms, only for AAs with RMSD higher than threshold
-        a_profiles = {aa: subtract_IP_from_IP(elazar_ips[aa], MPResSolv_current_ips[aa])
-                      for aa in AAs if elazar_ips[aa].rmsd_ips(MPResSolv_current_ips[aa]) > RMSD_THRESHOLD}
-        new_profiles = {aa: subtract_IP_from_IP(MPResSolv_current_ips[aa], a_profiles[aa])
-                        for aa in AAs if elazar_ips[aa].rmsd_ips(MPResSolv_current_ips[aa]) > RMSD_THRESHOLD}
+        a_profiles = {aa: subtract_IP_from_IP(elazar_ips[aa], MPResSolv_current_ips[aa]) if elazar_ips[aa].rmsd_ips(
+            MPResSolv_current_ips[aa]) > RMSD_THRESHOLD else MPResSolv_current_ips[aa] for aa in AAs}
+        new_profiles = {aa: subtract_IP_from_IP(MPResSolv_current_ips[aa], a_profiles[aa]) if elazar_ips[aa].rmsd_ips(
+            MPResSolv_current_ips[aa]) > RMSD_THRESHOLD else MPResSolv_current_ips[aa] for aa in AAs}
 
         # report the status
         logger.log('created new profiles by subtracting the last MPResSolv from Elazar:')
@@ -195,12 +206,11 @@ def main():
         create_polyval_table(new_profiles, 'ELazaridis_%i.txt' % iteration_num)
 
         logger.log('rerunning FilterScan analysis...')
-        all_cnfgs_df = filterscan_analysis()
-        MPResSolv_current_ips = create_insertion_profiles(all_cnfgs_df, 'ResSolv_normed')
+        MPResSolv_current_ips = filterscan_analysis_energy_func('ResSolv')
 
         for aa in AAs:
             rmsd = elazar_ips[aa].rmsd_ips(MPResSolv_current_ips[aa])
-            rmsd_iter[aa].append(rmsd)
+            RMSD_ITERATIONS[aa].append(rmsd)
             logger.log('the RMSD between Elazar and ResSolv for %s is %.2f' % (aa, rmsd))
 
         logger.log('finished iteration number %i' % iteration_num)
@@ -211,12 +221,13 @@ def main():
 
     logger.log('throught the run, the RMSD for the AAs have changes as such:')
     for aa in AAs:
-        logger.log('%s %r' % (aa, rmsd_iter[aa]))
+        logger.log('%s %r' % (aa, RMSD_ITERATIONS[aa]))
 
     draw_rmsd_plots()
-    # if args['show_fig']:
-    #     draw_filterscan_profiles(OrderedDict({'full': full_ips, 'no_Menv': noMenv_ips, 'ResSolv': MPResSolv_ips,
-    #                                           'diff_ips': diff_ips, 'elazar': elazar_ips}))
+    draw_filterscan_profiles(OrderedDict({'full': full_ips, 'no_Menv': noMenv_ips, 'ResSolv': MPResSolv_current_ips,
+                                          'diff_ips': diff_ips, 'elazar': elazar_ips}))
+    if args['show_fig']:
+        plt.show()
 
 
 def create_polyval_table(diff_ips: dict, file_name: str) -> None:
@@ -237,19 +248,12 @@ def draw_filterscan_profiles(ips_dict: OrderedDict) -> None:
     """
     draws all profiles
     """
+    plt.figure()
     plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.15, hspace=0.45)
     for i, aa in enumerate(AAs):
         plt.subplot(5, 4, 1+i)
         for name, ips in ips_dict.items():
-            plt.plot(Z, [x.energy for x in ips[aa].poz_energy], color=color_map[name], label=name)
-        # plt.plot(Z, [x.energy for x in full_ips[aa].poz_energy], color='blue', label='full')
-        # plt.plot(Z, [x.energy for x in noMenv_ips[aa].poz_energy], color='red', linestyle='dashed', label='no M env')
-        # plt.plot(Z, [x.energy-y.energy for x, y in zip(full_ips[aa].poz_energy, noMenv_ips[aa].poz_energy)], color='green')
-        # plt.plot(Z, [x.energy for x in elazar_ips[aa].poz_energy], color='black', linestyle='dashed', label='Elazar')
-        # plt.plot(Z, [x.energy for x in diff_ips[aa].poz_energy], color='purple', linestyle='dashed', label='Elazar-no_Menv')
-        # plt.plot(Z, [np.polyval(diff_ips[aa].polynom, z) for z in Z], color='green', label='diff fit')
-        # plt.plot(Z, [np.polyval(MPResSolv_ips[aa].polynom, z) for z in Z], color='orange', label='diff fit')
-        # plt.plot(Z, [np.polyval(MPResSolv_remade_ips[aa].polynom, z) for z in Z], color='cyan', label='remade ResSolv')
+            plt.plot(Z, [x.energy for x in ips[aa].poz_energy], color=COLOR_MAP[name], label=name)
         plt.title(aa.upper())
         if aa == 'P':
             plt.ylim([-12, 5])
@@ -259,7 +263,6 @@ def draw_filterscan_profiles(ips_dict: OrderedDict) -> None:
     file_location = '%sprofile_comparison.png' % PWD
     plt.savefig(file_location, dpi=600)
     logger.log('saving profile comparison figure to %s' % file_location)
-    plt.show()
 
 
 def draw_sigmoidal_profiles(elazar_ips: dict) -> None:
@@ -322,7 +325,7 @@ def filterscan_analysis() -> pd.DataFrame:
         command = '%s%s -database %s -parser:protocol %s -s %s -mp:setup:spanfiles %s -nstruct %i -overwrite ' \
                   '-mp:scoring:hbond -mute all' % (ROSETTA_EXECUTABLES_PATH, ROSETTA_SCRIPTS_EXEC_PATH,
                                                    ROSETTA_DATABASE_PATH, PROTOCOLS_PATH + MPFilterScan_XML,
-                                                   PWD + POLY_A_NAME + '.pdb', PWD + POLY_A_NAME + '.span', nstruct)
+                                                   PWD + POLY_A_NAME + '.pdb', PWD + POLY_A_NAME + '.span', NSTRUCT)
         logger.log('running FilterScan protocol, issuing command:\n%s' % command)
         os.system(command)
 
@@ -359,12 +362,54 @@ def filterscan_analysis() -> pd.DataFrame:
     return df
 
 
+def filterscan_analysis_energy_func(energy_function) -> dict:
+    """
+    run the FilteScan protocol on the ployA and return InsertionProfiles dict for energy_function
+    """
+    # run FilterScan protocol to create sclog files for both full and no M env score functions
+    if args['full']: # -unmute core.scoring.membrane.MPResSolvEnergy
+        command = '%s%s -database %s -parser:protocol %s -s %s -mp:setup:spanfiles %s -nstruct %i -overwrite ' \
+                  '-mp:scoring:hbond -mute all -parser:script_vars energy_function=%s' % \
+                  (ROSETTA_EXECUTABLES_PATH, ROSETTA_SCRIPTS_EXEC_PATH, ROSETTA_DATABASE_PATH,
+                   PROTOCOLS_PATH + MPFilterScanDifferentSF, PWD + POLY_A_NAME + '.pdb', PWD + POLY_A_NAME + '.span', NSTRUCT,
+                   energy_function)
+        logger.log('running FilterScan for the energy function %s protocol, issuing command:\n%s' %
+                   (energy_function, command))
+        os.system(command)
+
+        logger.log('ran FilterScan for energy function %s. finished at %s' %
+                   (energy_function, time.strftime("%H:%M_%d%b")))
+
+    # parse both sclog files to {pos: {AA: score}}
+    temp_fs_log = parse_filterscan_log('temp.sclog')
+    shutil.move('temp.sclog', '%s.sclog' % energy_function)
+    logger.log('saved the FilterScan sclog to %s.sclog' % energy_function)
+
+    # create DataFrame
+    df = pd.DataFrame()
+    for aa in AAs:
+        for pos in range(FLANK_SIZE+1, NUM_AAS+FLANK_SIZE+1+1):
+            df = df.append({'pos': pos-FLANK_SIZE, 'aa': aa, energy_function: temp_fs_log[pos][aa]}, ignore_index=True)
+
+    # calculate polyA scores in both score funcitons
+    temp_A_mean = df[df['aa'] == 'A'][energy_function].mean()
+
+    # calcualte delta of every mutant and the polyA for both score functions
+    df['%s_normed' % energy_function] = df[energy_function]-temp_A_mean
+
+    logger.log('mean of A for %s is %f' % (energy_function, temp_A_mean))
+
+    ips = create_insertion_profiles(df, '%s_normed' % energy_function)
+    return ips
+
+
 def draw_rmsd_plots() -> None:
     """
     draw the rmsd over iteration plots
     """
     i = 0
-    for aa, rmsd_list in rmsd_iter.items():
+    plt.figure()
+    for aa, rmsd_list in RMSD_ITERATIONS.items():
         plt.subplot(5, 4, 1 + i)
         plt.plot(range(len(rmsd_list)), rmsd_list)
         plt.title(aa)
@@ -377,7 +422,7 @@ def parse_filterscan_log(file_name) -> dict:
     """
     parse a FilterScan run log file, returns dict {position: {AA: score}}
     """
-    result = {i: {aa: None for aa in AAs} for i in range(1, NUM_AAS + flank_size * 2 + 1)}
+    result = {i: {aa: None for aa in AAs} for i in range(1, NUM_AAS + FLANK_SIZE * 2 + 1)}
     for l in open(file_name, 'r'):
         s = l.split()
         if len(s) >= 4:
@@ -409,7 +454,7 @@ def run_all_configurations():
 
 
 def create_profiles():
-    profiles = {aa: {pos: None for pos in range(flank_size + 1, flank_size + NUM_AAS + 1)} for aa in aas_names}
+    profiles = {aa: {pos: None for pos in range(FLANK_SIZE + 1, FLANK_SIZE + NUM_AAS + 1)} for aa in aas_names}
     sc_files = [a for a in os.listdir(all_configurations_path) if '.sc' in a]
     for sc_file in sc_files:
         sc = score2dict(all_configurations_path+sc_file)
@@ -418,12 +463,12 @@ def create_profiles():
         pos = int(sc_file.split('_')[2].split('.')[0])
         profiles[aa][pos] = np.mean(df['score']) - polyA_total_mean
         print('for res %s in pos %i found %.3f mean with %.3f std' % (aa, pos, np.mean(df['score']), np.std(df['score'])))
-    membrane_position = np.linspace(-membrane_half_depth, membrane_half_depth, endpoint=True, num=NUM_AAS)
+    membrane_position = np.linspace(-MEMBRANE_HALF_WIDTH, MEMBRANE_HALF_WIDTH, endpoint=True, num=NUM_AAS)
     print('AAAA', membrane_position)
-    mm_profiles = {aa: OrderedDict((membrane_position[pos-flank_size-1], profiles[aa][pos])
-                                   for pos in range(flank_size + 1, flank_size + NUM_AAS + 1)) for aa in aas_names}
+    mm_profiles = {aa: OrderedDict((membrane_position[pos - FLANK_SIZE - 1], profiles[aa][pos])
+                                   for pos in range(FLANK_SIZE + 1, FLANK_SIZE + NUM_AAS + 1)) for aa in aas_names}
     print(mm_profiles)
-    mm_polys = {aa: np.polyfit(list(mm_profiles[aa].keys()), list(mm_profiles[aa].values()), lazaridis_poly_deg)
+    mm_polys = {aa: np.polyfit(list(mm_profiles[aa].keys()), list(mm_profiles[aa].values()), LAZARIDIS_POLY_DEG)
                 for aa in aas_names}
     mm_eqs = {aa: Expression('+'.join('%f*z^%i' % (n, i) for i, n in enumerate(mm_polys[aa][::-1])),
                              argorder=['z']) for aa, val in mm_polys.items()}
@@ -458,7 +503,7 @@ def MakeHydrophobicityGrade():
 def draw_profiles(mm_profiles: dict, mm_eqs: dict):
     fig = plt.figure()
     elazar_profiles = get_elazar_scale()
-    z = np.linspace(-membrane_half_depth, membrane_half_depth, endpoint=True, num=NUM_AAS + 1)
+    z = np.linspace(-MEMBRANE_HALF_WIDTH, MEMBRANE_HALF_WIDTH, endpoint=True, num=NUM_AAS + 1)
     for i, (aa, val) in enumerate(mm_profiles.items()):
         ax = plt.subplot(5, 4, i+1)
         # Lazaridis - line
@@ -472,7 +517,7 @@ def draw_profiles(mm_profiles: dict, mm_eqs: dict):
 
         # plot attributes
         plt.title(aa)
-        plt.xlim([-(membrane_half_depth+0.5), membrane_half_depth+0.5])
+        plt.xlim([-(MEMBRANE_HALF_WIDTH + 0.5), MEMBRANE_HALF_WIDTH + 0.5])
         plt.ylim([-3., 3.])#-5., 6.
     ax.legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
     plt.show()
@@ -490,7 +535,7 @@ def sleep_until_jobs_finish() -> None:
 def make_all_configurations_jobs():
     shutil.copy(PWD + POLY_A_NAME + '.span', './')
     shutil.copy(PWD + POLY_A_NAME + '.pdb', './')
-    for i in range(flank_size+1, flank_size+NUM_AAS+1):
+    for i in range(FLANK_SIZE+1, FLANK_SIZE+NUM_AAS+1):
         for aa in aas_names:
             job_args = {
                     '-parser:protocol': '%s%s' % (PROTOCOLS_PATH, MPMutateRelax_XML),
@@ -499,7 +544,7 @@ def make_all_configurations_jobs():
                     '-s': '%s.pdb' % POLY_A_NAME,
                     '-out:suffix': '_%s_%i.pdb' % (aa, i),
                     '-mp:setup:spanfiles': POLY_A_NAME + '.span',
-                    '-nstruct': nstruct,
+                    '-nstruct': NSTRUCT,
                     '-mp:scoring:hbond': None,
                 }
             script_vars = {'mut_pos=': i, 'mut_iden=': aa}
@@ -512,7 +557,7 @@ def run_polyA_score_benchmark() -> pd.DataFrame:
               '-mp:scoring:hbond '
               '-parser:script_vars mut_pos=1 mut_iden=ALA' %
               (ROSETTA_EXECUTABLES_PATH, ROSETTA_SCRIPTS_EXEC_PATH, ROSETTA_DATABASE_PATH,
-               PROTOCOLS_PATH + MPMutateRelax_XML, PWD + POLY_A_NAME + '.pdb', PWD + POLY_A_NAME + '.span', nstruct))
+               PROTOCOLS_PATH + MPMutateRelax_XML, PWD + POLY_A_NAME + '.pdb', PWD + POLY_A_NAME + '.span', NSTRUCT))
     shutil.move('%sscore.sc' % PWD, '%spolyA_benchmark.score' % PWD)
     print('ran a FastRelax benchmark and placed the score in polyA_benchmark.score')
 
@@ -522,7 +567,7 @@ def create_polyA_fasta() -> None:
     creates a fasta file with a num_As polyA in it
     """
     with open(PWD+POLY_A_NAME+ '.fa', 'w+') as fout:
-        fout.write('>polyA\n%s\n' % ''.join(['A'] * (NUM_AAS + 2 * flank_size)))
+        fout.write('>polyA\n%s\n' % ''.join(['A'] * (NUM_AAS + 2 * FLANK_SIZE)))
         print('created polyA file at %s.fa with %i As' % (PWD + POLY_A_NAME, NUM_AAS))
 
 
@@ -587,7 +632,7 @@ def create_spanfile() -> None:
     """
     with open('%s%s.span' % (PWD, POLY_A_NAME), 'w+') as fout:
         fout.write('Rosetta-generated spanfile from SpanningTopology object\n%i %i\nantiparallel\nn2c\n\t%i	%i\n'
-                   % (flank_size + 1, flank_size + NUM_AAS, flank_size + 1, flank_size + NUM_AAS))
+                   % (FLANK_SIZE + 1, FLANK_SIZE + NUM_AAS, FLANK_SIZE + 1, FLANK_SIZE + NUM_AAS))
 
 
 def trunctate_2nd_mem_res() -> None:
