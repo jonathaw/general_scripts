@@ -101,6 +101,21 @@ class XYZ:
         return sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2)
 
 
+class MembraneResidue:
+    def __init__(self):
+        self.thkn = XYZ()
+        self.cntr = XYZ()
+        self.norm = XYZ()
+        self.chain = None
+        self.res_num = None
+
+    def __repr__(self):
+        msg = '\tthkn: %r\n' % self.thkn
+        msg += '\tcntr: %r\n' % self.cntr
+        msg += '\tnorm: %r\n' % self.norm
+        return msg
+
+
 class Atom:
     def __init__(self, header=None, serial_num=None, name=None, alternate=None, res_type_3=None, chain=None,
                  res_seq_num=None, x=None, y=None, z=None, achar=None, occupancy=None, temp=None, si=None, element=None,
@@ -145,6 +160,15 @@ class Atom:
     def __ge__(self, other) -> bool:
         return self.serial_num >= other.serial_num
 
+    def set_temp(self, temp: float) -> None:
+        """
+        B factor
+        """
+        self.temp = temp
+
+    def set_occupancy(self, occupancy) -> None:
+        self.occupancy = occupancy
+
     def distance(self, other) -> float:
         """
         :param other:another atom instance
@@ -184,9 +208,15 @@ class Residue:
             self.atoms = {}
         else:
             self.atoms = atoms
+        self.memb_z = None
 
     def __repr__(self) -> str:
-        msg = 'Chain %s Res #%i Type %s with %i atoms' % (self.chain, self.res_num, self.res_type_3, len(self.atoms))
+        if self.memb_z is None:
+            msg = 'Chain %s Res #%i Type %s with %i atoms' % (
+                self.chain, self.res_num, self.res_type_3, len(self.atoms))
+        else:
+            msg = 'Chain %s Res #%i Type %s with %i atoms, memb Z %.2f' % (
+                self.chain, self.res_num, self.res_type_3, len(self.atoms), self.memb_z)
         return msg
 
     def __getitem__(self, item: str) -> Atom:
@@ -329,6 +359,7 @@ class MyPDB:
         self.name = name
         self.chains = chains if chains is not None else {}
         self.seqs = seqs if seqs is not None else {}
+        self.memb_res = None
 
     @property
     def __repr__(self) -> str:
@@ -395,6 +426,43 @@ class MyPDB:
         """
         for cid, c in self:
             c.translate_xyz(xyz)
+
+    def add_memb_res(self, memb_res: MembraneResidue) -> None:
+        self.memb_res = memb_res
+
+        # go over all residues, assign membrane Z value
+        for cid in sorted(self.chains.keys()):
+            for rid, res in sorted(self[cid].residues.items()):
+                if -15. <= res['CA'].xyz.x <= 15:
+                    res.memb_z = res['CA'].xyz.x
+                else:
+                    res.memb_z = None
+
+    def summarize(self):
+        print('MyPDB instance with:')
+        print('\t%i chains' % len(self.chains))
+        print('\tsequences %s' % '\n\t'.join('>%s\n%s' % (k, v) for k, v in self.seqs.items()))
+        print('\tmembrnae residue \n%r' % self.memb_res)
+
+
+def parse_membrane_residue(pdb_lines: list) -> MembraneResidue:
+    """
+    pdb_lines: a list of text lines from .pdb file
+    returns a MembraneResidue instance
+    """
+    result = MembraneResidue()
+    for l in pdb_lines:
+        s = l.split()
+        if s != 0:
+            if s[2] == 'THKN':
+                result.thkn = XYZ(x=float(s[6]), y=float(s[7]), z=float(s[8]))
+            elif s[2] == 'CNTR':
+                result.cntr = XYZ(x=float(s[6]), y=float(s[7]), z=float(s[8]))
+            elif s[2] == 'NORM':
+                result.norm = XYZ(x=float(s[6]), y=float(s[7]), z=float(s[8]))
+                result.chain = s[4]
+                result.res_num = int(s[5])
+    return result
 
 
 def distance_two_point_to_point(p1: XYZ, p2: XYZ, x: XYZ) -> float:
@@ -482,6 +550,7 @@ def parse_PDB(file_in: str, name: str = None, with_non_residue: bool = True) -> 
         fin = open(file_in, 'r')
         cont = fin.read().split('\n')
     pdb = MyPDB(name=name)
+    memb_res = []
     for l in cont:
         s = l.split()
         if len(s) < 1:
@@ -491,6 +560,9 @@ def parse_PDB(file_in: str, name: str = None, with_non_residue: bool = True) -> 
                 if l[17:20] not in three_2_one.keys():
                     continue
             if 'H' in s[2] and ('1' in s[2] or '2' in s[2] or '3' in s[2]):
+                continue
+            if s[3] == 'MEM':
+                memb_res.append(l)
                 continue
             atom = Atom(header=s[0], serial_num=int(l[6:11]), name=l[12:16].replace(' ', ''),
                         alternate=l[16] if l[16] != ' ' else None,
@@ -503,12 +575,14 @@ def parse_PDB(file_in: str, name: str = None, with_non_residue: bool = True) -> 
                 continue
             pdb.add_atom(atom)
     pdb.renumber()
+    if memb_res != []:
+        mm_res = parse_membrane_residue(memb_res)
+        pdb.add_memb_res(mm_res)
     return pdb
 
 
 def write_PDB(file_out: str, pdb: MyPDB) -> None:
     atoms = []
-    print(sorted(pdb.chains.keys()))
     for cid in sorted(pdb.chains.keys()):
         for rid in sorted(pdb[cid].residues.keys()):
             for aid in sorted(pdb[cid][rid].keys()):
@@ -587,6 +661,17 @@ def com_residues(chain: Chain, residues: list) -> XYZ:
     return XYZ(np.mean(Xs), np.mean(Ys), np.mean(Zs))
 
 
+def memb_residues(pdb: MyPDB) -> set():
+    """
+    collect a set of residues with memb_z within [-15, 15]
+    """
+    result = []
+    for ch in pdb.chains.values():
+        for res in ch.values():
+            if res.memb_z is not None:
+                result.append(res)
+    return result
+
 if __name__ == '__main__':
     import argparse
 
@@ -653,7 +738,7 @@ if __name__ == '__main__':
         print("select ch_%s_inter, %s and res %s" % (
         args['chains'][1], args['in_file'][:-4], '+'.join([str(a) for a in ch2])))
 
-    elif args['mode'] == 'test':
+    elif args['mode'] == 'ramachandran':
         pdb = parse_PDB('/home/labs/fleishman/jonathaw/scripts/general_scripts/test_1ohz_AB.pdb', args['name'])
         print(pdb.seqs)
         draw_ramachadran(pdb)
@@ -667,6 +752,10 @@ if __name__ == '__main__':
         pdb = parse_PDB(args['in_file'], args['name'])
         pdb.remove_hydrogens()
         write_PDB(args['out_file'], pdb)
+
+    elif args['mode'] == 'test':
+        pdb = parse_PDB(args['in_file'], args['name'])
+        pdb.summarize()
 
     else:
         print("mode not found")
