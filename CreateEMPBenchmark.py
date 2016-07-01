@@ -58,10 +58,10 @@ MPFilterScanDifferentSFAAs = 'MPFilterScanDifferentSFAAs.xml'
 RMSD_THRESHOLD = 0.5
 NUM_AAS = 26
 POLY_A_NAME = 'polyA'
-NSTRUCT = 1 #0
+NSTRUCT = 1  # 0
 MEMBRANE_HALF_WIDTH = 15
 LAZARIDIS_POLY_DEG = 4
-FLANK_SIZE = 6
+FLANK_SIZE = 30  # 6
 Z = np.linspace(-MEMBRANE_HALF_WIDTH, MEMBRANE_HALF_WIDTH, num=NUM_AAS)
 POS_Z_DICT = {i + 1: z for i, z in enumerate(Z)}
 
@@ -175,13 +175,17 @@ def main():
     # first FilterScan run. using null ResSolv
     full_ips = filterscan_analysis_energy_func('full', residues_to_test=AAs)
     noMenv_ips = filterscan_analysis_energy_func('noMenv', residues_to_test=AAs)
+    noMenvCEN_ips = filterscan_analysis_energy_func('noMenvCEN', residues_to_test=AAs)
 
     # calc the difference InsertionProfiles between Elazar and Rosetta. assign them as the polynom table
     diff_ips = {k: subtract_IP_from_IP(elazar_ips[k], noMenv_ips[k]) for k in AAs}
+    diff_ips_CEN = {k: subtract_IP_from_IP(elazar_ips[k], noMenvCEN_ips[k]) for k in AAs}
     create_polyval_table(diff_ips, 'ELazaridis_0.txt')
+    create_polyval_table(diff_ips_CEN, 'ELazaridis_CEN_0.txt')
 
     # analyse Rosetta again.
     MPResSolv_current_ips = filterscan_analysis_energy_func('ResSolv', residues_to_test=AAs)
+    MPResSolvCEN_current_ips = filterscan_analysis_energy_func('ResSolvCEN', residues_to_test=AAs)
 
     draw_filterscan_profiles(OrderedDict({'full': full_ips, 'no_Menv': noMenv_ips, 'ResSolv': MPResSolv_current_ips,
                                           'diff_ips': diff_ips, 'elazar': elazar_ips}))
@@ -257,6 +261,7 @@ def draw_rosetta_profiles(args):
     #     dct[e_term] = e_term_ips[e_term]
 
     draw_filterscan_profiles(dct)
+    plt.show()
 
 
 def create_e_term_specific_profiles(path_pdbs: str, e_terms: list) -> dict:
@@ -338,7 +343,6 @@ def draw_filterscan_profiles(ips_dict: OrderedDict) -> None:
     file_location = '%sprofile_comparison.png' % PWD
     plt.savefig(file_location, dpi=600)
     logger.log('saving profile comparison figure to %s' % file_location)
-    plt.show()
 
 
 def draw_sigmoidal_profiles(elazar_ips: dict) -> None:
