@@ -4,6 +4,7 @@ a collection of sequence functions
 """
 import pandas as pd
 from AASeq import AASeq
+from os import system
 
 
 def read_multi_fastas(fastas_file: str, suffix_to_remove: str=None, lower=False, add_aligned=False) -> dict:
@@ -118,8 +119,13 @@ def write_seq_from_seq(name, seq, seq_out):
         fout.write('>%s\n%s' % (name, seq))
 
 
+def run_psipred(fasta_file):
+    cmd = 'runpsipred %s' % fasta_file
+    print('running command: %s ' % cmd)
+    system(cmd)
+
+
 def run_muscle(fastas_file, muscle_out):
-    from os import system
     system('muscle -in %s -out %s' % (fastas_file, muscle_out))
 
 

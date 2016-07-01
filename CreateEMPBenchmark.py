@@ -61,7 +61,7 @@ POLY_A_NAME = 'polyA'
 NSTRUCT = 1  # 0
 MEMBRANE_HALF_WIDTH = 15
 LAZARIDIS_POLY_DEG = 4
-FLANK_SIZE = 30  # 6
+FLANK_SIZE = 6 # 30  # 6
 Z = np.linspace(-MEMBRANE_HALF_WIDTH, MEMBRANE_HALF_WIDTH, num=NUM_AAS)
 POS_Z_DICT = {i + 1: z for i, z in enumerate(Z)}
 
@@ -74,8 +74,8 @@ aas_1_3 = {v: k for k, v in aas_3_1.items()}
 AAs = list('ACDEFGHIKLMNPQRSTVWY')
 
 COLOR_MAP = {'full': 'blue', 'no_Menv': 'grey', 'elazar': 'red', 'ResSolv': 'purple', 'ResSolvCEN': 'pink',
-             'diff_ips': 'orange', 'fa_intra_rep': 'green', 'fa_mpsolv': 'pink', 'fa_rep': 'black', 'p_aa_pp': 'blue',
-             'rama': 'brown'}
+             'fullCEN': 'yellow', 'no_MenvCEN': 'black', 'diff_ips': 'orange', 'fa_intra_rep': 'green',
+             'fa_mpsolv': 'pink', 'fa_rep': 'black', 'p_aa_pp': 'blue', 'rama': 'brown'}
 RMSD_ITERATIONS = {aa: [] for aa in AAs}
 
 
@@ -174,6 +174,7 @@ def main():
 
     # first FilterScan run. using null ResSolv
     full_ips = filterscan_analysis_energy_func('full', residues_to_test=AAs)
+    fullCEN_ips = filterscan_analysis_energy_func('fullCEN', residues_to_test=AAs)
     noMenv_ips = filterscan_analysis_energy_func('noMenv', residues_to_test=AAs)
     noMenvCEN_ips = filterscan_analysis_energy_func('noMenvCEN', residues_to_test=AAs)
 
@@ -188,7 +189,9 @@ def main():
     MPResSolvCEN_current_ips = filterscan_analysis_energy_func('ResSolvCEN', residues_to_test=AAs)
 
     draw_filterscan_profiles(OrderedDict({'full': full_ips, 'no_Menv': noMenv_ips, 'ResSolv': MPResSolv_current_ips,
-                                          'diff_ips': diff_ips, 'elazar': elazar_ips}))
+                                          'diff_ips': diff_ips, 'elazar': elazar_ips,
+                                          'fullCEN': fullCEN_ips, 'no_MenvCEN': noMenvCEN_ips,
+                                          'ResSolvCEN': MPResSolvCEN_current_ips}))
 
     for aa in AAs:
         rmsd = elazar_ips[aa].rmsd_ips(MPResSolv_current_ips[aa])

@@ -152,6 +152,8 @@ def score2dict(file_name: str, verbose=False) -> dict:
         elif (s[0] == 'SCORE:' or 'SCORE' in s[0]) and 'score' not in s[1]:
             if len(s) != len(list(fields.keys()))+1 if 'rms' in s else 0:  # adding 1 because I remove rms
                 continue
+            if s[-1] == s[-2]:  # added due to erregularities in some very large score files...
+                continue
             results[s[fields['description']]] = {a: float(s[i]) for a, i in fields.items()
                                                  if a not in ['SCORE:', 'description'] and 'SCORE' not in a}
             if 'score' not in results[s[fields['description']]].keys():
@@ -181,3 +183,14 @@ def df2boxplots(sc_df: pd.DataFrame) -> None:
         plt.boxplot(sc_df[flt].tolist())
         plt.title(flt)
     plt.show()
+
+
+def score_file2df(score_file: str) -> pd.DataFrame:
+    # return pd.read_table(score_file, sep='\s+').convert_objects(convert_numeric=True)
+    df = pd.read_table(score_file, sep='\s+')
+    score_column = [col for col in df if 'SCORE:' in col][0]
+    for column in df:
+	    if column not in ['description', score_column]:
+		    df[column] = pd.to_numeric(df[column], errors='coerce')
+    df.dropna()
+    return df

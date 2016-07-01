@@ -1,7 +1,9 @@
 #!/usr/bin/env python3.5
+import numpy as np
+import pandas as pd
 from List1 import List1
 from AASeq import AASeq
-import numpy as np
+from math import sqrt
 
 three_2_one = {'ALA': 'A', 'CYS': 'C', 'ASP': 'D', 'GLU': 'E', 'PHE': 'F', 'GLY': 'G', 'HIS': 'H', 'ILE': 'I',
                'LYS': 'K', 'LEU': 'L', 'MET': 'M', 'ASN': 'N', 'PRO': 'P', 'GLN': 'Q', 'ARG': 'R', 'SER': 'S',
@@ -181,7 +183,6 @@ class Atom:
         >>> a.distance(c)
         1.7320508075688772
         """
-        from math import sqrt
         return sqrt((self.xyz.x - other.xyz.x) ** 2 + (self.xyz.y - other.xyz.y) ** 2 + (self.xyz.z - other.xyz.z) ** 2)
 
     def change_chain_name(self, new: str) -> None:
@@ -225,6 +226,9 @@ class Residue:
     def __iter__(self):
         for k, v in self.atoms.items():
             yield k, v
+
+    def values(self):
+        return self.atoms.values()
 
     def remove_atom(self, atom: Atom) -> None:
         new_res = {}
@@ -375,6 +379,11 @@ class MyPDB:
         for k, v in self.chains.items():
             yield k, v
 
+    def iter_all_res(self):
+        for ch in sorted(self.chains.keys()):
+            for res in sorted(self.chains[ch].residues.keys()):
+                yield self[ch][res]
+
     def add_chain(self, chain: Chain) -> None:
         """
         :param chain: a Chain
@@ -433,8 +442,8 @@ class MyPDB:
         # go over all residues, assign membrane Z value
         for cid in sorted(self.chains.keys()):
             for rid, res in sorted(self[cid].residues.items()):
-                if -15. <= res['CA'].xyz.x <= 15:
-                    res.memb_z = res['CA'].xyz.x
+                if -15. <= res['CA'].xyz.z <= 15:
+                    res.memb_z = res['CA'].xyz.z
                 else:
                     res.memb_z = None
 
@@ -443,6 +452,18 @@ class MyPDB:
         print('\t%i chains' % len(self.chains))
         print('\tsequences %s' % '\n\t'.join('>%s\n%s' % (k, v) for k, v in self.seqs.items()))
         print('\tmembrnae residue \n%r' % self.memb_res)
+
+    def count_atoms_near_res(self, a_res: Residue, cutoff: float) -> int:
+        atoms_set = set()
+        for i_res in self.iter_all_res():
+
+            if a_res.res_num-4 <= i_res.res_num <= a_res.res_num + 4:
+                continue
+
+            for aid, a_ in i_res:
+                if a_res['CA'].distance(a_) <= cutoff:
+                    atoms_set.add(aid)
+        return len(atoms_set)
 
 
 def parse_membrane_residue(pdb_lines: list) -> MembraneResidue:
@@ -671,6 +692,27 @@ def memb_residues(pdb: MyPDB) -> set():
             if res.memb_z is not None:
                 result.append(res)
     return result
+
+
+def parse_energy_table(in_file: str) -> pd.DataFrame:
+    """
+    :param in_file: pdb file name
+    :return: data frame of the energy table
+    """
+    import re, sys
+    i = 0
+    for l in open(in_file, 'r'):
+        i += 1
+        if 'BEGIN_POSE_ENERGIES_TABLE' in l:
+            begin_table = i
+            continue
+        if 'END_POSE_ENERGIES_TABLE' in l:
+             end_of_table = i
+
+    df = pd.read_table(in_file, header=begin_table, sep=' ', skipfooter=i-end_of_table+1, engine='python')
+    df['res_type_num'] = ['%s_%i' % (a.split('_')[0].split(':')[0], int(a.split('_')[-1])) if a not in ['weights', 'pose'] else a for a in df['label']]
+    return df
+
 
 if __name__ == '__main__':
     import argparse

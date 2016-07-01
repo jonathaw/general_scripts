@@ -90,6 +90,20 @@ def combine_scores(file_name, sc_list):
         print('found many scores, removing *sc')
         [os.remove(sc) for sc in sc_list]
 
+def test():
+    from AnnotateFinder import AnnoteFinder
+    import matplotlib.pyplot as plt
+    x = range(10)
+    y = range(10)
+    annotes = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
+
+    fig, ax = plt.subplots()
+    ax.scatter(x, y)
+    af = AnnoteFinder(x, y, annotes, ax=ax)
+    fig.canvas.mpl_connect('button_press_event', af)
+    plt.show()
+
 
 if __name__ == '__main__':
-    main()
+    test()
+    # main()

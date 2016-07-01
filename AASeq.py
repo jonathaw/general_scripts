@@ -119,8 +119,8 @@ class AASeq():
         if file_name is None:
             import os
             file_name = '%s/%s.fasta' % (os.getcwd(), self.name)
-        with open(file_name, 'wr+') as fout:
-            fout.write('>%s\n%s' % (self.name, self.seq))
+        with open(file_name, 'w+') as fout:
+            fout.write('>%s\n%s\n' % (self.name, self.get_seq()))
 
     def align(self, other, matrix=None, gap_open=-10, gap_extend=-0.5) -> (float, int, int):
         """

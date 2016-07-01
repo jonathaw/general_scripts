@@ -1,22 +1,32 @@
-from mpl_toolkits.mplot3d import axes3d
-import matplotlib.pyplot as plt
+#!/usr/bin/env python3.5
 import numpy as np
+import matplotlib.pyplot as plt
+import random
 
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-# X, Y, Z = axes3d.get_test_data(0.05)
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# ax.set_title('click on points')
 #
-# print('X', X, type(X))
-# print('Y', Y)
-# print('Z', Z)
+# line, = ax.plot(np.random.rand(100), 'o', picker=5)  # 5 points tolerance
+#
+# def onpick(event):
+#     thisline = event.artist
+#     xdata = thisline.get_xdata()
+#     ydata = thisline.get_ydata()
+#     ind = event.ind
+#     points = tuple(zip(xdata[ind], ydata[ind]))
+#     print('onpick points:', points)
+#
+# fig.canvas.mpl_connect('pick_event', onpick)
+#
+# plt.show()
 
 
-X = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-Y = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-Z = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+x = [random.randint(1, 4) for a in range(500)]
+print(x)
+col_dict = {1: 'black', 2: 'red', 3: 'green', 4: 'purple'}
+for i, x_ in enumerate(x):
+    plt.hlines(1, i, i+1, colors=col_dict[x_], lw=20)
+plt.plot(range(500), x)
 
-ax.plot_wireframe(X, Y, Z, rstride=10, cstride=10)
-# plt.zlabel('Z')
-plt.xlabel('X')
-plt.ylabel('Y')
 plt.show()

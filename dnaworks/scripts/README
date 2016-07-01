@@ -1,0 +1,17 @@
+use:
+
+translate_all.bash < my sequences, in 2nd column  >
+
+this scripts calls the otherscripts in this folder. Since it currently doesnt use an 
+absolute path, you have to copy all scripts into your folder. or define an
+absolute path under translate all....
+
+make_dnaworksinput.bash makes a simple text file that gets read by dnaworks.
+here change which expression host to use. their webpage has the namings. 
+
+getseq_from_dnaworks.bash extracts the info from the DNAworks output. update, now it uses
+getSeq.pl instead, which works best for all varying lenghts.
+
+combine* puts all sequences into 1 big fasta file
+
+Eva
