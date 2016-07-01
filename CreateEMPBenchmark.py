@@ -234,8 +234,8 @@ def main():
             logger.log('%s %r' % (aa, RMSD_ITERATIONS[aa]))
 
         draw_rmsd_plots()
-    draw_filterscan_profiles(OrderedDict({'full': full_ips, 'no_Menv': noMenv_ips, 'ResSolv': MPResSolv_current_ips,
-                                          'diff_ips': diff_ips, 'elazar': elazar_ips}))
+    # draw_filterscan_profiles(OrderedDict({'full': full_ips, 'no_Menv': noMenv_ips, 'ResSolv': MPResSolv_current_ips,
+    #                                       'diff_ips': diff_ips, 'elazar': elazar_ips}))
     if args['show_fig']:
         plt.show()
 

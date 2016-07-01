@@ -12,7 +12,7 @@ class Logger:
             path = os.getcwd()+'/'
         elif path[-1] != '/':
             path += '/'
-        self.emblem = emblem if emblem is not None else '<'
+        self.emblem = emblem if emblem is not None else '~'
         self.log_file = open(path+log_file, 'w+')
         self.log('given command: %s' % ' '.join(sys.argv))
 
@@ -21,7 +21,7 @@ class Logger:
             if emphasize:
                 print(colorama.Fore.RED + colorama.Back.GREEN + string + colorama.Style.RESET_ALL)
             else:
-                print('%s~> %s' % (self.emblem, string))
+                print('<%s> %s' % (self.emblem, string))
         self.log_file.write(string+'\n')
         sys.stdout.flush()
 
