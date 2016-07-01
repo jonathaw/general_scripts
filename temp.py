@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #!/usr/bin/env python3.5
 """
 process rosetta run results
@@ -107,3 +108,22 @@ def test():
 if __name__ == '__main__':
     test()
     # main()
+=======
+import time
+import sys
+
+toolbar_width = 40
+
+# setup toolbar
+sys.stdout.write("[%s]" % (" " * toolbar_width))
+sys.stdout.flush()
+sys.stdout.write("\b" * (toolbar_width+1)) # return to start of line, after '['
+
+for i in xrange(toolbar_width):
+    time.sleep(0.1) # do real work here
+    # update the bar
+    sys.stdout.write("-")
+    sys.stdout.flush()
+
+sys.stdout.write("\n")
+>>>>>>> fc3355ffc96dcbbc4b29f11edfa219de936d6a00

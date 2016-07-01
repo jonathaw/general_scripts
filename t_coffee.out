@@ -1,0 +1,55 @@
+CLUSTAL FORMAT for T-COFFEE Version_11.00.8cbe486 [http://www.tcoffee.org] [MODE: 3dcoffee ], CPU=0.00 sec, SCORE=793, Nseq=15, Len=110 
+
+1OHZ.B          ------GDVNGDGTINSTDLTMLKRSVLRAITL----------------T
+2B59.B          ---------VKDNSINLLDVAEVIRCFNATK-----------------GS
+2CCL.B          V---LLGDVNGDGTINSTDLTMLKRSVLRAITL----------------T
+2OZN.B          -------DFNGNGKIDIGDLAMVSKNIGST--------------------
+2VN5.B          I---VYGDYNNDGNVDALDFAGLKKYIMAA--------------------
+2VN6.B          VI--VYGDYNNDGNVDSTDFAGLKKYIMAADH------------------
+2Y3N.B          MFVKLKGDLNGDGVINMADVMILAQSFGKA--------------------
+3KCP.B          -------DIVKDNSINLLDVAEVIRCFNATK-----------------GS
+3UL4.B          V---LNGDLNRNGIVNDEDYILLKNYLLRGNKL----------------V
+4DH2.B          A---VIGDVNADGVVNISDYVLMKRYILRIIADFP--------------A
+4FL4.B          H----MGDVNDDGKVNSTDLTLLKRYVLKAVSTLP--------------S
+4IU2.B          ------GDTDLNNIVDGRDATATLTYYAATSTDGKDATTVALSPSTLVGG
+4UYP.B          KF--IYGDVDGNGSVRSIDAVLIRDYVLGKINEFP--------------Y
+4UYQ.B          KF--IYGDVDGNGSVRINDAVLIRDYVLGKINEFP--------------Y
+CT_CIPA         b---b---------------------------------------------
+                                                                  
+
+1OHZ.B          D-D------AKARADVDK-------------NGSINSTDVL-LLSRYL--
+2B59.B          A-N------YVEELDINR-------------NGAINMQDIM-IVHKHFGA
+2CCL.B          D-D------AKARADVDK-------------NGSINAADVL-LLSRYLLR
+2OZN.B          ---------TNTSLDLNK-------------DGSIDEYEIS-FINHRILN
+2VN5.B          ---------YVKNLDVNL-------------DNEVNSTDLA-ILKKYLLG
+2VN6.B          --A------YVKNLDVNL-------------DNEVNAFDLA-ILKKYLLG
+2Y3N.B          ----------IEKADLNN-------------DGVINSDDAI-ILAQYFGK
+3KCP.B          A-N------YVEELDINR-------------NGAINMQDIM-IVHKHFGA
+3UL4.B          --I------DLNVADVNK-------------DGKVNSTDCL-FLKKYILG
+4DH2.B          D-D------DMWVGDVNG-------------DNVINDIDCN-YLKRYLLH
+4FL4.B          S-K------AEKNADVNR-------------DGRVNSSDVT-ILSRYLIR
+4IU2.B          NPESVYDDFSAFLSDVKVDAGKELTRFAKKAERLIDGRDASSILTFYTKS
+4UYP.B          E-Y------GMLAADVDG-------------NGSIKINDAV-LVRDYVLG
+4UYQ.B          E-Y------GMLAADVDG-------------NGSIKSIDAV-LVRDYVLG
+CT_CIPA         -----------------------------------------------bbb
+                                                                  
+
+1OHZ.B          ---------L
+2B59.B          TSSDYD---A
+2CCL.B          V--------I
+2OZN.B          ----------
+2VN5.B          M--------V
+2VN6.B          MVSKL----E
+2Y3N.B          TKS------A
+3KCP.B          TSSD-----Y
+3UL4.B          LIT------I
+4DH2.B          MIREFPKNSY
+4FL4.B          VIEK-----L
+4IU2.B          SVDQY----K
+4UYP.B          KIFLFPVEEK
+4UYQ.B          KIFLFPVEEK
+CT_CIPA         --b------b
+                          
+
+
+

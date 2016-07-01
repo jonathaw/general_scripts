@@ -54,8 +54,6 @@
                 <element signature="e#13160#13865#0" expanded="true" />
                 <element signature="e#20523#20848#0" expanded="true" />
                 <element signature="e#28968#29461#0" expanded="true" />
-                <marker date="1467389734000" expanded="true" signature="7186:7522" ph="..." />
-                <marker date="1467389734000" expanded="true" signature="9633:9794" ph="..." />
                 <marker date="1467389734000" expanded="false" signature="9876:10788" ph="..." />
               </folding>
             </state>
@@ -1198,8 +1196,6 @@
             <element signature="e#13160#13865#0" expanded="true" />
             <element signature="e#20523#20848#0" expanded="true" />
             <element signature="e#28968#29461#0" expanded="true" />
-            <marker date="1467389734000" expanded="true" signature="7186:7522" ph="..." />
-            <marker date="1467389734000" expanded="true" signature="9633:9794" ph="..." />
             <marker date="1467389734000" expanded="false" signature="9876:10788" ph="..." />
           </folding>
         </state>

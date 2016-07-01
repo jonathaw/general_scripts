@@ -2,7 +2,15 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/.idea/general_scripts.iml" filepath="$PROJECT_DIR$/.idea/general_scripts.iml" />
     </modules>
   </component>
 </project>
+=======
+      <module fileurl="file://$PROJECT_DIR$/.idea/job_makers.iml" filepath="$PROJECT_DIR$/.idea/job_makers.iml" />
+    </modules>
+  </component>
+</project>
+
+>>>>>>> fc3355ffc96dcbbc4b29f11edfa219de936d6a00
