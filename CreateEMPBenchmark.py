@@ -35,6 +35,8 @@ import pandas as pd
 import numpy as np
 from collections import OrderedDict
 from Equation import Expression
+from scipy import interpolate
+
 
 # specific imports
 from RosettaFilter import score2dict, score_dict2df, df2boxplots
@@ -60,9 +62,13 @@ NUM_AAS = 26
 POLY_A_NAME = 'polyA'
 NSTRUCT = 1  # 0
 MEMBRANE_HALF_WIDTH = 15
+TOTAL_HALF_WIDTH = 50
 LAZARIDIS_POLY_DEG = 4
-FLANK_SIZE = 6 # 30  # 6
+FLANK_SIZE = 30  # 6
+TOTAL_AAS = NUM_AAS + (FLANK_SIZE * 2)
 Z = np.linspace(-MEMBRANE_HALF_WIDTH, MEMBRANE_HALF_WIDTH, num=NUM_AAS)
+Z_total = np.linspace(-TOTAL_HALF_WIDTH, TOTAL_HALF_WIDTH, num=TOTAL_AAS)
+POS_Z_DICT_total = {i + 1: z for i, z in enumerate(Z_total)}
 POS_Z_DICT = {i + 1: z for i, z in enumerate(Z)}
 
 aas_names = ['ALA', 'CYS', 'ASP', 'GLU', 'PHE', 'GLY', 'HIS', 'ILE', 'LYS', 'LEU', 'MET', 'ASN', 'PRO', 'GLN', 'ARG',
@@ -73,9 +79,10 @@ aas_3_1 = {'ALA': 'A', 'CYS': 'C', 'ASP': 'D', 'GLU': 'E', 'PHE': 'F', 'GLY': 'G
 aas_1_3 = {v: k for k, v in aas_3_1.items()}
 AAs = list('ACDEFGHIKLMNPQRSTVWY')
 
-COLOR_MAP = {'full': 'blue', 'no_Menv': 'grey', 'elazar': 'red', 'ResSolv': 'purple', 'ResSolvCEN': 'pink',
-             'fullCEN': 'yellow', 'no_MenvCEN': 'black', 'diff_ips': 'orange', 'fa_intra_rep': 'green',
-             'fa_mpsolv': 'pink', 'fa_rep': 'black', 'p_aa_pp': 'blue', 'rama': 'brown'}
+COLOR_MAP = {'full': 'blue', 'no_Menv': 'grey', 'ResSolv': 'purple',
+             'fullCEN': 'blue', 'no_MenvCEN': 'grey', 'ResSolvCEN': 'purple',
+             'elazar': 'red', 'diff_ips': 'orange', 'fa_intra_rep': 'green','fa_mpsolv': 'pink', 'fa_rep': 'black',
+             'p_aa_pp': 'blue', 'rama': 'brown'}
 RMSD_ITERATIONS = {aa: [] for aa in AAs}
 
 
@@ -113,7 +120,7 @@ class InsertionProfile:
         self.residue_num = residue_num
         self.pos_score = pos_score
         self.poz_energy = pos_energy_dict_to_PoZEnergy_list(pos_score)
-        self.polynom = np.polyfit(Z, [x.energy for x in self.poz_energy], LAZARIDIS_POLY_DEG)
+        self.polynom = np.polyfit(Z_total, [x.energy for x in self.poz_energy], LAZARIDIS_POLY_DEG)
 
     def __repr__(self):
         res = '<InsertionProfile for %s>\n' % self.AA
@@ -121,7 +128,11 @@ class InsertionProfile:
         for a in self.poz_energy:
             res += '\t\t<%s/>\n' % a
         res += '\t<poz_energy/>\n'
-        res += '<polynom: %.2f*z^4 + %.2f*z^3 %.2f*z^2 %.2f*z + %.2f />' % self.polynom
+        print('ddd', self.polynom)
+        try:
+            res += '<polynom: %.2f*z^4 + %.2f*z^3 %.2f*z^2 %.2f*z + %.2f />' % self.polynom
+        except:
+            pass
         res += '<InsertionProfile for %s/>\n' % self.AA
         return res
 
@@ -142,7 +153,7 @@ class InsertionProfile:
         retruns the difference between the IPs calculated as by RMSD over Z
         """
         res = 0.0
-        for z in Z:
+        for z in Z_total:
             res += (self.polynom_at_z(z) - other.polynom_at_z(z))**2
         return np.sqrt(np.mean(res))
 
@@ -152,8 +163,8 @@ def pos_energy_dict_to_PoZEnergy_list(pos_energy_dict: dict) -> list():
     creates an ordered list of PoZEnergy instances corresponding to their positions
     """
     result = []
-    for pos in range(1, NUM_AAS+1):
-        result.append(PoZEnergy(pos, POS_Z_DICT[pos], pos_energy_dict[pos]))
+    for pos in range(1, TOTAL_AAS+1):
+        result.append(PoZEnergy(pos, POS_Z_DICT_total[pos], pos_energy_dict[pos]))
     return result
 
 
@@ -181,17 +192,18 @@ def main():
     # calc the difference InsertionProfiles between Elazar and Rosetta. assign them as the polynom table
     diff_ips = {k: subtract_IP_from_IP(elazar_ips[k], noMenv_ips[k]) for k in AAs}
     diff_ips_CEN = {k: subtract_IP_from_IP(elazar_ips[k], noMenvCEN_ips[k]) for k in AAs}
-    create_polyval_table(diff_ips, 'ELazaridis_0.txt')
-    create_polyval_table(diff_ips_CEN, 'ELazaridis_CEN_0.txt')
+    create_polyval_table(diff_ips, 'ELazaridis_0.txt', rosetta_table_name='ELazaridis_polynom_table.txt')
+    create_polyval_table(diff_ips_CEN, 'ELazaridis_CEN_0.txt', rosetta_table_name='ELazaridis_cen_polynom_table.txt')
 
     # analyse Rosetta again.
     MPResSolv_current_ips = filterscan_analysis_energy_func('ResSolv', residues_to_test=AAs)
     MPResSolvCEN_current_ips = filterscan_analysis_energy_func('ResSolvCEN', residues_to_test=AAs)
 
     draw_filterscan_profiles(OrderedDict({'full': full_ips, 'no_Menv': noMenv_ips, 'ResSolv': MPResSolv_current_ips,
-                                          'diff_ips': diff_ips, 'elazar': elazar_ips,
-                                          'fullCEN': fullCEN_ips, 'no_MenvCEN': noMenvCEN_ips,
-                                          'ResSolvCEN': MPResSolvCEN_current_ips}))
+                                          'elazar': elazar_ips}), cen_fa='fa')
+
+    draw_filterscan_profiles(OrderedDict({'fullCEN': fullCEN_ips, 'no_MenvCEN': noMenvCEN_ips,
+                                          'ResSolvCEN': MPResSolvCEN_current_ips, 'elazar': elazar_ips}), cen_fa='cen')
 
     for aa in AAs:
         rmsd = elazar_ips[aa].rmsd_ips(MPResSolv_current_ips[aa])
@@ -250,9 +262,10 @@ def draw_rosetta_profiles(args):
     ###
     elazar_ips = create_elazar_ips()
     full_ips = filterscan_analysis_energy_func('full', residues_to_test=AAs)
+    fullCEN_ips = filterscan_analysis_energy_func('fullCEN', residues_to_test=AAs)
 
     MPResSolv_current_ips = filterscan_analysis_energy_func('ResSolv', residues_to_test=AAs, to_dump_pdbs=True)
-    MPResSolvCEN_current_ips = filterscan_analysis_energy_func('ResSolv_cen', residues_to_test=AAs, to_dump_pdbs=True)
+    MPResSolvCEN_current_ips = filterscan_analysis_energy_func('ResSolvCEN', residues_to_test=AAs, to_dump_pdbs=True)
 
 
     # e_term_ips = create_e_term_specific_profiles('./', args['e_terms'])
@@ -267,18 +280,77 @@ def draw_rosetta_profiles(args):
     plt.show()
 
 
+def draw_rosetta_profiles_fa_cen(args):
+    ### create files for running benchmark
+    if args['full']:
+        create_polyA_fasta()
+        sequence_to_idealized_helix()
+        create_spanfile()
+        trunctate_2nd_mem_res()
+    ###
+    elazar_ips = create_elazar_ips()
+
+    # caluclate and draw full-atom level terms
+    fa_terms = ['fa_atr', 'fa_rep', 'fa_intra_rep', 'fa_pair', 'fa_dun', 'fa_mpsolv', 'fa_mpenv',
+                'fa_mpenv_smooth', 'ref', 'hbond_lr_bb', 'hbond_sr_bb', 'hbond_bb_sc', 'hbond_sc', 'p_aa_pp'] # canceled fa_sol, fa_plane, weight=0
+    full_ips = filterscan_analysis_energy_func('full', residues_to_test=AAs, to_dump_pdbs=True)
+    fa_e_term_ips = create_e_term_specific_profiles('./', fa_terms)
+
+    for term in fa_terms:
+        plt.figure()
+        plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.15, hspace=0.45)
+        for i, aa in enumerate(AAs):
+            plt.subplot(5, 4, 1 + i)
+            plt.plot(Z_total, [x.energy for x in fa_e_term_ips[term][aa].poz_energy], color='k', label=term)
+            plt.title(aa.upper())
+            if aa == 'P':
+                plt.ylim([-12, 5])
+            else:
+                plt.ylim([-5, 5])
+        plt.savefig('fa_%s.png' % term)
+        plt.close()
+
+    # calculate and draw centroid level terms
+    cen_terms = ['mp_pair', 'mp_env', 'mp_cbeta', 'rama', 'rsigma', 'sheet', 'ss_pair', 'hs_pair', 'interchain_env',
+                 'interchain_pair', 'interchain_vdw', 'interchain_contact']
+    fullCEN_ips = filterscan_analysis_energy_func('fullCEN', residues_to_test=AAs, to_dump_pdbs=True)
+    cen_e_term_ips = create_e_term_specific_profiles('./', cen_terms)
+
+    for term in cen_terms:
+        plt.figure()
+        plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.15, hspace=0.45)
+        for i, aa in enumerate(AAs):
+            plt.subplot(5, 4, 1 + i)
+            plt.plot(Z_total, [x.energy for x in cen_e_term_ips[term][aa].poz_energy], color='k', label=term)
+            plt.title(aa.upper())
+            if aa == 'P':
+                plt.ylim([-12, 5])
+            else:
+                plt.ylim([-5, 5])
+        plt.savefig('cen_%s.png' % term)
+        plt.close()
+
+    # MPResSolv_current_ips = filterscan_analysis_energy_func('ResSolv', residues_to_test=AAs, to_dump_pdbs=True)
+    # MPResSolvCEN_current_ips = filterscan_analysis_energy_func('ResSolvCEN', residues_to_test=AAs, to_dump_pdbs=True)
+    # dct = OrderedDict({'ResSolv': MPResSolv_current_ips, 'ResSolvCEN': MPResSolvCEN_current_ips,
+    #                    'elazar': elazar_ips, 'full': full_ips})
+    # for e_term in args['e_terms']:
+    #     dct[e_term] = e_term_ips[e_term]
+    # draw_filterscan_profiles(dct)
+    # plt.show()
+
+
 def create_e_term_specific_profiles(path_pdbs: str, e_terms: list) -> dict:
     """
     creates residue specific insertion profiles for every e_term in the list
     """
     # get energy terms for all res / position combinations
     all_results = get_all_e_terms(path_pdbs)
-
     # create DataFrame
     df = pd.DataFrame()
     for aa in AAs:
-        for pos in range(FLANK_SIZE + 1, NUM_AAS + FLANK_SIZE + 1 + 1):
-            dct = {'pos': pos - FLANK_SIZE, 'aa': aa}
+        for pos in range(1, TOTAL_AAS + 1):
+            dct = {'pos': pos, 'aa': aa}
             for e_term in e_terms:
                 # print('a', all_results[aa][pos].keys())
                 dct[e_term] = all_results[aa][pos][e_term]
@@ -305,7 +377,7 @@ def get_all_e_terms(path_pdbs: str) -> dict:
     """
     result = {a: {} for a in AAs}
     for res in sorted(aas_3_1.keys()):
-        for ind in range(1, 2*FLANK_SIZE+NUM_AAS):
+        for ind in range(1, TOTAL_AAS+1):
             for l in open('polyA.pdbALA%i%s.pdb' % (ind, res), 'r'):
                 if 'TOTAL_WTD' in l:
                     s = l.split()
@@ -313,7 +385,7 @@ def get_all_e_terms(path_pdbs: str) -> dict:
     return result
 
 
-def create_polyval_table(diff_ips: dict, file_name: str) -> None:
+def create_polyval_table(diff_ips: dict, file_name: str, rosetta_table_name) -> None:
     """
     creates a file_name with polynom values for all residues:
     A float float float float (highest power first)
@@ -323,11 +395,11 @@ def create_polyval_table(diff_ips: dict, file_name: str) -> None:
             fout.write('%s %s\n' % (aa, diff_ips[aa].format_polyval()))
     logger.log('created table at %s' % PWD + file_name)
     if args['change_rosetta_table']:
-        shutil.copy(PWD + file_name, ROSETTA_MEM_POTENTIAL_PATH + args['polynom_table_file_name'])
-        logger.log('copied table to %s' % ROSETTA_MEM_POTENTIAL_PATH + args['polynom_table_file_name'])
+        shutil.copy(PWD + file_name, ROSETTA_MEM_POTENTIAL_PATH + rosetta_table_name)
+        logger.log('copied table to %s' % ROSETTA_MEM_POTENTIAL_PATH + rosetta_table_name)
 
 
-def draw_filterscan_profiles(ips_dict: OrderedDict) -> None:
+def draw_filterscan_profiles(ips_dict: OrderedDict, cen_fa='fa') -> None:
     """
     draws all profiles
     """
@@ -336,14 +408,14 @@ def draw_filterscan_profiles(ips_dict: OrderedDict) -> None:
     for i, aa in enumerate(AAs):
         plt.subplot(5, 4, 1+i)
         for name, ips in ips_dict.items():
-            plt.plot(Z, [x.energy for x in ips[aa].poz_energy], color=COLOR_MAP[name], label=name)
+            plt.plot(Z_total, [x.energy for x in ips[aa].poz_energy], color=COLOR_MAP[name], label=name)
         plt.title(aa.upper())
         if aa == 'P':
             plt.ylim([-12, 5])
         else:
             plt.ylim([-5, 5])
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    file_location = '%sprofile_comparison.png' % PWD
+    file_location = '%sprofile_comparison_%s.png' % (PWD, cen_fa)
     plt.savefig(file_location, dpi=600)
     logger.log('saving profile comparison figure to %s' % file_location)
 
@@ -375,7 +447,7 @@ def create_elazar_ips() -> dict:
     elazar_polyval = MakeHydrophobicityGrade()
     result = {}
     for aa in AAs:
-        pos_score = {i+1: a for i, a in enumerate([np.polyval(elazar_polyval[aas_1_3[aa]], z) for z in Z])}
+        pos_score = {i+1: a for i, a in enumerate([np.polyval(elazar_polyval[aas_1_3[aa]], z) for z in Z_total])}
         # adjust kcal/mol to REUs according to kcal/mol=0.57REU.
         # suggested by "Role of conformational sampling in computing mutation-induced changes in protein structure
         # and stability."
@@ -393,7 +465,8 @@ def create_insertion_profiles(df: pd.DataFrame, column: str) -> dict:
     logger.log('creating InsertionProfiles for %s' % column)
     result = {}
     for aa in AAs:
-        pos_score = {i: df[((df['aa'] == aa) & (df['pos'] == i))][column].values[0] for i in range(1, NUM_AAS + 1)}
+        # pos_score = {i: df[((df['aa'] == aa) & (df['pos'] == i))][column].values[0] for i in range(1, NUM_AAS + 1)}
+        pos_score = {i: df[((df['aa'] == aa) & (df['pos'] == i))][column].values[0] for i in range(1, TOTAL_AAS + 1)} # switched for -50 to 50
         ip = InsertionProfile(aa, pos_score=pos_score)
         result[aa] = ip
     return result
@@ -472,8 +545,10 @@ def filterscan_analysis_energy_func(energy_function: str, residues_to_test: list
     # create DataFrame
     df = pd.DataFrame()
     for aa in AAs:
-        for pos in range(FLANK_SIZE+1, NUM_AAS+FLANK_SIZE+1+1):
-            df = df.append({'pos': pos-FLANK_SIZE, 'aa': aa, energy_function: temp_fs_log[pos][aa]}, ignore_index=True)
+        # for pos in range(FLANK_SIZE+1, NUM_AAS+FLANK_SIZE+1+1):
+        #     df = df.append({'pos': pos-FLANK_SIZE, 'aa': aa, energy_function: temp_fs_log[pos][aa]}, ignore_index=True) # switched for -50 to 50
+        for pos in range(1, TOTAL_AAS+1):
+            df = df.append({'pos': pos, 'aa': aa, energy_function: temp_fs_log[pos][aa]}, ignore_index=True)
 
     # calculate polyA scores in both score funcitons
     temp_A_mean = df[df['aa'] == 'A'][energy_function].mean()
@@ -506,7 +581,7 @@ def parse_filterscan_log(file_name) -> dict:
     """
     parse a FilterScan run log file, returns dict {position: {AA: score}}
     """
-    result = {i: {aa: None for aa in AAs} for i in range(1, NUM_AAS + FLANK_SIZE * 2 + 1)}
+    result = {i: {aa: None for aa in AAs} for i in range(1, TOTAL_AAS + 1)}
     for l in open(file_name, 'r'):
         s = l.split()
         if len(s) >= 4:
@@ -538,7 +613,8 @@ def run_all_configurations():
 
 
 def create_profiles():
-    profiles = {aa: {pos: None for pos in range(FLANK_SIZE + 1, FLANK_SIZE + NUM_AAS + 1)} for aa in aas_names}
+    # profiles = {aa: {pos: None for pos in range(FLANK_SIZE + 1, FLANK_SIZE + NUM_AAS + 1)} for aa in aas_names}
+    profiles = {aa: {pos: None for pos in range(1, TOTAL_AAS + 1)} for aa in aas_names} # switched to this for -50 to 50
     sc_files = [a for a in os.listdir(all_configurations_path) if '.sc' in a]
     for sc_file in sc_files:
         sc = score2dict(all_configurations_path+sc_file)
@@ -547,11 +623,9 @@ def create_profiles():
         pos = int(sc_file.split('_')[2].split('.')[0])
         profiles[aa][pos] = np.mean(df['score']) - polyA_total_mean
         print('for res %s in pos %i found %.3f mean with %.3f std' % (aa, pos, np.mean(df['score']), np.std(df['score'])))
-    membrane_position = np.linspace(-MEMBRANE_HALF_WIDTH, MEMBRANE_HALF_WIDTH, endpoint=True, num=NUM_AAS)
-    print('AAAA', membrane_position)
+    membrane_position = np.linspace(-TOTAL_HALF_WIDTH, TOTAL_HALF_WIDTH, endpoint=True, num=NUM_AAS)
     mm_profiles = {aa: OrderedDict((membrane_position[pos - FLANK_SIZE - 1], profiles[aa][pos])
                                    for pos in range(FLANK_SIZE + 1, FLANK_SIZE + NUM_AAS + 1)) for aa in aas_names}
-    print(mm_profiles)
     mm_polys = {aa: np.polyfit(list(mm_profiles[aa].keys()), list(mm_profiles[aa].values()), LAZARIDIS_POLY_DEG)
                 for aa in aas_names}
     mm_eqs = {aa: Expression('+'.join('%f*z^%i' % (n, i) for i, n in enumerate(mm_polys[aa][::-1])),
@@ -587,7 +661,7 @@ def MakeHydrophobicityGrade():
 def draw_profiles(mm_profiles: dict, mm_eqs: dict):
     fig = plt.figure()
     elazar_profiles = get_elazar_scale()
-    z = np.linspace(-MEMBRANE_HALF_WIDTH, MEMBRANE_HALF_WIDTH, endpoint=True, num=NUM_AAS + 1)
+    z = np.linspace(-TOTAL_HALF_WIDTH, TOTAL_HALF_WIDTH, endpoint=True, num=NUM_AAS + 1)
     for i, (aa, val) in enumerate(mm_profiles.items()):
         ax = plt.subplot(5, 4, i+1)
         # Lazaridis - line
@@ -601,7 +675,7 @@ def draw_profiles(mm_profiles: dict, mm_eqs: dict):
 
         # plot attributes
         plt.title(aa)
-        plt.xlim([-(MEMBRANE_HALF_WIDTH + 0.5), MEMBRANE_HALF_WIDTH + 0.5])
+        plt.xlim([-(TOTAL_HALF_WIDTH + 0.5), TOTAL_HALF_WIDTH + 0.5])
         plt.ylim([-3., 3.])#-5., 6.
     ax.legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
     plt.show()
@@ -731,6 +805,35 @@ def trunctate_2nd_mem_res() -> None:
     shutil.move('%s%s.tmp' % (PWD, POLY_A_NAME), '%s%s.pdb' % (PWD, POLY_A_NAME))
     logger.log('removed the second membrane residue')
 
+
+def draw_elazar_splines() -> None:
+    """
+    make and draw Elazar splines
+    :return:
+    """
+    profiles = MakeHydrophobicityGrade()
+    x = np.arange(-50, +50, 0.1)
+    Z = np.arange(-15, 15, 0.1)
+    plt.figure()
+    plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.15, hspace=0.45)
+    for i, aa in enumerate(list('ACDEFGHIKLMNPQRSTVWY')):
+        y = [0] * (35 * 10) + [np.polyval(profiles[aa], z) for z in Z] + [0] * (35 * 10)
+        if aa not in ['V', 'M', 'H']:
+            tck = interpolate.splrep(x, y, s=25)
+        else:
+            tck = interpolate.splrep(x, y, s=5)
+        xnew = np.arange(-50, 50, 0.05)
+        ynew = interpolate.splev(xnew, tck, der=0)
+        plt.subplot(5, 4, 1 + i)
+        plt.plot(x, y, c='k')
+        plt.plot(xnew, ynew, c='r')
+        plt.vlines(-15, -2, 3, color='grey', linestyles='dashed')
+        plt.vlines(15, -2, 3, color='grey', linestyles='dashed')
+        plt.title(aa.upper())
+        plt.ylim([-2, 3])
+    plt.show()
+
+
 if __name__ == '__main__':
     global polyA_total_mean, logger, args
 
@@ -771,6 +874,9 @@ if __name__ == '__main__':
 
     elif args['mode'] == 'draw_profiles':
         draw_rosetta_profiles(args)
+
+    elif args['mode'] == 'draw_rosetta_profiles_fa_cen':
+        draw_rosetta_profiles_fa_cen(args)
 
     elif args['mode'] == 'test':
         create_e_term_specific_profiles('./', ['fa_rep', 'fa_mpsolv'])

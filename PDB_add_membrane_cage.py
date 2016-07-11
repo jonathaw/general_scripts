@@ -49,7 +49,7 @@ def create_and_add_MBR_residue(pdb, memb_chain, highest_atom_number):
 
 
 def append_CONECT_to_PDB(pdb_file, highet_atom_number):
-    with open('test.pdb', 'a') as fout:
+    with open(pdb_file, 'a') as fout:
         for i, j in zip([1, 2, 3, 4], [2, 3, 4, 1]):
             fout.write('CONECT %i %i\n' % (highet_atom_number+i, highet_atom_number+j))
         for i, j in zip([5, 6, 7, 8], [6, 7, 8, 5]):
@@ -58,3 +58,7 @@ def append_CONECT_to_PDB(pdb_file, highet_atom_number):
         fout.write('CONECT %i %i\n' % (highet_atom_number + 2, highet_atom_number + 6))
         fout.write('CONECT %i %i\n' % (highet_atom_number + 3, highet_atom_number + 7))
         fout.write('CONECT %i %i\n' % (highet_atom_number + 4, highet_atom_number + 8))
+
+
+if __name__ == '__main__':
+    main()
