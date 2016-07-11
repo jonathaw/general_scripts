@@ -806,7 +806,7 @@ def trunctate_2nd_mem_res() -> None:
     logger.log('removed the second membrane residue')
 
 
-def draw_elazar_splines() -> None:
+def draw_elazar_splines(args) -> None:
     """
     make and draw Elazar splines
     :return:
@@ -817,7 +817,7 @@ def draw_elazar_splines() -> None:
     plt.figure()
     plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.15, hspace=0.45)
     for i, aa in enumerate(list('ACDEFGHIKLMNPQRSTVWY')):
-        y = [0] * (35 * 10) + [np.polyval(profiles[aa], z) for z in Z] + [0] * (35 * 10)
+        y = [0] * (35 * 10) + [np.polyval(profiles[aas_1_3[aa]], z) for z in Z] + [0] * (35 * 10)
         if aa not in ['V', 'M', 'H']:
             tck = interpolate.splrep(x, y, s=25)
         else:
@@ -827,11 +827,89 @@ def draw_elazar_splines() -> None:
         plt.subplot(5, 4, 1 + i)
         plt.plot(x, y, c='k')
         plt.plot(xnew, ynew, c='r')
+        plt.scatter(x, [bspleval(x_, tck[0], tck[1], tck[2]) for x_ in x], c='g', marker='+')
         plt.vlines(-15, -2, 3, color='grey', linestyles='dashed')
         plt.vlines(15, -2, 3, color='grey', linestyles='dashed')
         plt.title(aa.upper())
         plt.ylim([-2, 3])
     plt.show()
+
+
+def bspleval(x, knots, coeffs, order, debug=False):
+    """
+    adopted from http://scipy.github.io/old-wiki/pages/Numpy_Example_List_With_Doc.html
+
+    Evaluate a B-spline at a set of points.
+
+    Parameters
+    ----------
+    x : list or ndarray
+        The set of points at which to evaluate the spline.
+    knots : list or ndarray
+        The set of knots used to define the spline.
+    coeffs : list of ndarray
+        The set of spline coefficients.
+    order : int
+        The order of the spline.
+
+    Returns
+    -------
+    y : ndarray
+        The value of the spline at each point in x.
+    """
+
+    k = order
+    t = knots
+    m = np.alen(t)
+    npts = np.alen(x)
+    B = np.zeros((m-1,k+1,npts))
+
+    if debug:
+        print('k=%i, m=%i, npts=%i' % (k, m, npts))
+        print('t=', t)
+        print('coeffs=', coeffs)
+
+    ## Create the zero-order B-spline basis functions.
+    for i in range(m-1):
+        B[i,0,:] = np.float64(np.logical_and(x >= t[i], x < t[i+1]))
+
+    if (k == 0):
+        B[m-2,0,-1] = 1.0
+
+    ## Next iteratively define the higher-order basis functions, working from lower order to higher.
+    for j in range(1,k+1):
+        for i in range(m-j-1):
+            if (t[i+j] - t[i] == 0.0):
+                first_term = 0.0
+            else:
+                first_term = ((x - t[i]) / (t[i+j] - t[i])) * B[i,j-1,:]
+
+            if (t[i+j+1] - t[i+1] == 0.0):
+                second_term = 0.0
+            else:
+                second_term = ((t[i+j+1] - x) / (t[i+j+1] - t[i+1])) * B[i+1,j-1,:]
+
+            B[i,j,:] = first_term + second_term
+        B[m-j-2,j,-1] = 1.0
+
+    if debug:
+        plt.figure()
+        for i in range(m-1):
+            plt.plot(x, B[i,k,:])
+        plt.title('B-spline basis functions')
+
+    ## Evaluate the spline by multiplying the coefficients with the highest-order basis functions.
+    y = np.zeros(npts)
+    for i in range(m-k-1):
+        y += coeffs[i] * B[i,k,:]
+
+    if debug:
+        plt.figure()
+        plt.plot(x, y)
+        plt.title('spline curve')
+        plt.show()
+
+    return(y)
 
 
 if __name__ == '__main__':
@@ -877,6 +955,9 @@ if __name__ == '__main__':
 
     elif args['mode'] == 'draw_rosetta_profiles_fa_cen':
         draw_rosetta_profiles_fa_cen(args)
+
+    elif args['mode'] == 'draw_elazar_splines':
+        draw_elazar_splines(args)
 
     elif args['mode'] == 'test':
         create_e_term_specific_profiles('./', ['fa_rep', 'fa_mpsolv'])
