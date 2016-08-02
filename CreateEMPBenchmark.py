@@ -726,7 +726,7 @@ def create_polyA_fasta() -> None:
     """
     with open(PWD+POLY_A_NAME+ '.fa', 'w+') as fout:
         fout.write('>polyA\n%s\n' % ''.join(['A'] * (NUM_AAS + 2 * FLANK_SIZE)))
-        logger.log('created polyA file at %s.fa with %i As' % (PWD + POLY_A_NAME, NUM_AAS))
+        logger.log('created polyA file at %s.fa with %i As and %i flank size' % (PWD + POLY_A_NAME, NUM_AAS, FLANK_SIZE))
 
 
 def make_jobs(aa: str, pos: int, job_args: dict, script_vars: dict=None) -> None:
@@ -959,7 +959,7 @@ if __name__ == '__main__':
     elif args['mode'] == 'draw_elazar_splines':
         draw_elazar_splines(args)
 
-    elif args['mode'] == 'test':
+    elif args['mode'] == 'create_e_term_specific_profiles':
         create_e_term_specific_profiles('./', ['fa_rep', 'fa_mpsolv'])
 
     else:
