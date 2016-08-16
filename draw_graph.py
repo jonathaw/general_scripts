@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #!/usr/bin/env python3.5
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -39,7 +38,6 @@ fig.set_size_inches(18.5, 10.5)
 plt.savefig('/home/labs/fleishman/jonathaw/graph.png', dpi=100)
 
 plt.show()
-=======
 #!/usr/bin/env python
 def main():
     import matplotlib.pyplot as plt
@@ -73,4 +71,3 @@ def main():
 
 if __name__ == '__main__':
     main()
->>>>>>> fc3355ffc96dcbbc4b29f11edfa219de936d6a00

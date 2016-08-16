@@ -4,6 +4,7 @@ a class for making log files, during stdout print
 import os
 import colorama
 import sys
+import time
 
 
 class Logger:
@@ -16,12 +17,14 @@ class Logger:
         self.log_file = open(path+log_file, 'w+')
         self.log('given command: %s' % ' '.join(sys.argv))
 
-    def log(self, string, to_print=True, emphasize=False):
+    def log(self, string, to_print=True, emphasize=False, time_stamp=True):
+        ts = "{%s}" % time.strftime("%H:%M") if time_stamp else ""
+
         if to_print:
             if emphasize:
                 print(colorama.Fore.RED + colorama.Back.GREEN + string + colorama.Style.RESET_ALL)
             else:
-                print('<%s> %s' % (self.emblem, string))
+                print('<%s> %s %s' % (self.emblem, ts, string))
         self.log_file.write(string+'\n')
         sys.stdout.flush()
 
