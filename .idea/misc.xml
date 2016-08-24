@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-<<<<<<< HEAD
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.5.1 (/usr/local/Cellar/python3/3.5.1/Frameworks/Python.framework/Versions/3.5/bin/python3.5)" project-jdk-type="Python SDK" />
   <component name="masterDetails">
     <states>
@@ -18,8 +17,5 @@
     </states>
   </component>
 </project>
-=======
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 2.7.5 (/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7)" project-jdk-type="Python SDK" />
 </project>
-
->>>>>>> fc3355ffc96dcbbc4b29f11edfa219de936d6a00

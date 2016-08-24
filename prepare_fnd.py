@@ -39,6 +39,7 @@ def main():
     parser.add_argument('-num_jobs', type=int, default=1000, help='number of jobs to create')
     parser.add_argument('-queue', type=str, default='fleishman', help='queue to run on')
     parser.add_argument('-avoid_psipred', type=bool, default=True, help='whether to use psipred')
+    parser.add_argument('-database', default='/home/labs/fleishman/jonathaw/Rosetta/main/database')
     args = vars(parser.parse_args())
     if args['some_pdb'] is None:
         args['some_pdb'] = args['native_pdb']
@@ -116,6 +117,7 @@ def create_fnd_flags(args):
         number_of_units = args['symm_num']
     with open(args['flags_file'], 'w+') as fout:
         fout.write('-parser:protocol %s\n' % args['fnd_protocol'])
+        fout.write('-database %s\n' % args['database'])
         fout.write('-in:file:fasta %s%s\n' % (args['path_data'], args['fasta']))
         fout.write('-mp:scoring:hbond\n')
         fout.write('-mp:setup:spanfiles %s%s.span\n' % (args['path_data'], args['name']))
@@ -228,7 +230,7 @@ def run_fragment_picker(args):
         args['logger'].log('creating fragment_picker flags for %i' % n)
         with open('fragment_picker_%i.flags' % n, 'w+') as fout:
             fout.write('#input databases\n')
-            fout.write('-database   %s\n' % (rosetta_path+'main/database/'))
+            fout.write('-database   %s\n' % args['database']) #'(rosetta_path+'main/database/'))
             fout.write('-in::file::vall  %stools/fragment_tools/vall.jul19.2011.gz\n' % rosetta_path)
 
             fout.write('# Query-related input files\n')

@@ -159,11 +159,13 @@ def generate_score(file_name, filters: list):
 def quick_rmsd_total(args):
     sc_df = Rf.score_file2df(args['sc'])
     args['logger'].log('examining %s with span_topo threshold %f' % (args['sc'], args['span_threshold']))
+
     fig, ax = plt.subplots()
     sc_df['pass'] = sc_df['a_span_topo'] > args['span_threshold']
     sc_df_pass = sc_df[sc_df['a_span_topo'] > args['span_threshold']]
     args['logger'].log('%i models passed span_topo threshold' % len(sc_df_pass))
-    # sc_df_fail = sc_df[sc_df['a_span_topo'] <= 0.7]
+    sc_df_fail = sc_df[sc_df['a_span_topo'] <= args['span_threshold']]
+    args['logger'].log('%i models failed span_topo threshold' % len(sc_df_fail))
 
     # ax.scatter(sc_df_fail['rmsd_calc'].values, sc_df_fail['score'].values, color='r', marker='.')
     ax.scatter(sc_df_pass['rmsd_calc'].values, sc_df_pass['score'].values, marker='o',
@@ -173,7 +175,10 @@ def quick_rmsd_total(args):
     min_energy = np.nanmin(list(sc_df_pass['score'].values))
     plt.ylim([min_energy - 1, min_energy + 100])
     plt.xlim([0, 30])
-    plt.title(args['sc'])
+    plt.title(args['sc']+'_pass')
+
+    ax.scatter(sc_df_fail['rmsd_calc'].values, sc_df_fail['score'].values, marker='x',
+               c=sc_df_fail['a_span_topo'].values, picker=True, cmap=plt.cm.coolwarm, markersize=200)
 
     # af = PrintLabel(sc_df_pass, 'rmsd_calc', 'score', ['description', 'pass'])
     # fig.canvas.mpl_connect('button_press_event', af)
