@@ -3,6 +3,8 @@ import os
 import time
 import argparse
 import pickle
+import matplotlib as mpl
+# mpl.use('Agg')
 import matplotlib.pyplot as plt
 import RosettaFilter as Rf
 from Logger import Logger
@@ -178,7 +180,7 @@ def quick_rmsd_total(args):
     plt.title(args['sc']+'_pass')
 
     ax.scatter(sc_df_fail['rmsd_calc'].values, sc_df_fail['score'].values, marker='x',
-               c=sc_df_fail['a_span_topo'].values, picker=True, cmap=plt.cm.coolwarm, markersize=200)
+               c=sc_df_fail['a_span_topo'].values, picker=True, cmap=plt.cm.coolwarm)#, markersize=200)
 
     # af = PrintLabel(sc_df_pass, 'rmsd_calc', 'score', ['description', 'pass'])
     # fig.canvas.mpl_connect('button_press_event', af)

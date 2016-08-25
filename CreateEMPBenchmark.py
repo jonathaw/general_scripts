@@ -30,8 +30,9 @@ import shutil
 import subprocess
 
 # 3rd party imports
-import matplotlib.pyplot as plt
 import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from collections import OrderedDict
@@ -220,6 +221,26 @@ def add_IP_to_IP(ip1: InsertionProfile, ip2: InsertionProfile, verbose: bool = F
     return InsertionProfile(ip1.AA, new_pos_score)#, adjust_extra_membranal=ip1.extra_membrane_adjusted)
 
 
+def calibrate_energy_function(args):
+    """
+    
+    :param args:
+    :return:
+    """
+    score_funcs_to_calibrate = ['score0', 'score1', 'score2', 'score3', 'score5']
+    original_dir = os.getcwd()
+    logger.log("will calibrate the score functions %r" % score_funcs_to_calibrate)
+    for en_func in score_funcs_to_calibrate:
+        os.mkdir('%s/%s' % (original_dir, en_func))
+        os.chdir('%s/%s' % (original_dir, en_func))
+        logger.log("calibrating %s" % en_func)
+
+
+
+
+        os.chdir('%s/' % original_dir)
+
+
 def main():
     # create files for running benchmark
     if args['full']:
@@ -230,11 +251,6 @@ def main():
 
     elazar_ips = create_elazar_ips()
 
-    # print('F')
-    # for pos in POS_RANGE:
-    #     print(pos, elazar_ips['F'].pos_score[pos])
-    # sys.exit()
-
     # first FilterScan run. using null ResSolv
     # full_ips = filterscan_analysis_energy_func('full', residues_to_test=AAs)
     full_ips = filterscan_analysis_energy_func('talaris', residues_to_test=AAs, print_xml=True)
@@ -244,24 +260,14 @@ def main():
     noMenv_ips = filterscan_analysis_energy_func('talaris', residues_to_test=AAs)
     # noMenvCEN_ips = filterscan_analysis_energy_func('noMenvCEN', residues_to_test=AAs)
 
-    # print('F')
-    # for pos in POS_RANGE:
-    #     print(pos, noMenv_ips['F'].pos_score[pos])
-    # sys.exit()
     # calc the difference InsertionProfiles between Elazar and Rosetta. assign them as the polynom table
     diff_ips = {0: {k: subtract_IP_from_IP(elazar_ips[k], noMenv_ips[k]) for k in AAs}}
     # diff_ips_CEN = {k: subtract_IP_from_IP(elazar_ips[k], noMenvCEN_ips[k]) for k in AAs}
-    # var = {v.adjust_exta_membrane() for v in diff_ips[0].values()}
-    # print('F')
-    # for pos in POS_RANGE:
-    #     print(pos, diff_ips['F'].pos_score[pos])
-    # sys.exit()
 
     # create_polyval_table(diff_ips[0], 'ELazaridis_0.txt', rosetta_table_name='ELazaridis_polynom_table.txt')
     # create_polyval_table(diff_ips_CEN, 'ELazaridis_CEN_0.txt', rosetta_table_name='ELazaridis_cen_polynom_table.txt')
 
     create_spline_table(diff_ips[0], 'spline_test_fa.txt', 'spline_test_fa.txt')
-    # create_spline_table(elazar_ips, 'spline_test_fa.txt', 'spline_test_fa.txt')
     # create_spline_table(diff_ips_CEN, 'spline_test_cen.txt', 'spline_test_cen.txt')
 
     # analyse Rosetta again.
@@ -269,17 +275,8 @@ def main():
         0: filterscan_analysis_energy_func('ResSolv', residues_to_test=AAs, adjust_extra_membranal=False,
                                            to_dump_pdbs=False)}
     # MPResSolvCEN_current_ips = filterscan_analysis_energy_func('ResSolvCEN', residues_to_test=AAs, adjust_extra_membranal=False, to_dump_pdbs=False)
-    # print('F')
-    # for pos in POS_RANGE:
-    #     print(pos, MPResSolv_current_ips['A'].pos_score[pos])
-    # sys.exit()
     draw_filterscan_profiles(OrderedDict({'full': full_ips, 'no_Menv': noMenv_ips, 'ResSolv': MPResSolv_current_ips[0],
                                           'elazar': elazar_ips, 'diff_ips': diff_ips[0]}), cen_fa='fa')
-
-    # draw_filterscan_profiles(OrderedDict({'elazar': elazar_ips, 'ResSolv': MPResSolv_current_ips}), cen_fa='fa')
-
-    # draw_filterscan_profiles(OrderedDict({'fullCEN': fullCEN_ips, 'no_MenvCEN': noMenvCEN_ips, 'diff_ips_CEN': diff_ips_CEN,
-    #                                       'ResSolvCEN': MPResSolvCEN_current_ips, 'elazar': elazar_ips}), cen_fa='cen')
 
     # draw_filterscan_profiles(OrderedDict({'elazar': elazar_ips, 'ResSolv': MPResSolvCEN_current_ips}), cen_fa='cen')
     for aa in AAs:
@@ -334,18 +331,6 @@ def main():
             create_spline_table(diff_ips[iter_num], 'spline_test_fa_%i.txt' % iter_num, 'spline_test_fa.txt')
             MPResSolv_current_ips[iter_num] = filterscan_analysis_energy_func('ResSolv', residues_to_test=AAs,
                                                                     adjust_extra_membranal=False, to_dump_pdbs=False)
-            # plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.15, hspace=0.45)
-            for i, aa in enumerate(['F']):
-                # plt.subplot(5, 4, 1 + i)
-                plt.scatter(POS_RANGE, [MPResSolv_current_ips[iter_num][aa].pos_score[pos] for pos in POS_RANGE], label='ResSolv_%i' % iter_num, c='purple')
-                plt.scatter(POS_RANGE, [elazar_ips[aa].pos_score[pos] for pos in POS_RANGE], label='elazar', c='red')
-                plt.scatter(POS_RANGE, [diff_ips[iter_num][aa].pos_score[pos] for pos in POS_RANGE], label='diff_%i' % iter_num, c='black')
-                plt.title(aa)
-            plt.legend()
-            plt.suptitle('iter num %i' % iter_num)
-            plt.savefig('iter_num_%i.png' % iter_num)
-            plt.close()
-            # sys.exit()
 
             rmsds = {aa: elazar_ips[aa].rmsd_ips(MPResSolv_current_ips[iter_num][aa]) for aa in AAs}
             iter_num += 1
@@ -353,13 +338,6 @@ def main():
         draw_rmsd_plots()
         draw_filterscan_profiles(OrderedDict({'ResSolv': MPResSolv_current_ips[iter_num-1],
                                               'elazar': elazar_ips}), cen_fa='final_!')
-
-    # draw_filterscan_profiles(OrderedDict({'full': full_ips, 'no_Menv': noMenv_ips, 'ResSolv': MPResSolv_current_ips,
-    #                                       'diff_ips': diff_ips, 'elazar': elazar_ips}))
-
-    if args['show_fig']:
-        plt.show()
-        plt.close()
 
 
 def follow_ip(aa, ips, title):
@@ -558,9 +536,7 @@ def draw_filterscan_profiles(ips_dict: OrderedDict, cen_fa='fa', show: bool = Fa
         for name, ips in ips_dict.items():
             plt.plot(Z_total, [ips[aa].pos_score[pos] for pos in POS_RANGE], color=COLOR_MAP[name], label=name)
         plt.title(aa.upper())
-        if aa == 'P':
-            plt.ylim([-12, 5])
-        else:
+        if aa != 'P':
             plt.ylim([-5, 5])
         plt.xlim([-50, 50])
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))

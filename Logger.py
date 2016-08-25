@@ -27,7 +27,7 @@ class Logger:
                 print(colorama.Fore.RED + colorama.Back.GREEN + string + colorama.Style.RESET_ALL)
             else:
                 print('<%s%s> %s' % (pt, ts, string))
-        self.log_file.write(string+'\n')
+        self.log_file.write('<%s%s> %s\n' % (pt, ts, string))
         self.log_file.flush()
         sys.stdout.flush()
 
