@@ -43,7 +43,6 @@ def main():
     args = vars(parser.parse_args())
     if args['some_pdb'] is None:
         args['some_pdb'] = args['native_pdb']
-
     args['time'] = time.strftime("%d.%0-m")
     args['logger'] = Logger('log_file_%s.log' % args['time'])
     make_data(args)
@@ -112,6 +111,7 @@ def make_bin(args):
 def create_fnd_flags(args):
     args['flags_file'] = 'fnd_%s_%s.flags' % (args['name'], args['time'])
     args['logger'].log('creating flags file at %s' % args['flags_file'])
+    spans = get_spans_from_topo_string(args)
     number_of_units = 1
     if args['is_symm']:
         number_of_units = args['symm_num']
@@ -133,6 +133,42 @@ def create_fnd_flags(args):
         fout.write('-in:file:native %s%s\n' % (args['path_data'], args['native_pdb'].split('/')[-1]))
         fout.write('-nstruct %i\n' % args['nstruct'])
         fout.write('-mute all\n')
+        for i, span in enumerate(spans):
+            fout.write('-parser:script_vars span_start_%i=%i\n' % (i+1, span['start']))
+            fout.write('-parser:script_vars span_end_%i=%i\n' % (i+1, span['end']))
+            fout.write('-parser:script_vars span_orientation_%s=%s\n' % (i+1, span['orientation']))
+
+
+def get_spans_from_topo_string(args) -> list:
+    topology_list = []
+    topo_string = args['topo_string']
+    hhh = re.compile('[hH]*')
+    h_list = [(a.start(), a.end()) for a in hhh.finditer(topo_string) if a.end() - a.start() > 1
+              and a.end() - a.start() >= 1]
+    for h in h_list:
+        direction = 'fwd' if topo_string[h[0] - 1] == '1' else 'rev'
+        topology_list.append((h[0]+1, h[1], direction))
+    spans = []
+    for span in topology_list:
+        ori = ''
+        if span[2] == 'fwd':
+            ori = 'in2out'
+        elif span[2] =='rev':
+            ori = 'out2in'
+        else:
+            sys.exit('illegal orientation found for span', span)
+        spans.append({'start': span[0], 'end': span[1], 'orientation': ori})
+    new_spans = spans.copy()
+    for i in range(args['symm_num']-1):
+        for span in spans:
+            new_span = span.copy()
+            new_span['start'] += len(args['seq'])
+            new_span['end'] += len(args['seq'])
+            new_spans.append(new_span)
+    args['logger'].log('found the following spans for symmetry %i' % args['symm_num'])
+    for span in new_spans:
+        args['logger'].log('start: %i end: %i orientation: %s' % (span['start'], span['end'], span['orientation']))
+    return new_spans
 
 
 def make_data(args):
@@ -254,7 +290,9 @@ def run_fragment_picker(args):
             fout.write('-frags::describe_fragments 	frags.fsc\n')
     for n in [3, 9]:
         args['logger'].log('running fragment_picker for %i' % n)
-        os.system('%sfragment_picker.default.linuxgccrelease @fragment_picker_%i.flags' % (rosetta_bin_path, n))
+        cmd = '%sfragment_picker.default.linuxgccrelease @fragment_picker_%i.flags' % (rosetta_bin_path, n)
+        args['logger'].log('running command:\n%s' % cmd)
+        os.system(cmd)
 
 if __name__ == '__main__':
     main()

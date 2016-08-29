@@ -46,8 +46,8 @@ from Logger import Logger
 
 mpl.rc_context(fname="/home/labs/fleishman/jonathaw/.matplotlib/publishable_matplotlibrc")
 LSF_USERNAME = 'jonatha'
-PWD = os.getcwd() + '/'
-all_configurations_path = PWD + 'all_configs/'
+# PWD = os.getcwd() + '/'
+# all_configurations_path = PWD + 'all_configs/'
 
 ROSETTA_EXECUTABLES_PATH = '/home/labs/fleishman/jonathaw/Rosetta/main/source/bin/'
 ROSETTA_SCRIPTS_EXEC_PATH = 'rosetta_scripts.default.linuxgccrelease'
@@ -221,27 +221,31 @@ def add_IP_to_IP(ip1: InsertionProfile, ip2: InsertionProfile, verbose: bool = F
     return InsertionProfile(ip1.AA, new_pos_score)#, adjust_extra_membranal=ip1.extra_membrane_adjusted)
 
 
-def calibrate_energy_function(args):
+def calibrate_energy_functions(args):
     """
     
     :param args:
     :return:
     """
-    score_funcs_to_calibrate = ['score0', 'score1', 'score2', 'score3', 'score5']
+    global PWD
+
+    fa_cen_for_scores = OrderedDict(
+        dict(score0='centroid', score1='centroid', score2='centroid', score3='centroid', score5='centroid'))
+    score_funcs_to_calibrate = list(fa_cen_for_scores.keys())
     original_dir = os.getcwd()
     logger.log("will calibrate the score functions %r" % score_funcs_to_calibrate)
     for en_func in score_funcs_to_calibrate:
         os.mkdir('%s/%s' % (original_dir, en_func))
         os.chdir('%s/%s' % (original_dir, en_func))
         logger.log("calibrating %s" % en_func)
+        PWD = '%s/%s/' % (original_dir, en_func)
 
-
-
+        calibrate_function(en_func + '_elazaridis', fa_cen=fa_cen_for_scores[en_func])
 
         os.chdir('%s/' % original_dir)
 
 
-def main():
+def calibrate_function(score_func='talaris', fa_cen='fa_standard'):
     # create files for running benchmark
     if args['full']:
         create_polyA_fasta()
@@ -253,30 +257,32 @@ def main():
 
     # first FilterScan run. using null ResSolv
     # full_ips = filterscan_analysis_energy_func('full', residues_to_test=AAs)
-    full_ips = filterscan_analysis_energy_func('talaris', residues_to_test=AAs, print_xml=True)
+    full_ips = filterscan_analysis_energy_func(score_func, res_solv_weight=0.0, fa_cen=fa_cen,residues_to_test=AAs,
+                                               print_xml=True)
     # fullCEN_ips = filterscan_analysis_energy_func('fullCEN', residues_to_test=AAs)
 
     # noMenv_ips = filterscan_analysis_energy_func('noMenv', residues_to_test=AAs)
-    noMenv_ips = filterscan_analysis_energy_func('talaris', residues_to_test=AAs)
+    # noMenv_ips = filterscan_analysis_energy_func(score_func, residues_to_test=AAs)
     # noMenvCEN_ips = filterscan_analysis_energy_func('noMenvCEN', residues_to_test=AAs)
 
     # calc the difference InsertionProfiles between Elazar and Rosetta. assign them as the polynom table
-    diff_ips = {0: {k: subtract_IP_from_IP(elazar_ips[k], noMenv_ips[k]) for k in AAs}}
+    diff_ips = {0: {k: subtract_IP_from_IP(elazar_ips[k], full_ips[k]) for k in AAs}}
     # diff_ips_CEN = {k: subtract_IP_from_IP(elazar_ips[k], noMenvCEN_ips[k]) for k in AAs}
 
     # create_polyval_table(diff_ips[0], 'ELazaridis_0.txt', rosetta_table_name='ELazaridis_polynom_table.txt')
     # create_polyval_table(diff_ips_CEN, 'ELazaridis_CEN_0.txt', rosetta_table_name='ELazaridis_cen_polynom_table.txt')
 
-    create_spline_table(diff_ips[0], 'spline_test_fa.txt', 'spline_test_fa.txt')
+    create_spline_table(diff_ips[0], 'spline_%s_fa.txt' % score_func,
+                        'spline_test_%s.txt' % ('fa' if fa_cen == 'fa_standard' else 'cen'))
     # create_spline_table(diff_ips_CEN, 'spline_test_cen.txt', 'spline_test_cen.txt')
 
     # analyse Rosetta again.
     MPResSolv_current_ips = {
-        0: filterscan_analysis_energy_func('ResSolv', residues_to_test=AAs, adjust_extra_membranal=False,
-                                           to_dump_pdbs=False)}
+        0: filterscan_analysis_energy_func(score_func, res_solv_weight=1.0, fa_cen=fa_cen, residues_to_test=AAs,
+                                           adjust_extra_membranal=False, to_dump_pdbs=False)}
     # MPResSolvCEN_current_ips = filterscan_analysis_energy_func('ResSolvCEN', residues_to_test=AAs, adjust_extra_membranal=False, to_dump_pdbs=False)
-    draw_filterscan_profiles(OrderedDict({'full': full_ips, 'no_Menv': noMenv_ips, 'ResSolv': MPResSolv_current_ips[0],
-                                          'elazar': elazar_ips, 'diff_ips': diff_ips[0]}), cen_fa='fa')
+    # draw_filterscan_profiles(OrderedDict({'full': full_ips, 'no_Menv': noMenv_ips, 'ResSolv': MPResSolv_current_ips[0],
+    #                                       'elazar': elazar_ips, 'diff_ips': diff_ips[0]}), cen_fa='fa')
 
     # draw_filterscan_profiles(OrderedDict({'elazar': elazar_ips, 'ResSolv': MPResSolvCEN_current_ips}), cen_fa='cen')
     for aa in AAs:
@@ -293,21 +299,17 @@ def main():
                      label='ResSolv_%i' % 0, c='purple')
             plt.scatter(POS_RANGE, [elazar_ips[aa].pos_score[pos] for pos in POS_RANGE], label='elazar', c='red')
             plt.scatter(POS_RANGE, [diff_ips[0][aa].pos_score[pos] for pos in POS_RANGE], label='diff_%i' % 0, c='black')
-            plt.scatter(POS_RANGE, [noMenv_ips[aa].pos_score[pos] for pos in POS_RANGE], label='noMenv_%i' % 0, c='green')
+            plt.scatter(POS_RANGE, [full_ips[aa].pos_score[pos] for pos in POS_RANGE], label='%s_%i' % (score_func, 0), c='green')
             plt.title(aa)
         plt.legend()
         plt.suptitle('iter num %i original !!!' % 0)
         plt.savefig('iter_num_0_original.png')
-        plt.close()
-        plt.scatter(POS_RANGE, [MPResSolv_current_ips[0]['F'].pos_score[pos] for pos in POS_RANGE])
-        plt.savefig('F_mpressolv_current.png')
         plt.close()
         args['full'] = True
         rmsds = {aa: elazar_ips[aa].rmsd_ips(MPResSolv_current_ips[0][aa]) for aa in AAs}
         fixed_ips = {}
         iter_num = 1
         while any([rmsd > RMSD_THRESHOLD for rmsd in rmsds.values()]) and iter_num < 10:
-            # rmsds = {aa: elazar_ips[aa].rmsd_ips(MPResSolv_current_ips[iter_num][aa]) for aa in AAs}
             aas_improve = [aa for aa in AAs if rmsds[aa] > RMSD_THRESHOLD]
             logger.log('starting round %i for AAs %s' % (iter_num, aas_improve))
             diff_ips[iter_num] = {'A': diff_ips[iter_num-1]['A']}
@@ -321,23 +323,31 @@ def main():
                     diff_ips[iter_num][aa] = fixed_ips[aa]
 
             for aa in aas_improve:
-                print('improve %s at %.2f' % (aa, rmsds[aa]))
+                logger.log('improve %s at %.2f round %i' % (aa, rmsds[aa], iter_num))
                 diff_ips[iter_num][aa] = InsertionProfile(aa, dict())
 
                 for pos in POS_RANGE:
                     diff_ips[iter_num][aa].pos_score[pos] = diff_ips[iter_num-1][aa].pos_score[pos] + \
                                                             elazar_ips[aa].pos_score[pos] - \
                                                             MPResSolv_current_ips[iter_num-1][aa].pos_score[pos]
-            create_spline_table(diff_ips[iter_num], 'spline_test_fa_%i.txt' % iter_num, 'spline_test_fa.txt')
-            MPResSolv_current_ips[iter_num] = filterscan_analysis_energy_func('ResSolv', residues_to_test=AAs,
-                                                                    adjust_extra_membranal=False, to_dump_pdbs=False)
+            create_spline_table(diff_ips[iter_num], 'spline_%s_fa_%i.txt' % (score_func, iter_num),
+                                'spline_test_%s.txt' % ('fa' if fa_cen == 'fa_standard' else 'cen'))
+            MPResSolv_current_ips[iter_num] = filterscan_analysis_energy_func(score_func, res_solv_weight=1.0,
+                                                                              fa_cen=fa_cen,
+                                                                              residues_to_test=AAs,
+                                                                              adjust_extra_membranal=False,
+                                                                              to_dump_pdbs=False)
 
             rmsds = {aa: elazar_ips[aa].rmsd_ips(MPResSolv_current_ips[iter_num][aa]) for aa in AAs}
             iter_num += 1
 
         draw_rmsd_plots()
         draw_filterscan_profiles(OrderedDict({'ResSolv': MPResSolv_current_ips[iter_num-1],
-                                              'elazar': elazar_ips}), cen_fa='final_!')
+                                              'elazar': elazar_ips}), cen_fa='%s %s' % (score_func, fa_cen))
+        logger.log('finished calibrating %s %s' % (score_func, fa_cen))
+        logger.log('got these RMSDs:')
+        for aa in AAs:
+            logger.log('for %s got %.2f after %i rounds' % (aa, rmsds[aa], len(RMSD_ITERATIONS[aa])))
 
 
 def follow_ip(aa, ips, title):
@@ -649,9 +659,11 @@ def filterscan_analysis() -> pd.DataFrame:
     return df
 
 
-def filterscan_analysis_energy_func(energy_function: str, residues_to_test: list=AAs, to_dump_pdbs: bool=False,
+def filterscan_analysis_energy_func(energy_function: str, res_solv_weight: float, fa_cen: str,
+                                    residues_to_test: list=AAs, to_dump_pdbs: bool=False,
                                     adjust_extra_membranal: bool=True, print_xml: bool=False) -> dict:
     """
+    energy_function = which energy function to calibrate
     run the FilteScan protocol on the ployA and return InsertionProfiles dict for energy_function
     """
     # run FilterScan protocol to create sclog files for both full and no M env score functions
@@ -660,10 +672,11 @@ def filterscan_analysis_energy_func(energy_function: str, residues_to_test: list
             print('no energy function provided!')
             sys.exit()
         command = '%s%s -database %s -parser:protocol %s -s %s -mp:setup:spanfiles %s -nstruct %i -overwrite ' \
-                  '-mp:scoring:hbond -mute all -ex1aro -ex2aro -parser:script_vars energy_function=%s residues_to_test=%s to_dump=%i' % \
+                  '-mp:scoring:hbond -mute all -ex1aro -ex2aro -parser:script_vars energy_function=%s ' \
+                  'residues_to_test=%s to_dump=%i res_solv_weight=%.2f fa_or_cen=%s' % \
                   (ROSETTA_EXECUTABLES_PATH, ROSETTA_SCRIPTS_EXEC_PATH, ROSETTA_DATABASE_PATH,
                    PROTOCOLS_PATH + MPFilterScanDifferentSFAAs, PWD + POLY_A_NAME + '.pdb', PWD + POLY_A_NAME + '.span', NSTRUCT,
-                   energy_function, ''.join(residues_to_test), 1 if to_dump_pdbs else 0)
+                   energy_function, ''.join(residues_to_test), 1 if to_dump_pdbs else 0, res_solv_weight, fa_cen)
         logger.log('running FilterScan for the energy function %s protocol, issuing command:\n%s' %
                    (energy_function, command))
         logger.log_text_file('%s' % str(PROTOCOLS_PATH + MPFilterScanDifferentSFAAs), to_print=print_xml)
@@ -863,7 +876,8 @@ def create_polyA_fasta() -> None:
     """
     with open(PWD+POLY_A_NAME+ '.fa', 'w+') as fout:
         fout.write('>polyA\n%s\n' % ''.join(['A'] * (NUM_AAS + 2 * FLANK_SIZE)))
-        logger.log('created polyA file at %s.fa with %i As and %i flank size' % (PWD + POLY_A_NAME, NUM_AAS, FLANK_SIZE))
+        logger.log('created polyA file at %s.fa with %i As and %i flank size' %
+                   (PWD + POLY_A_NAME, NUM_AAS, FLANK_SIZE))
 
 
 def make_jobs(aa: str, pos: int, job_args: dict, script_vars: dict=None) -> None:
@@ -1062,6 +1076,36 @@ def understanding_spline_improvements():
         print(pos, obj_f.pos_score[pos], int_f.pos_score[pos], obj_f.pos_score[pos]-int_f.pos_score[pos])
 
 
+def compare_multiple_splines():
+    """
+    compare splines from multiple energy funcs
+    :return:
+    """
+    score_funcs = ['score0', 'score1', 'score2', 'score3', 'score5']
+    score_splines = {k: dict() for k in score_funcs}
+    for score in score_funcs:
+        spline_file = sorted([a for a in os.listdir(score) if 'spline' in a])[0]
+        for l in open(score+'/'+spline_file, 'r'):
+            s = l.split()
+            score_splines[score][s[0]] = [float(a) for a in s[1:]]
+
+    elazar_ips = create_elazar_ips()
+
+    plt.figure()
+    plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.15, hspace=0.45)
+    for i, aa in enumerate(AAs):
+        plt.subplot(5, 4, 1 + i)
+        plt.plot(Z_total, [elazar_ips[aa].pos_score[pos] for pos in POS_RANGE], label='elazar')
+        for sc in score_funcs:
+            plt.plot(Z_total, score_splines[sc][aa], label=sc)
+        if aa != 'P':
+            plt.ylim([-5, 5])
+        plt.title(aa)
+    plt.legend()
+    plt.savefig('spline_comparisons.png')
+    plt.show()
+
+
 if __name__ == '__main__':
     global polyA_total_mean, logger, args
 
@@ -1082,7 +1126,10 @@ if __name__ == '__main__':
     args = vars(parser.parse_args())
 
     if args['mode'] == 'main':
-        main()
+        calibrate_function()
+
+    elif args['mode'] == 'calibrate_multiple':
+        calibrate_energy_functions(args)
 
     elif args['mode'] == 'create_polyA':
         create_polyA_fasta()
@@ -1116,6 +1163,9 @@ if __name__ == '__main__':
 
     elif args['mode'] == 'just':
         just_draw_current_profiles()
+
+    elif args['mode'] == 'compare_multiple_splines':
+        compare_multiple_splines()
 
     elif args['mode'] == 'test':
         understanding_spline_improvements()
