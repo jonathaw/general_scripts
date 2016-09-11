@@ -1,129 +1,116 @@
-<<<<<<< HEAD
 #!/usr/bin/env python3.5
-"""
-process rosetta run results
-"""
 import os
 import sys
-import argparse
+import time
+import curses
 import subprocess
-import RosettaFilter as RF
-import DoCohResultProcessor as DCRP
+
+HEIGHT, WIDTH = (int(a) for a in os.popen('stty size', 'r').read().split())
 
 
-def main():
-    import time
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-save_pass', type=bool, default=False)
-    args = vars(parser.parse_args())
-    pwd = os.getcwd()+'/'
-    name = pwd.split('/')[-2]
-    time = time.strftime("%d.%0-m")
+class User:
+    def __init__(self, name):
+        self.name = name
+        self.run = 0
+        self.pend = 0
+        self.susp = 0
+        self.ssusp = 0
+        self.unkwn = 0
 
-    if os.path.isfile('%sall_%s_%s.err' % (pwd, name, time)) or os.path.isfile('%sall_%s_%s.score' % (pwd, name, time)):
-        print('found %sall_%s_%s.err / score, STOPPING' % (pwd, name, time))
-        sys.exit()
+    def draw_at(self, pos: int):
+        pass
 
-    sc_files = [a for a in os.listdir(pwd) if a[-3:] == '.sc']
-    pdb_files = [a for a in os.listdir(pwd) if a[-4:] == '.pdb']
-    err_files = [a for a in os.listdir(pwd) if a[:4] == 'err.']
-    job_files = [a for a in os.listdir(pwd) if a[:4] == 'job.']
-    print('found a total of %i job files, %i err files, %i pdbs and %i scores' % (len(job_files), len(err_files),
-                                                                                  len(pdb_files), len(sc_files)))
-    if len(sc_files) == 0:
-        print('found 0 .sc files, so EXITING')
-        sys.exit()
-    combine_scores('%sall_%s_%s.score' % (pwd, name, time), sc_files)
-    non_triv_errs = process_errors('%sall_%s_%s.err' % (pwd, name, time), err_files)
 
-    if non_triv_errs == 0:
-        print('removing out.* and job.*')
-        [os.remove(out) for out in os.listdir(pwd) if out[:4] == 'out.']
-        [os.remove(job) for job in job_files]
-        os.remove('./command')
+def main(stdscr):
+    stdscr.clear()
+    user = sys.argv[1]
+    stdscr.nodelay(True)
+    iter_num = 1
+    loc_y = HEIGHT / 2
+    key = ''
+    total_last = 0
+    time_to_sleep = 6
+    while key != ord('q'):
+        # stat = get_status(user)
+        stat = get_all_status()
+        for i in range(1, time_to_sleep):
+            try:
+                key = stdscr.getch()
+            except:
+                pass
+            if key == 'q':
+                break
+            if user not in stat.keys():
+                # stat[user] = {'RUN': 0, 'PEND': 0}
+                stat[user] = User(user)
+            msg = '%i@%s RUN: %i PEND: %i [%s%s]               \r' % (iter_num,
+                                                        time.strftime("%H:%M:%S"),
+                                                        stat[user].run,
+                                                        stat[user].pend, 
+                                                        '-'*i, ' '*(time_to_sleep-1-i))
+            sys.stdout.write('\33[%i;%iH%s' % (loc_y,
+                                               (WIDTH-len(msg))/2,
+                                               msg))
+            if stat[user].run + stat[user].pend > total_last:
+                time_to_sleep = 15
+            else:
+                time_to_sleep = 6
+            total_last = stat[user].run + stat[user].pend
+            
+            sys.stdout.flush()
+            time.sleep(1)
+            iter_num += 1
+            stdscr.refresh()
 
-    run_filters = DCRP.generate_run_filters()
-    score_dict = RF.score2dict('%sall_%s_%s.score' % (pwd, name, time))
-    passed, failed = DCRP.all_who_pass_run_filters({}, score_dict, run_filters)
-    if len(passed) != 0:
-        print('there are %i passed scores, so choosing from there' % len(list(passed.keys())))
-        best_structs = DCRP.best_n_structures({'filter': 'ddg', 'n': min([10, len(list(passed.keys()))])}, passed)
+
+def get_status(user):
+    proc = subprocess.Popen(['bjobs', '-u', user], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout = str(proc.stdout.read())
+    stderr = str(proc.stderr.read())
+    if stderr == 'No unfinished job found':
+        return 'No unfinished job found'
     else:
-        print('there are no passed, so choosing from the failed')
-        best_structs = DCRP.best_n_structures({'filter': 'ddg', 'n': min([10, len(list(failed.keys()))])}, failed)
-    best_names = [a['description'] for a in best_structs]
-    print('the best:', best_names)
-    print('removing all other pdbs')
-    if not args['save_pass']:
-        [os.remove(pdb) for pdb in pdb_files if pdb[:-4] not in best_names]
-    else:
-        pass_names = list(passed.keys())
-        [os.remove(pdb) for pdb in pdb_files if pdb[:-4] not in pass_names]
+        data = stdout.split('\\n')
+        result = {'running': 0, 'pending': 0}
+        for l in data[1:]:
+            s = l.split()
+            if len(s) >= 2:
+                if s[2] == 'RUN':
+                    result['running'] += 1
+                elif s[2] == 'PEND':
+                    result['pending'] += 1
+        return result
 
 
-def process_errors(file_name, err_list):
-    non_triv = []
-    with open(file_name, 'w+') as err_out:
-        for err in err_list:
-            only_non_triv = True
-            with open(err, 'r') as err_in:
-                for l in err_in.read().split('\n'):
-                    if 'load in l':
-                        continue
-                    else:
-                        err_out.write(l+'\n')
-                        only_non_triv = False
-                        non_triv.append(l)
-            if only_non_triv:
-                os.remove(err)
-    print('found %i non trivial errors, in %i files' % (len(non_triv), len(err_list)))
-    return len(non_triv)
+def get_all_status():
+    proc = subprocess.Popen(['bjobs', '-u', 'all'], stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    stdout = str(proc.stdout.read())
+    stderr = str(proc.stderr.read())
+    data = stdout.split('\\n')
+    result = {}
+    user_list = {}
+    for l in data[1:]:
+        s = l.split()
+        if len(s) >= 2:
+            if s[1] not in result.keys():
+                result[s[1]] = {'RUN': 0, 'PEND': 0, 'SUSP': 0, 'UNKWN': 0,
+                                'SSUSP': 0}
+                user_list[s[1]] = User(s[1])
+            result[s[1]][s[2]] += 1
+            if s[2] == 'RUN':
+                user_list[s[1]].run += 1
+            elif s[2] == 'PEND':
+                user_list[s[1]].pend += 1
+            elif s[2] == 'SSUSP':
+                user_list[s[1]].ssusp += 1
+            elif s[2] == 'unkwn':
+                user_list[s[1]].unkwn += 1
+            elif s[2] == 'SUSP':
+                user_list[s[1]].susp += 1
 
-
-def combine_scores(file_name, sc_list):
-    header = subprocess.check_output('grep description %s' % sc_list[0], shell=True).decode()
-    cont = subprocess.check_output('grep SCORE: *.sc | grep -v description', shell=True)
-    with open(file_name, 'w+') as fout:
-        fout.write(str(header))
-        for l in str(cont).split('\\n'):
-            fout.write(str(l)+'\n')
-    if len(cont) > 100:
-        print('found many scores, removing *sc')
-        [os.remove(sc) for sc in sc_list]
-
-def test():
-    from AnnotateFinder import AnnoteFinder
-    import matplotlib.pyplot as plt
-    x = range(10)
-    y = range(10)
-    annotes = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
-
-    fig, ax = plt.subplots()
-    ax.scatter(x, y)
-    af = AnnoteFinder(x, y, annotes, ax=ax)
-    fig.canvas.mpl_connect('button_press_event', af)
-    plt.show()
+    return user_list
 
 
 if __name__ == '__main__':
-    test()
-    # main()
-=======
-import time
-import sys
-
-toolbar_width = 40
-
-# setup toolbar
-sys.stdout.write("[%s]" % (" " * toolbar_width))
-sys.stdout.flush()
-sys.stdout.write("\b" * (toolbar_width+1)) # return to start of line, after '['
-
-for i in xrange(toolbar_width):
-    time.sleep(0.1) # do real work here
-    # update the bar
-    sys.stdout.write("-")
-    sys.stdout.flush()
-
-sys.stdout.write("\n")
->>>>>>> fc3355ffc96dcbbc4b29f11edfa219de936d6a00
+    curses.wrapper(main)

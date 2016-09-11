@@ -40,7 +40,7 @@ def main():
                                      }}
         
     elif args['mode'] == 'excel':
-        absorbances = [0, 0.3028,    0,    0,    0,    0.2696,    0,    0,    0.3302  ,  0.1656  , 0 ,   0.07824   , 0.062 ,   0.6694]
+        absorbances = [0, 1.2205, 0, 0, 0, 0.7145,  0, 0, 1.3835, 1.859, 0, 0, 1.83875, 3.18925]
         names = ['j829.A', 'j5711.A', 'j5517.A', 'j5106.A', 'j5093.A', 'j4286.A', 'j3622.A', 'j1647.A', 'j4398.A',
                  'j3983.A', 'j3626.A', 'j4518.A', 'j4653.A', '1ohz.A']
         j_data = J_data()
@@ -98,7 +98,7 @@ def main():
         v['seq'] = v['seq'].get_seq()
         df = df.append(v, ignore_index=True)
     print(df)
-
+    print(', '.join(["%i" %i for i in df['extinction_coefficient']]))
     # print conc row for excel
     print('conc row for excel')
     print('\t'.join('%.2f' % (a * 10**6) for a in df['conc'].values))

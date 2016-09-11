@@ -16,7 +16,8 @@ class Logger:
         self.emblem = emblem if emblem is not None else '~'
         self.HOME = os.environ['HOME']
         self.log_file = open(path+log_file, 'w+')
-        self.log('given command: %s' % ' '.join(sys.argv))
+        self.log('given command: %s' 
+                 % ' '.join(sys.argv))
         self.files_logged = {}
 
     def log(self, string, to_print=True, emphasize=False, time_stamp=True):

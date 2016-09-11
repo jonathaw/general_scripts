@@ -165,13 +165,20 @@ def get_rmsds_from_table(pymol_calc_file:str) -> pd.DataFrame:
 
 
 def quick_rmsd_total(args):
+
+    y_axis_term = 'score'
+
     sc_df = Rf.score_file2df(args['sc'])
     pc_df = get_rmsds_from_table(args['pc'])
-    print(pc_df)
     a = sc_df.merge(pc_df, on='description')
     sc_df = a.copy()
     args['logger'].log('examining %s with span_topo threshold %f' % (args['sc'], args['span_threshold']))
     fig, ax = plt.subplots()
+    sc_df = sc_df[sc_df['a_tms_span_fa'] > 0.5]
+    # sc_df = sc_df[sc_df['a_shape'] >= 0.8]
+    # sc_df = sc_df[sc_df['a_sasa'] > 900]
+    # sc_df = sc_df[sc_df['a_ddg'] < -10 ]
+
     sc_df['pass'] = sc_df['a_span_topo'] > args['span_threshold']
     sc_df_pass = sc_df[sc_df['a_span_topo'] > args['span_threshold']]
     args['logger'].log('%i models passed span_topo threshold' % len(sc_df_pass))
@@ -179,32 +186,36 @@ def quick_rmsd_total(args):
     args['logger'].log('%i models failed span_topo threshold' % len(sc_df_fail))
 
     # ax.scatter(sc_df_fail['rmsd_calc'].values, sc_df_fail['score'].values, color='r', marker='.')
-    ax.scatter(sc_df_pass['pc_rmsd'].values, sc_df_pass['score'].values, marker='o',
+    ax.scatter(sc_df_pass['pc_rmsd'].values, sc_df_pass[y_axis_term].values, marker='o',
                c=sc_df_pass['a_span_topo'].values, picker=True, cmap=plt.cm.coolwarm)
 
     # min_energy = np.nanmin(list(sc_df_pass['score'].values)+list(sc_df_fail['score'].values))
-    min_energy = np.nanmin(list(sc_df_pass['score'].values))
-    plt.ylim([min_energy - 1, min_energy + 100])
+    min_energy = np.nanmin(list(sc_df_pass[y_axis_term].values))
+    # plt.ylim([min_energy - 1, min_energy + 100])
     plt.xlim([0, 30])
     plt.title(args['sc']+'_pass')
 
-    ax.scatter(sc_df_fail['pc_rmsd'].values, sc_df_fail['score'].values, marker='x',
+    ax.scatter(sc_df_fail['pc_rmsd'].values, sc_df_fail[y_axis_term].values, marker='x',
                c=sc_df_fail['a_span_topo'].values, picker=True, cmap=plt.cm.coolwarm)#, markersize=200)
 
     # af = PrintLabel(sc_df_pass, 'rmsd_calc', 'score', ['description', 'pass'])
     # fig.canvas.mpl_connect('button_press_event', af)
-    pl = PointLabel(sc_df_pass, ax, fig, 'pc_rmsd', 'score',
-                    ['description', 'a_sasa', 'a_shape', 'a_res_solv', 'a_pack', 'a_span_topo'], args['logger'])
+    pl = PointLabel(sc_df_pass, ax, fig, 'pc_rmsd', y_axis_term,
+                    ['description', 'a_sasa', 'a_shape', 'a_res_solv',
+                     'a_pack', 'a_span_topo', 'a_ddg'], args['logger'])
     fig.canvas.mpl_connect('pick_event', pl.onpick)
     # print('for pass')
     # print_best_scores(sc_df_pass, 'score', percentile=0.05)
-    # print('for fail')
+    # print('for. fail')
     # print_best_scores(sc_df_fail, 'score', percentile=0.05)
+    plt.xlabel('RMSD')
+    plt.ylabel(y_axis_term)
     plt.show()
 
 
 class PointLabel:
-    def __init__(self, df: pd.DataFrame, ax, fig, x_axis: str, y_axis: str, labels: list, file=None):
+    def __init__(self, df: pd.DataFrame, ax, fig, x_axis: str, y_axis: str,
+                 labels: list, file_=None):
         self.df = df.copy()
         self.axis = ax
         self.fig = fig
@@ -212,8 +223,8 @@ class PointLabel:
         self.y_axis = y_axis
         self.labels = labels
         self.has_written_title = False
-        if file is not None:
-            self.file_handler = file
+        if file_ is not None:
+            self.file_handler = file_
         else:
             self.file_handler = Logger('point_label.log')
 

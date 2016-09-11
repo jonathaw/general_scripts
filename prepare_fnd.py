@@ -40,6 +40,7 @@ def main():
     parser.add_argument('-queue', type=str, default='fleishman', help='queue to run on')
     parser.add_argument('-avoid_psipred', type=bool, default=True, help='whether to use psipred')
     parser.add_argument('-database', default='/home/labs/fleishman/jonathaw/Rosetta/main/database')
+    parser.add_argument('-energy_func', default='ResSolv')
     args = vars(parser.parse_args())
     if args['some_pdb'] is None:
         args['some_pdb'] = args['native_pdb']
@@ -112,6 +113,7 @@ def create_fnd_flags(args):
     args['flags_file'] = 'fnd_%s_%s.flags' % (args['name'], args['time'])
     args['logger'].log('creating flags file at %s' % args['flags_file'])
     spans = get_spans_from_topo_string(args)
+
     number_of_units = 1
     if args['is_symm']:
         number_of_units = args['symm_num']
@@ -120,16 +122,16 @@ def create_fnd_flags(args):
         fout.write('-database %s\n' % args['database'])
         fout.write('-in:file:fasta %s%s\n' % (args['path_data'], args['fasta']))
         fout.write('-mp:scoring:hbond\n')
-        fout.write('-mp:setup:spanfiles %s%s.span\n' % (args['path_data'], args['name']))
-        fout.write('-in:file:spanfile %s%s.span\n' % (args['path_data'], args['name']))
+        # fout.write('-mp:setup:spanfiles %s%s.span\n' % (args['path_data'], args['name']))
+        # fout.write('-in:file:spanfile %s%s.span\n' % (args['path_data'], args['name']))
         fout.write('-overwrite\n')
-        fout.write('-parser:script_vars energy_function=ResSolv\n')
-        fout.write('-parser:script_vars score_func=mpframework_docking_cen_ELazaridis\n')
+        fout.write('-parser:script_vars energy_function=%s\n' % args['energy_func'])
+        # fout.write('-parser:script_vars score_func=mpframework_docking_cen_ELazaridis\n')
         fout.write('-parser:script_vars frags9mers=%sfrags.200.9mers\n' % args['path_data'])
         fout.write('-parser:script_vars frags3mers=%sfrags.200.3mers\n' % args['path_data'])
         fout.write('-parser:script_vars symm_file=%s\n' % (args['path_data'] + 'C%i.symm' % args['symm_num']))
-        fout.write('-parser:script_vars start_res=%i\n' % 1)
-        fout.write('-parser:script_vars end_res=%i\n' % len(args['AASeq'])*number_of_units)
+        # fout.write('-parser:script_vars start_res=%i\n' % 1)
+        # fout.write('-parser:script_vars end_res=%i\n' % len(args['AASeq'])*number_of_units)
         fout.write('-in:file:native %s%s\n' % (args['path_data'], args['native_pdb'].split('/')[-1]))
         fout.write('-nstruct %i\n' % args['nstruct'])
         fout.write('-mute all\n')
@@ -137,6 +139,16 @@ def create_fnd_flags(args):
             fout.write('-parser:script_vars span_start_%i=%i\n' % (i+1, span['start']))
             fout.write('-parser:script_vars span_end_%i=%i\n' % (i+1, span['end']))
             fout.write('-parser:script_vars span_orientation_%s=%s\n' % (i+1, span['orientation']))
+        if args['energy_func'] == 'mpframework':
+            for i in [0, 1, 2, 3, 5]:
+                   |   fout.write('-parser:script_vars
+                                  score_func_%i=score%i_membrane\n' % (i, i if
+                                                                      i != 0
+                                                                       else ''))
+        else:
+            for i in [0, 1, 2, 3, 5]:
+                fout.write('-parser:script_vars score_func_%i=score%i%s\n' % 
+                           (i, i, 'elazaridis' if args['energy_func'] == 'ResSolv' else ''))
 
 
 def get_spans_from_topo_string(args) -> list:

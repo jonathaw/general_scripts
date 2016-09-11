@@ -8,6 +8,7 @@ def parse_Bfactor_list(file_name: str) -> dict:
     return a dict of res numbers pointing to list value normalized to 1-50
     """
     result = {}
+    i = 1
     for l in open(file_name, 'r'):
         s = l.split()
         if len(s) == 2:
@@ -15,6 +16,9 @@ def parse_Bfactor_list(file_name: str) -> dict:
                 result[int(s[0])] = float(s[1])
             except:
                 pass
+        if len(s) == 1:
+            result[i] = float(s[0])
+            i += 1
     min_ = min(result.values())
     max_ = max(result.values())
     new_results = {}
