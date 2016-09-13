@@ -2,6 +2,7 @@
 import os
 import sys
 import time
+import inspect
 import curses
 import subprocess
 
@@ -112,5 +113,18 @@ def get_all_status():
     return user_list
 
 
+def other():
+    print('in other')
+    ins = inspect.getouterframes( inspect.currentframe() )
+    (frame, filename, lineno, function, code_context, index) = ins[1]
+    print('%s:%i' % (filename.split('/')[-1], lineno))
+
+def yaba():
+    print('calling other')
+    other()
+    print('back')
+
 if __name__ == '__main__':
+    yaba()
+    sys.exit()
     curses.wrapper(main)

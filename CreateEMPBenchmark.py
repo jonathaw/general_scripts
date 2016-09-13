@@ -91,6 +91,9 @@ RMSD_ITERATIONS = {aa: [] for aa in AAs}
 z_range_aa = {aa: [-20, +20] if aa not in ['R', 'K', 'H'] else [-23, +20] for
               aa in AAs}
 
+SPLINE_SMOOTHNESS = 0
+SPLINE_LIM = 30
+
 class InsertionProfile:
     """
     a single residue insertion profile described by either a sorted list of PoZEnergy instances (poz_energy) or by
@@ -154,9 +157,10 @@ class InsertionProfile:
             # return ' '.join(
                 # str(self.pos_score[pos] if -23 <= POS_Z_DICT_total[pos] <= 15 else 0.0) for pos in POS_RANGE)
         if self.AA != 'P':
-            return ' '.join(str(self.pos_score[pos] if z_range_aa[self.AA][0]
-                                <= POS_Z_DICT_total[pos] <=
-                                z_range_aa[self.AA][1] else 0.0) for pos in POS_RANGE)
+            # return ' '.join(str(self.pos_score[pos] if z_range_aa[self.AA][0]
+                                # <= POS_Z_DICT_total[pos] <=
+                                # z_range_aa[self.AA][1] else 0.0) for pos in POS_RANGE)
+            return ' '.join(str(self.pos_score[pos] if -SPLINE_LIM <= POS_Z_DICT_total[pos] <= SPLINE_LIM else 0.0) for pos in POS_RANGE)
         else:
             logger.log("creating P spline as 0.0")
             return ' '.join("0.0" for pos in POS_RANGE)
@@ -177,6 +181,8 @@ class InsertionProfile:
         :return:
         """
         self.extramembrane_adjusted = True
+        print('ADJUSTING !!! !STOP ME !!!!')
+        sys.exit()
         for pos in POS_RANGE:
             if -15 > POS_Z_DICT_total[pos] or +15 < POS_Z_DICT_total[pos]:
                 self.pos_score[pos] = 0
@@ -192,18 +198,28 @@ def pos_energy_dict_to_PoZEnergy_list(pos_energy_dict: dict) -> list():
     return result
 
 
-def subtract_IP_from_IP(ip1: InsertionProfile, ip2: InsertionProfile, verbose: bool = False) -> InsertionProfile:
+def subtract_IP_from_IP(ip1: InsertionProfile, ip2: InsertionProfile, verbose: bool = False, smooth: bool=True) -> InsertionProfile:
     """
     """
-    # new_pos_score = {k: v - ip2.pos_score[k] for k, v in ip1.pos_score.items()}
-    # if verbose:
-    #     for pos in ip1.pos_score.keys():
-    #         print(pos, ip1.pos_score[pos], ip2.pos_score[pos], ip1.pos_score[pos]-ip2.pos_score[pos])
     new_pos_score = {}
-    for pos in POS_RANGE:
-        new_pos_score[pos] = ip1.pos_score[pos] - ip2.pos_score[pos]
-        if verbose:
-            print(pos, ip1.pos_score[pos], ip2.pos_score[pos], ip1.pos_score[pos]-ip2.pos_score[pos])
+    if not smooth:
+        for pos in POS_RANGE:
+            new_pos_score[pos] = ip1.pos_score[pos] - ip2.pos_score[pos]
+    else:
+        # smooth the transition from water to membrane between +/-15A to +/-25A for resulting splines
+        y, x = [], []
+        for pos in POS_RANGE:
+            if -SPLINE_LIM > POS_Z_DICT_total[pos] or POS_Z_DICT_total[pos] > SPLINE_LIM:
+                y.append(0.0)
+                x.append(pos)
+            elif z_range_aa[ip1.AA][0] <= POS_Z_DICT_total[pos] <= z_range_aa[ip1.AA][1]:
+                y.append(ip1.pos_score[pos] - ip2.pos_score[pos])
+                x.append(pos)
+        tck = interpolate.splrep(x, y, s=SPLINE_SMOOTHNESS)
+        new_pos_score = {pos: interpolate.splev(pos, tck) 
+                         if -SPLINE_LIM <= POS_Z_DICT_total[pos] <= +SPLINE_LIM else 0.0 
+                         for pos in POS_RANGE}
+
     return InsertionProfile(ip1.AA, new_pos_score)#, adjust_extra_membranal=ip1.extra_membrane_adjusted)
 
 
@@ -259,7 +275,7 @@ def calibrate_function(score_func='talaris2014_elazaridis', fa_cen='fa_standard'
     # first FilterScan run. using null ResSolv
     # full_ips = filterscan_analysis_energy_func('full', residues_to_test=AAs)
     full_ips = filterscan_analysis_energy_func(score_func, res_solv_weight=0.0, fa_cen=fa_cen, residues_to_test=AAs,
-                                               print_xml=True)
+                                               print_xml=True, adjust_extra_membranal=False)
     # full_ips = filterscan_parallel(score_func, res_solv_weight=0.0, fa_cen=fa_cen, residues_to_test=AAs, print_xml=True, iteration=-1)
     # fullCEN_ips = filterscan_analysis_energy_func('fullCEN', residues_to_test=AAs)
 
@@ -273,7 +289,6 @@ def calibrate_function(score_func='talaris2014_elazaridis', fa_cen='fa_standard'
 
     # create_polyval_table(diff_ips[0], 'ELazaridis_0.txt', rosetta_table_name='ELazaridis_polynom_table.txt')
     # create_polyval_table(diff_ips_CEN, 'ELazaridis_CEN_0.txt', rosetta_table_name='ELazaridis_cen_polynom_table.txt')
-
     create_spline_table(diff_ips[0], 'spline_%s_fa.txt' % score_func, 'spline_test_%s.txt' % ('fa' if fa_cen == 'fa_standard' else 'cen'))
     # create_spline_table(diff_ips_CEN, 'spline_test_cen.txt', 'spline_test_cen.txt')
 
@@ -317,6 +332,7 @@ def calibrate_function(score_func='talaris2014_elazaridis', fa_cen='fa_standard'
             logger.log('starting round %i for AAs %s' % (iter_num, aas_improve))
             diff_ips[iter_num] = {'A': diff_ips[iter_num-1]['A']}
 
+            # check which residues are "good enough" by RMSD, and fix them.
             for aa in AAs:
                 if aa == 'P':
                     continue
@@ -331,12 +347,33 @@ def calibrate_function(score_func='talaris2014_elazaridis', fa_cen='fa_standard'
                 if aa == 'P':
                     continue
                 logger.log('improve %s at %.2f round %i' % (aa, rmsds[aa], iter_num))
-                diff_ips[iter_num][aa] = InsertionProfile(aa, dict())
+                # diff_ips[iter_num][aa] = InsertionProfile(aa, dict())
 
+                # for pos in POS_RANGE:
+                    # diff_ips[iter_num][aa].pos_score[pos] = diff_ips[iter_num-1][aa].pos_score[pos] + \
+                                                            # elazar_ips[aa].pos_score[pos] - \
+                                                            # MPResSolv_current_ips[iter_num-1][aa].pos_score[pos]
+                # create a spline that describes the required profile. in the elazar range (-23, 15 or -15, 15)
+                # it will be what is required to get to elazar within the membrane.
+                # in (inf, -25) and (+25, inf) it is 0.
+                y, x = [], []
                 for pos in POS_RANGE:
-                    diff_ips[iter_num][aa].pos_score[pos] = diff_ips[iter_num-1][aa].pos_score[pos] + \
-                                                            elazar_ips[aa].pos_score[pos] - \
-                                                            MPResSolv_current_ips[iter_num-1][aa].pos_score[pos]
+                    if -SPLINE_LIM > POS_Z_DICT_total[pos] or POS_Z_DICT_total[pos] > SPLINE_LIM:
+                        y.append(0.0)
+                        x.append(pos)
+                    elif z_range_aa[aa][0] <= POS_Z_DICT_total[pos] <= z_range_aa[aa][1]:
+                        # train the spline on the difference between the profile from the previous iteration
+                        # and what is reuqired to pull it closer to the Elazar 
+                        y.append(diff_ips[iter_num-1][aa].pos_score[pos] + elazar_ips[aa].pos_score[pos] 
+                                 - MPResSolv_current_ips[iter_num-1][aa].pos_score[pos])
+                        x.append(pos)
+                print('X & Y for %s' % aa)
+                for x_, y_ in zip(x, y):
+                    print(x_, y_)
+                tck = interpolate.splrep(x, y, s=SPLINE_SMOOTHNESS)
+                diff_ips[iter_num][aa] = InsertionProfile(aa, {pos: interpolate.splev(pos, tck) 
+                                                               if -SPLINE_LIM <= POS_Z_DICT_total[pos] <= +SPLINE_LIM else 0.0 
+                                                               for pos in POS_RANGE})
             create_spline_table(diff_ips[iter_num], 'spline_%s_fa_%i.txt' % (score_func, iter_num),
                                 'spline_test_%s.txt' % ('fa' if fa_cen == 'fa_standard' else 'cen'))
             MPResSolv_current_ips[iter_num] = filterscan_analysis_energy_func(score_func, res_solv_weight=1.0,
@@ -554,6 +591,10 @@ def draw_filterscan_profiles(ips_dict: OrderedDict, cen_fa='fa', show: bool = Fa
         if aa != 'P':
             plt.ylim([-5, 5])
         plt.xlim([-50, 50])
+        plt.axvline(z_range_aa[aa][0], color='grey')
+        plt.axvline(z_range_aa[aa][1], color='grey')
+        plt.axvline(-SPLINE_LIM, color='blue')
+        plt.axvline(+SPLINE_LIM, color='blue')
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     file_location = '%sprofile_comparison_%s.png' % (PWD, cen_fa)
     plt.savefig(file_location, dpi=600)
@@ -592,13 +633,15 @@ def create_elazar_ips() -> dict:
     result = {}
     for aa in AAs:
         pos_score = {i+1: a for i, a in enumerate([np.polyval(elazar_polyval[aas_1_3[aa]], z)
-                                                   if -MEMBRANE_HALF_WIDTH <= z <= MEMBRANE_HALF_WIDTH else 0.0
-                                                   for z in Z_total])}
+                                                  if -20 <= z <= +20 else 0.0 for z in Z_total])}
+        # pos_score = {i+1: a for i, a in enumerate([np.polyval(elazar_polyval[aas_1_3[aa]], z)
+                                                   # if -MEMBRANE_HALF_WIDTH <= z <= MEMBRANE_HALF_WIDTH else 0.0
+                                                   # for z in Z_total])}
         if aa in ['R', 'K', 'H']:
-            edge_score = np.polyval(elazar_polyval[aas_1_3[aa]], -MEMBRANE_HALF_WIDTH)
-            logger.log('adjusting %s -23 <= z <= -15 to be %.2f' % (aa, edge_score))
+            edge_score = np.polyval(elazar_polyval[aas_1_3[aa]], -20)
+            logger.log('adjusting %s -23 <= z <= -20 to be %.2f' % (aa, edge_score))
             for pos in POS_RANGE:
-                if -23 <= POS_Z_DICT_total[pos] <= -15:
+                if -23 <= POS_Z_DICT_total[pos] <= -20:
                     pos_score[pos] = edge_score
         # adjust kcal/mol to REUs according to kcal/mol=0.57REU.
         # suggested by "Role of conformational sampling in computing mutation-induced changes in protein structure
@@ -617,25 +660,8 @@ def create_insertion_profiles(df: pd.DataFrame, column: str, adjust_extra_membra
     logger.log('creating InsertionProfiles for %s' % column)
     result = {}
     for aa in AAs:
-        if smooth:
-            # smooth the transition from water to membrane between +/-15A to +/-25A for resulting splines
-            logger.log('smoothing profiles using splines')
-            y, x = [], []
-            for pos in POS_RANGE:
-                if -25 > POS_Z_DICT_total[pos] or POS_Z_DICT_total[pos] > 25:
-                    y.append(0.0)
-                    x.append(pos)
-                elif z_range_aa[aa][0] <= POS_Z_DICT_total[pos] <= z_range_aa[aa][1]:
-                    y.append(df[((df['aa'] == aa) & (df['pos'] == pos))][column].values[0])
-                    x.append(pos)
-            tck = interpolate.splrep(x, y, s=25)
-            pos_score = {pos: interpolate.splev(pos, tck) for pos in POS_RANGE}
-            if aa == 'F':
-                for pos, x_, y_ in zip(POS_RANGE, x, y):
-                    print('a %.2f %.2f %i %.2f' % (x_, y_, pos, pos_score[pos]))
-        else:
-            # pos_score = {i: df[((df['aa'] == aa) & (df['pos'] == i))][column].values[0] for i in range(1, NUM_AAS + 1)}
-            pos_score = {i: df[((df['aa'] == aa) & (df['pos'] == i))][column].values[0] for i in POS_RANGE} # switched for -50 to 50
+        # pos_score = {i: df[((df['aa'] == aa) & (df['pos'] == i))][column].values[0] for i in range(1, NUM_AAS + 1)}
+        pos_score = {i: df[((df['aa'] == aa) & (df['pos'] == i))][column].values[0] for i in POS_RANGE} # switched for -50 to 50
 
         ip = InsertionProfile(aa, pos_score=pos_score, adjust_extra_membranal=adjust_extra_membranal)
         result[aa] = ip
@@ -737,7 +763,7 @@ def filterscan_analysis_energy_func(energy_function: str, res_solv_weight: float
 
     logger.log('mean of A for %s is %f' % (energy_function, temp_A_mean))
 
-    ips = create_insertion_profiles(df, '%s_normed' % energy_function, adjust_extra_membranal, smooth=res_solv_weight==1.0)
+    ips = create_insertion_profiles(df, '%s_normed' % energy_function, adjust_extra_membranal, smooth=adjust_extra_membranal)
     return ips
 
 
