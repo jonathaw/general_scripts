@@ -28,6 +28,7 @@ import time
 import copy
 import shutil
 import subprocess
+from scipy.signal import argrelextrema
 
 # 3rd party imports
 import matplotlib as mpl
@@ -100,7 +101,7 @@ class InsertionProfile:
     polynum
     """
     def __init__(self, aa: str, pos_score: dict, membrane_half_depth: int=MEMBRANE_HALF_WIDTH,
-                 residue_num: int=NUM_AAS, adjust_extra_membranal=True):
+                 residue_num: int=NUM_AAS, adjust_extra_membranal=True, poly_edges: list=[]):
         """
 
         """
@@ -116,6 +117,7 @@ class InsertionProfile:
         # self.poz_energy = pos_energy_dict_to_PoZEnergy_list(pos_score)
         # self.polynom = np.polyfit(Z_total, [x.energy for x in self.poz_energy], LAZARIDIS_POLY_DEG)
         self.extramembrane_adjusted = False
+        self.poly_edges = poly_edges
 
     def __repr__(self):
         res = '<InsertionProfile for %s>\n' % self.AA
@@ -171,7 +173,7 @@ class InsertionProfile:
         """
         res = 0.0
         for pos in range(1, TOTAL_AAS+1):
-            if z_range_aa[self.AA][0] <= POS_Z_DICT_total[pos] <= z_range_aa[self.AA][1]:
+            if self.poly_edges[0] <= POS_Z_DICT_total[pos] <= self.poly_edges[1]:
                 res += (self.pos_score[pos] - other.pos_score[pos])**2
         return np.sqrt(np.mean(res))
 
@@ -212,7 +214,7 @@ def subtract_IP_from_IP(ip1: InsertionProfile, ip2: InsertionProfile, verbose: b
             if -SPLINE_LIM > POS_Z_DICT_total[pos] or POS_Z_DICT_total[pos] > SPLINE_LIM:
                 y.append(0.0)
                 x.append(pos)
-            elif z_range_aa[ip1.AA][0] <= POS_Z_DICT_total[pos] <= z_range_aa[ip1.AA][1]:
+            elif ip1.poly_edges[0] <= POS_Z_DICT_total[pos] <= ip1.poly_edges[1]:
                 y.append(ip1.pos_score[pos] - ip2.pos_score[pos])
                 x.append(pos)
         tck = interpolate.splrep(x, y, s=SPLINE_SMOOTHNESS)
@@ -249,11 +251,11 @@ def calibrate_energy_functions(args):
     original_dir = os.getcwd()
     logger.log("will calibrate the score functions %r" % score_funcs_to_calibrate)
     for en_func in score_funcs_to_calibrate:
-        if en_func != 'talaris2014':
-            continue
+        # if en_func != 'talaris2014':
+            # continue
         os.mkdir('%s/%s' % (original_dir, en_func))
         os.chdir('%s/%s' % (original_dir, en_func))
-        logger.log("calibrating %s" % en_func)
+        logger.create_header("calibrating %s" % en_func)
         PWD = '%s/%s/' % (original_dir, en_func)
 
         calibrate_function(en_func + '_elazaridis', fa_cen=fa_cen_for_scores[en_func])
@@ -361,15 +363,13 @@ def calibrate_function(score_func='talaris2014_elazaridis', fa_cen='fa_standard'
                     if -SPLINE_LIM > POS_Z_DICT_total[pos] or POS_Z_DICT_total[pos] > SPLINE_LIM:
                         y.append(0.0)
                         x.append(pos)
-                    elif z_range_aa[aa][0] <= POS_Z_DICT_total[pos] <= z_range_aa[aa][1]:
+                    elif elazar_ips[aa].poly_edges[0] <= POS_Z_DICT_total[pos] <= elazar_ips[aa].poly_edges[1]:
+                        # elif z_range_aa[aa][0] <= POS_Z_DICT_total[pos] <= z_range_aa[aa][1]:
                         # train the spline on the difference between the profile from the previous iteration
                         # and what is reuqired to pull it closer to the Elazar 
                         y.append(diff_ips[iter_num-1][aa].pos_score[pos] + elazar_ips[aa].pos_score[pos] 
                                  - MPResSolv_current_ips[iter_num-1][aa].pos_score[pos])
                         x.append(pos)
-                print('X & Y for %s' % aa)
-                for x_, y_ in zip(x, y):
-                    print(x_, y_)
                 tck = interpolate.splrep(x, y, s=SPLINE_SMOOTHNESS)
                 diff_ips[iter_num][aa] = InsertionProfile(aa, {pos: interpolate.splev(pos, tck) 
                                                                if -SPLINE_LIM <= POS_Z_DICT_total[pos] <= +SPLINE_LIM else 0.0 
@@ -467,13 +467,17 @@ def draw_rosetta_profiles_fa_cen(args):
         plt.close()
 
 
-def create_e_term_specific_profiles(args, path_pdbs: str, energy_func) -> dict:
+def create_e_term_specific_profiles(args, path_pdbs: str, energy_func, res_solv_weight: float=0.0) -> dict:
     """
     creates residue specific insertion profiles for every e_term in the list
     """
     global PWD
     PWD = os.getcwd()+'/'
     if args['full']:
+        create_polyA_fasta()
+        sequence_to_idealized_helix()
+        create_spanfile()
+        trunctate_2nd_mem_res()
         filterscan_analysis_energy_func('talaris2014_elazaridis',
                                         res_solv_weight=0.0,
                                         residues_to_test=AAs,
@@ -637,17 +641,52 @@ def create_elazar_ips() -> dict:
         # pos_score = {i+1: a for i, a in enumerate([np.polyval(elazar_polyval[aas_1_3[aa]], z)
                                                    # if -MEMBRANE_HALF_WIDTH <= z <= MEMBRANE_HALF_WIDTH else 0.0
                                                    # for z in Z_total])}
+        # extend positive inside rule into the IN side
         if aa in ['R', 'K', 'H']:
             edge_score = np.polyval(elazar_polyval[aas_1_3[aa]], -20)
             logger.log('adjusting %s -23 <= z <= -20 to be %.2f' % (aa, edge_score))
             for pos in POS_RANGE:
                 if -23 <= POS_Z_DICT_total[pos] <= -20:
                     pos_score[pos] = edge_score
+
+        # force DEQN profiles to be linear, equivalent to the membrane core energy
+        if aa in ['D', 'E', 'Q', 'N']:
+            core_avg = np.mean([pos_score[pos] for pos in POS_RANGE if -10 <= POS_Z_DICT_total[pos] <= 10])
+            for pos in POS_RANGE:
+                if -20 <= POS_Z_DICT_total[pos] <= 20:
+                    pos_score[pos] = core_avg
+
+        # force H to be linear in (0, +20)
+        if aa == 'H':
+            zero_to_twenty_avg = np.max([pos_score[pos] for pos in POS_RANGE if -MEMBRANE_HALF_WIDTH <= POS_Z_DICT_total[pos] <= MEMBRANE_HALF_WIDTH])
+            for pos in POS_RANGE:
+                if 0 <= POS_Z_DICT_total[pos] <= 20:
+                    pos_score[pos] = zero_to_twenty_avg
+
+        # for all other AAs, stop polynom influence at furthest max/min points. this
+        # prevents the tiny troffs created by the polynom min points
+        if aa not in ['D', 'Q', 'N', 'E', 'H', 'A', 'T', 'G', 'K', 'R']:
+            x = np.array([pos_score[pos] for pos in POS_RANGE])
+            max_pnts = [a+1 for a in argrelextrema(x, np.greater)[0]]
+            min_pnts = [a+1 for a in argrelextrema(x, np.less)[0]]
+            # for I, there's a minimum at position 56 which is WRONG, skip it...
+            if aa == 'I':
+                min_pnts = [min_pnts[0]]
+            edge_pnts = [POS_Z_DICT_total[np.min(max_pnts+min_pnts)], POS_Z_DICT_total[np.max(max_pnts+min_pnts)]]
+            if not any([a > 10 for a in edge_pnts]):
+                edge_pnts[1] = z_range_aa[aa][1]
+            if not any([a < -10 for a in edge_pnts]):
+                edge_pnts[0] = z_range_aa[aa][0]
+        else:
+            edge_pnts = [z_range_aa[aa][0], z_range_aa[aa][1]]
+
+        logger.log('for %s setting the poly edges at %.2f, %.2f' % (aa, edge_pnts[0], edge_pnts[1]))
+
         # adjust kcal/mol to REUs according to kcal/mol=0.57REU.
         # suggested by "Role of conformational sampling in computing mutation-induced changes in protein structure
         # and stability."
         pos_score = {k: v/0.57 for k, v in pos_score.items()}
-        ip = InsertionProfile(aa, pos_score=pos_score)
+        ip = InsertionProfile(aa, pos_score=pos_score, poly_edges=edge_pnts)
         result[aa] = ip
     logger.log('adjusting kcal/mol to REU by REU=kcal/mol / 0.57')
     return result
@@ -1290,22 +1329,7 @@ if __name__ == '__main__':
         compare_multiple_splines()
 
     elif args['mode'] == 'test':
-        temp_fs_log = parse_filterscan_log('%s_iter_%i.sclog' % ('talaris2014_elazaridis', -1))
-        # create DataFrame
-        df = pd.DataFrame()
-        energy_function = 'talaris2014_elazaridis'
-        for aa in AAs:
-            for pos in range(1, TOTAL_AAS+1):
-                df = df.append({'pos': pos, 'aa': aa, energy_function: temp_fs_log[pos][aa]}, ignore_index=True)
-                temp_A_mean = df[df['aa'] == 'A'][energy_function].mean()
-                print(temp_A_mean)
-                df['%s_normed' % energy_function] = df[energy_function]-temp_A_mean
-        ips = create_insertion_profiles(df, '%s_normed' % energy_function)
-        for k, v in ips.items():
-            print(k, v.format_spline_energies())
-
-    if args['mode'] == 'assaf':
-        assaf(energy_function='talaris2014_elazaridis', res_solv_weight= 0.0, fa_cen='fa_standard', residues_to_test=AAs, to_dump_pdbs=False, adjust_extra_membranal=True,print_xml=False, iteration=-1)
+        create_elazar_ips()
 
     else:
         print('unknown mode')

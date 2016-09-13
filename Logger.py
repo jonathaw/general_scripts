@@ -20,23 +20,32 @@ class Logger:
         self.HOME = os.environ['HOME']
         self.log_file = open(path+log_file, 'w+')
         header = ' Starting %s ' % sys.argv[0]
-        print('%s%s%s' % ('='*int(self.WIDTH-len(header)/2), header, '='*int(self.WIDTH-len(header)/2)))
+        self.create_header(header)
         self.log('given command: %s' % ' '.join(sys.argv))
         self.files_logged = {}
 
     def log(self, string, to_print=True, emphasize=False, time_stamp=True):
+        # create time stamp
         log_ts = "%s" % time.strftime("%H:%M") if time_stamp else ""
         ts = colorama.Fore.RED + log_ts + colorama.Style.RESET_ALL
+
+        # create path stamp
         log_pt = os.path.expanduser(os.getcwd()).replace(self.HOME, '~')
         pt = colorama.Fore.GREEN + log_pt + colorama.Style.RESET_ALL
+
+        # create calling frame stamp
         ins = inspect.getouterframes( inspect.currentframe()  )
         (frame, filename, lineno, function, code_context, index) = ins[1]
-        log_lc ='%s:%i' % (filename.split('/')[-1], lineno)
+        log_lc ='%s$%s:%i' % (filename.split('/')[-1], function, lineno)
         lc = colorama.Fore.MAGENTA + log_lc + colorama.Style.RESET_ALL
-        if pt.count('/') > 2:
+
+        # shrink path stamp
+        if pt.count('/') > 1:
             s = pt.split('/')
-            log_pt = "%s/%s" % (s[-2], s[-1])
+            log_pt = "%s" % s[-1]
             pt = colorama.Fore.GREEN + log_pt + colorama.Style.RESET_ALL
+
+        # print or not and log
         if to_print:
             if emphasize:
                 print(colorama.Fore.RED + colorama.Back.GREEN + string + colorama.Style.RESET_ALL)
@@ -63,4 +72,13 @@ class Logger:
         h, remain = divmod(time_delta, 3600)
         m, s = divmod(remain, 60)
         self.log('finished at %s, process took %i:%i:%i' % (time.strftime("%H:%M"), h, m, s))
+        self.create_header('Finishing %s' % sys.argv[0])
         self.log_file.close()
+
+    def create_header(self, msg: str='') -> None:
+        print('='*self.WIDTH)
+        print('%s%s%s' % ('='*int((self.WIDTH-len(msg))/2), colorama.Fore.BLUE + msg + colorama.Style.RESET_ALL, '='*int((self.WIDTH-len(msg))/2)))
+        print('='*self.WIDTH)
+        self.log_file.write('%s%s%s' % ('='*int((self.WIDTH-len(msg))/2), msg, '='*int((self.WIDTH-  len(msg))/2)))
+        self.log_file.flush()
+    ¦   sys.stdout.flush()

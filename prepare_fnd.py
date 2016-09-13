@@ -141,13 +141,10 @@ def create_fnd_flags(args):
             fout.write('-parser:script_vars span_orientation_%s=%s\n' % (i+1, span['orientation']))
         if args['energy_func'] == 'mpframework':
             for i in [0, 1, 2, 3, 5]:
-                   |   fout.write('-parser:script_vars
-                                  score_func_%i=score%i_membrane\n' % (i, i if
-                                                                      i != 0
-                                                                       else ''))
+                fout.write('-parser:script_vars score_func_%i=score%i_membrane\n' % (i, i if i != 0 else ''))
         else:
             for i in [0, 1, 2, 3, 5]:
-                fout.write('-parser:script_vars score_func_%i=score%i%s\n' % 
+                fout.write('-parser:script_vars score_func_%i=score%i_%s\n' % 
                            (i, i, 'elazaridis' if args['energy_func'] == 'ResSolv' else ''))
 
 
