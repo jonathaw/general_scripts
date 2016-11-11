@@ -285,6 +285,22 @@ class Residue:
         for aid, a in self:
             a.translate_xyz(xyz)
 
+    def D_or_L(self) -> str:
+        """
+        return enantiomer of self, either D or L
+        """
+        CO = np.array([self['C'].xyz.x, self['C'].xyz.y, self['C'].xyz.z])
+        CA = np.array([self['CA'].xyz.x, self['CA'].xyz.y, self['CA'].xyz.z])
+        CB = np.array([self['CB'].xyz.x, self['CB'].xyz.y, self['CB'].xyz.z])
+        N = np.array([self['N'].xyz.x, self['N'].xyz.y, self['N'].xyz.z])
+
+        v1 = N - CO
+        v2 = CA - CO
+        cp = np.cross(v1, v2)
+        CB_infront = cp.dot(CB-CA) > 0
+        print(CB_infront)
+        return 'D' if CB_infront else 'L'
+
 
 class Chain:
     def __init__(self, chain_id: str = None, residues: dict = None, non_residues: dict = None):
@@ -308,6 +324,11 @@ class Chain:
     def __iter__(self):
         for k, v in self.residues.items():
             yield k, v
+
+    def __len__(self):
+        if self.residues == {}:
+            return 0
+        return len(self.residues.keys())
 
     def add_residue(self, residue: Residue) -> None:
         if residue.res_type_3 in three_2_one.keys():
@@ -781,7 +802,7 @@ if __name__ == '__main__':
         args['chains'][1], args['in_file'][:-4], '+'.join([str(a) for a in ch2])))
 
     elif args['mode'] == 'ramachandran':
-        pdb = parse_PDB('/home/labs/fleishman/jonathaw/scripts/general_scripts/test_1ohz_AB.pdb', args['name'])
+        pdb = parse_PDB(args[in_file], args['name'])
         print(pdb.seqs)
         draw_ramachadran(pdb)
 

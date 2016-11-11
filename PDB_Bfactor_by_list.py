@@ -17,8 +17,18 @@ def parse_Bfactor_list(file_name: str) -> dict:
             except:
                 pass
         if len(s) == 1:
+            if s[0] == '#NUM!':
+                s[0] = 0
             result[i] = float(s[0])
             i += 1
+    talk = False
+    for k, v in result.items():
+        if v < 0.001:
+            result[k] = 0
+            talk = True
+
+    if talk:
+        print('FORCED VALUS TO BE 0')
     min_ = min(result.values())
     max_ = max(result.values())
     new_results = {}

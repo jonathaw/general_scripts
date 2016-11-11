@@ -43,10 +43,9 @@ def main(stdscr):
             if user not in stat.keys():
                 # stat[user] = {'RUN': 0, 'PEND': 0}
                 stat[user] = User(user)
-            msg = '%i@%s RUN: %i PEND: %i [%s%s]               \r' % (iter_num,
-                                                        time.strftime("%H:%M:%S"),
+            msg = '%s RUN: %i PEND: %i [%s%s]               \r' % (time.strftime("%H:%M:%S"),
                                                         stat[user].run,
-                                                        stat[user].pend, 
+                                                        stat[user].pend,
                                                         '-'*i, ' '*(time_to_sleep-1-i))
             sys.stdout.write('\33[%i;%iH%s' % (loc_y,
                                                (WIDTH-len(msg))/2,
@@ -56,7 +55,7 @@ def main(stdscr):
             else:
                 time_to_sleep = 6
             total_last = stat[user].run + stat[user].pend
-            
+
             sys.stdout.flush()
             time.sleep(1)
             iter_num += 1
@@ -95,7 +94,7 @@ def get_all_status():
         if len(s) >= 2:
             if s[1] not in result.keys():
                 result[s[1]] = {'RUN': 0, 'PEND': 0, 'SUSP': 0, 'UNKWN': 0,
-                                'SSUSP': 0}
+                                'SSUSP': 0, 'USUSP': 0}
                 user_list[s[1]] = User(s[1])
             result[s[1]][s[2]] += 1
             if s[2] == 'RUN':

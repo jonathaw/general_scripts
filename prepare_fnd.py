@@ -19,6 +19,9 @@ import seq_funcs
 rosetta_path = '/home/labs/fleishman/jonathaw/Rosetta/'
 rosetta_bin_path = '/home/labs/fleishman/jonathaw/Rosetta/main/source/bin/'
 
+# rosetta_path = '/home/labs/fleishman/sarel/rosetta/'
+# rosetta_bin_path = '/home/labs/fleishman/sarel/rosetta/main/source/bin/'
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -38,14 +41,20 @@ def main():
     parser.add_argument('-nstruct', type=int, default=100, help='nstruct argument to pass to rosetta')
     parser.add_argument('-num_jobs', type=int, default=1000, help='number of jobs to create')
     parser.add_argument('-queue', type=str, default='fleishman', help='queue to run on')
-    parser.add_argument('-avoid_psipred', type=bool, default=True, help='whether to use psipred')
+    parser.add_argument('-avoid_psipred', type=bool, default=False, help='whether to use psipred')
     parser.add_argument('-database', default='/home/labs/fleishman/jonathaw/Rosetta/main/database')
-    parser.add_argument('-energy_func', default='ResSolv')
+    parser.add_argument('-energy_func', default=['ResSolv', 'mpframework'], type=str, nargs='+')
+    parser.add_argument('-ss2_file', default=None, help='whther an external ss2 file is provided')
+    parser.add_argument('-1st_span_orient', default=None, help='predetermine the 1st spans orientation')
     args = vars(parser.parse_args())
     if args['some_pdb'] is None:
         args['some_pdb'] = args['native_pdb']
+
+    test_input(args)
+
     args['time'] = time.strftime("%d.%0-m")
     args['logger'] = Logger('log_file_%s.log' % args['time'])
+
     make_data(args)
     make_bin(args)
     make_fnd_jobs(args)
@@ -53,16 +62,24 @@ def main():
     args['logger'].close()
 
 
+def test_input(args):
+    ok = len(args['seq']) == len(args['topo_string'])
+    if not ok:
+        sys.exit('sequence and topo string not same length')
+
 def make_fnd_jobs(args):
-    args['fnd_path'] = args['path'] + 'fnd_%s/' % args['time']
-    os.mkdir(args['fnd_path'])
-    os.chdir(args['fnd_path'])
-    args['logger'].log('creating jobs')
-    job_args = {'@%s%s' % (args['path_bin'], args['flags_file']): None}
-    for i in range(args['num_jobs']):
-        job_args['-out:prefix'] = '%i_' % i
-        job_args['-out:file:silent'] = 'ab_%i.out' % i
-        make_jobs(args, job_args)
+    for energy_func in args['energy_func']:
+        args['fnd_path_%s' % energy_func] = args['path'] + 'fnd_%s_%s/' % (args['time'], energy_func)
+        os.mkdir(args['fnd_path_%s' % energy_func])
+        os.chdir(args['fnd_path_%s' % energy_func])
+        args['logger'].log('creating jobs for energy function: %s' % energy_func)
+        job_args = {'@%s%s' % (args['path_bin'], args['flags_file_%s' % energy_func]): None}
+        for i in range(args['num_jobs']):
+            job_args['-out:prefix'] = '%i_' % i
+            job_args['-out:file:silent'] = 'ab_%i.out' % i
+
+            make_jobs(args, job_args)
+        os.chdir('../')
 
 
 def make_jobs(args, job_args=None):
@@ -84,10 +101,13 @@ def make_jobs(args, job_args=None):
         else:
             job.write('%srosetta_scripts.default.linuxgccrelease ' % rosetta_bin_path)
         for k, v in job_args.items():
+            if k == 'pdb_dump':
+                continue
             if v is None:
                 job.write('%s ' % k)
             else:
                 job.write('%s %s ' % (k, v))
+
         job.write('\n')
     with open(cmdname, 'a+') as cmd:
         if args['queue'] == 'new-all.q':
@@ -109,43 +129,51 @@ def make_bin(args):
     create_fnd_flags(args)
 
 
-def create_fnd_flags(args):
-    args['flags_file'] = 'fnd_%s_%s.flags' % (args['name'], args['time'])
-    args['logger'].log('creating flags file at %s' % args['flags_file'])
+def create_fnd_flags(args) -> None:
     spans = get_spans_from_topo_string(args)
 
     number_of_units = 1
     if args['is_symm']:
         number_of_units = args['symm_num']
-    with open(args['flags_file'], 'w+') as fout:
-        fout.write('-parser:protocol %s\n' % args['fnd_protocol'])
-        fout.write('-database %s\n' % args['database'])
-        fout.write('-in:file:fasta %s%s\n' % (args['path_data'], args['fasta']))
-        fout.write('-mp:scoring:hbond\n')
-        # fout.write('-mp:setup:spanfiles %s%s.span\n' % (args['path_data'], args['name']))
-        # fout.write('-in:file:spanfile %s%s.span\n' % (args['path_data'], args['name']))
-        fout.write('-overwrite\n')
-        fout.write('-parser:script_vars energy_function=%s\n' % args['energy_func'])
-        # fout.write('-parser:script_vars score_func=mpframework_docking_cen_ELazaridis\n')
-        fout.write('-parser:script_vars frags9mers=%sfrags.200.9mers\n' % args['path_data'])
-        fout.write('-parser:script_vars frags3mers=%sfrags.200.3mers\n' % args['path_data'])
-        fout.write('-parser:script_vars symm_file=%s\n' % (args['path_data'] + 'C%i.symm' % args['symm_num']))
-        # fout.write('-parser:script_vars start_res=%i\n' % 1)
-        # fout.write('-parser:script_vars end_res=%i\n' % len(args['AASeq'])*number_of_units)
-        fout.write('-in:file:native %s%s\n' % (args['path_data'], args['native_pdb'].split('/')[-1]))
-        fout.write('-nstruct %i\n' % args['nstruct'])
-        fout.write('-mute all\n')
-        for i, span in enumerate(spans):
-            fout.write('-parser:script_vars span_start_%i=%i\n' % (i+1, span['start']))
-            fout.write('-parser:script_vars span_end_%i=%i\n' % (i+1, span['end']))
-            fout.write('-parser:script_vars span_orientation_%s=%s\n' % (i+1, span['orientation']))
-        if args['energy_func'] == 'mpframework':
-            for i in [0, 1, 2, 3, 5]:
-                fout.write('-parser:script_vars score_func_%i=score%i_membrane\n' % (i, i if i != 0 else ''))
-        else:
-            for i in [0, 1, 2, 3, 5]:
-                fout.write('-parser:script_vars score_func_%i=score%i_%s\n' % 
-                           (i, i, 'elazaridis' if args['energy_func'] == 'ResSolv' else ''))
+    for energy_func in args['energy_func']:
+        args['flags_file_%s' % energy_func] = 'fnd_%s_%s_%s.flags' % (args['name'], args['time'], energy_func)
+        args['logger'].log('creating flag file at %s' % args['flags_file_%s' % energy_func])
+        with open(args['flags_file_%s' % energy_func], 'w+') as fout:
+            fout.write('-parser:protocol %s\n' % args['fnd_protocol'])
+            fout.write('-database %s\n' % args['database'])
+            fout.write('-in:file:fasta %s%s\n' % (args['path_data'], args['fasta']))
+            fout.write('-mp:scoring:hbond\n')
+            # fout.write('-mp:setup:spanfiles %s%s.span\n' % (args['path_data'], args['name']))
+            # fout.write('-in:file:spanfile %s%s.span\n' % (args['path_data'], args['name']))
+            fout.write('-overwrite\n')
+            fout.write('-parser:script_vars energy_function=%s\n' % energy_func)
+            # fout.write('-parser:script_vars score_func=mpframework_docking_cen_ELazaridis\n')
+            fout.write('-parser:script_vars frags9mers=%sfrags.200.9mers\n' % args['path_data'])
+            fout.write('-parser:script_vars frags3mers=%sfrags.200.3mers\n' % args['path_data'])
+            fout.write('-parser:script_vars symm_file=%s\n' % (args['path_data'] + 'C%i.symm' % args['symm_num']))
+            # fout.write('-parser:script_vars start_res=%i\n' % 1)
+            # fout.write('-parser:script_vars end_res=%i\n' % len(args['AASeq'])*number_of_units)
+            fout.write('-in:file:native %s%s\n' % (args['path_data'], args['native_pdb'].split('/')[-1]))
+            fout.write('-nstruct %i\n' % args['nstruct'])
+            fout.write('-mute all\n')
+            for i, span in enumerate(spans):
+                fout.write('-parser:script_vars span_start_%i=%i\n' % (i+1, span['start']))
+                fout.write('-parser:script_vars span_end_%i=%i\n' % (i+1, span['end']))
+                fout.write('-parser:script_vars span_orientation_%s=%s\n' % (i+1, span['orientation']))
+            if energy_func == 'mpframework':
+                for i in [0, 1, 2, 3, 5]:
+                    fout.write('-parser:script_vars score_func_%s=score%s_membrane\n' % (str(i), str(i) if i == 0 else ''))
+            else:
+                for i in [0, 1, 2, 3, 5]:
+                    fout.write('-parser:script_vars score_func_%i=score%i_%s\n' %
+                               (i, i, 'elazaridis' if energy_func == 'ResSolv' else ''))
+            if energy_func != 'ResSolv':
+                fout.write('-parser:script_vars steepness=10\n')
+                fout.write('-parser:script_vars membrane_core=15\n')
+                fout.write('-in:file:spanfile %s%s.span\n' % (args['path_data'], args['name']))
+            else:
+                fout.write('-parser:script_vars steepness=10\n')
+                fout.write('-parser:script_vars membrane_core=15\n')
 
 
 def get_spans_from_topo_string(args) -> list:
@@ -155,7 +183,10 @@ def get_spans_from_topo_string(args) -> list:
     h_list = [(a.start(), a.end()) for a in hhh.finditer(topo_string) if a.end() - a.start() > 1
               and a.end() - a.start() >= 1]
     for h in h_list:
-        direction = 'fwd' if topo_string[h[0] - 1] == '1' else 'rev'
+        if args['1st_span_orient'] is None:
+            direction = 'fwd' if topo_string[h[0] - 1] == '1' else 'rev'
+        else:
+            direction = args['1st_span_orient']
         topology_list.append((h[0]+1, h[1], direction))
     spans = []
     for span in topology_list:
@@ -199,6 +230,9 @@ def make_data(args):
 def create_psipred(args):
     if not args['avoid_psipred']:
         seq_funcs.run_psipred(args['fasta'])
+    elif args['ss2_file'] != None:
+        args['logger'].log('using provided ss2 file, provided here: %s' % args['ss2_file'])
+        shutil.copy(args['ss2_file'], args['path_data']+args['name']+'.ss2')
     else:
         args['logger'].log('creating helix only ss2')
         with open(args['path_data']+args['name']+'.ss2', 'w+') as fout:

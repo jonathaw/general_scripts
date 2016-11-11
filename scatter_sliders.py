@@ -29,15 +29,10 @@ def main():
     parser.add_argument('-score_wj')
     parser.add_argument('-obj_wj')
     parser.add_argument('-sc')
-    parser.add_argument('-mp_sc')
-    parser.add_argument('-rs_sc')
     parser.add_argument('-pc')
-    parser.add_argument('-mp_pc')
-    parser.add_argument('-rs_pc')
     parser.add_argument('-span_threshold', default=0.3, type=float)
     parser.add_argument('-names', default=None, help='file list of names to show')
     parser.add_argument('-log_path', default='./', help='path to place log file')
-    parser.add_argument('-percent', type=int, default=100)
 
     args = vars(parser.parse_args())
     args['logger'] = Logger('logeer_%s.log' % time.strftime("%d.%0-m"), args['log_path'])
@@ -56,9 +51,6 @@ def main():
 
     elif args['mode'] == 'slider':
         slide_ddg(args)
-
-    elif args['mode'] == 's_by_s':
-        side_by_side(args)
 
     else:
         print('no mode')
@@ -209,56 +201,14 @@ def update(val):
     fig.canvas.draw_idle()
 
 
-def side_by_side(args):
-    mp_sc = Rf.score_file2df(args['mp_sc'])
-    mp_pc = get_rmsds_from_table(args['mp_pc'])
-    a = mp_sc.merge(mp_pc, on='description')
-    mp_sc = a.copy()
-    rs_sc = Rf.score_file2df(args['rs_sc'])
-    rs_pc = get_rmsds_from_table(args['rs_pc'])
-    b = rs_sc.merge(rs_pc, on='description')
-    rs_sc = b.copy()
-        
-    names_dict = {}
-    for i, d in enumerate(mp_sc['description'].values):
-        names_dict[d] = i if 'MP' in d else i + 100
-    for i, d in enumerate(rs_sc['description'].values):
-        if d not in names_dict.keys():
-            names_dict[d] = i if 'MP' in d else i + 100
-    for k, v in names_dict.items():
-        print(v, k)
-
-    axmp = plt.subplot(121)
-    axmp.scatter(mp_sc['pc_rmsd'].values, mp_sc['tot_mp_fa'].values, label=mp_sc['description'].values)
-    for x, y, d in zip(mp_sc['pc_rmsd'].values, mp_sc['tot_mp_fa'], mp_sc['description']):
-        axmp.annotate(names_dict[d], (x, y))
-    # axmp.title('MP')
-
-    axrs = plt.subplot(122)
-    axrs.scatter(rs_sc['pc_rmsd'].values, rs_sc['tot_rs_fa'].values, label=rs_sc['description'].values)
-    for x, y, d in zip(rs_sc['pc_rmsd'].values, rs_sc['tot_rs_fa'], rs_sc['description']):
-        axrs.annotate(names_dict[d], (x, y))
-    # axrs.title('RS')
-
-
-    plt.show()
-
-
 def quick_rmsd_total(args):
 
     y_axis_term = 'score'
 
     sc_df = Rf.score_file2df(args['sc'], args['names'])
-    args['logger'].log('found %i structs in sc_df' % len(sc_df))
     pc_df = get_rmsds_from_table(args['pc'])
-    args['logger'].log('found %i structs in pc' % len(pc_df))
     a = sc_df.merge(pc_df, on='description')
     sc_df = a.copy()
-
-    if 'a_hha' in sc_df.columns:
-        sc_df['angle'] = sc_df['a_hha'] > 0
-
-    args['logger'].log('left with %i in merged df' % len(sc_df))
 
     args['logger'].log('examining %s with span_topo threshold %f' % (args['sc'], args['span_threshold']))
     fig, ax = plt.subplots()
@@ -266,9 +216,6 @@ def quick_rmsd_total(args):
     args['logger'].log('total of %i models in score' % len(sc_df))
     sc_df = sc_df[sc_df['a_tms_span_fa'] > 0.5]
     args['logger'].log('%i models pass tms_span' % len(sc_df))
-    threshold = np.percentile(sc_df[y_axis_term], args['percent'])
-    sc_df = sc_df[ sc_df[y_axis_term] < threshold ]
-    args['logger'].log('for percent %.2f found threshold to be %.2f and %i strucutres pass it' % (args['percent'], threshold, len(sc_df)))
     # sc_df = sc_df[sc_df['a_shape'] >= 0.6]
     # sc_df = sc_df[sc_df['a_sasa'] > 900]
     sc_df = sc_df[sc_df['a_ddg'] < -6]
@@ -281,13 +228,8 @@ def quick_rmsd_total(args):
     args['logger'].log('%i models failed span_topo threshold' % len(sc_df_fail))
 
     # ax.scatter(sc_df_fail['rmsd_calc'].values, sc_df_fail['score'].values, color='r', marker='.')
-
-    if 'a_hha' in sc_df.columns:
-        ax.scatter(sc_df_pass['pc_rmsd'].values, sc_df_pass[y_axis_term].values, marker='o',
-                c=sc_df_pass['a_hha'].values, picker=True, cmap=plt.cm.coolwarm)
-    else:
-        ax.scatter(sc_df_pass['pc_rmsd'].values, sc_df_pass[y_axis_term].values, marker='o',
-                c=sc_df_pass['a_span_topo'].values, picker=True, cmap=plt.cm.coolwarm)
+    ax.scatter(sc_df_pass['pc_rmsd'].values, sc_df_pass[y_axis_term].values, marker='o',
+               c=sc_df_pass['a_span_topo'].values, picker=True, cmap=plt.cm.coolwarm)
 
     # min_energy = np.nanmin(list(sc_df_pass['score'].values)+list(sc_df_fail['score'].values))
     min_energy = np.nanmin(list(sc_df_pass[y_axis_term].values))
@@ -296,12 +238,8 @@ def quick_rmsd_total(args):
     plt.xlim([0, 30])
     plt.title(args['sc']+'_pass')
 
-    if 'a_hha' in sc_df.columns:
-        ax.scatter(sc_df_fail['pc_rmsd'].values, sc_df_fail[y_axis_term].values, marker='x',
-                c=sc_df_fail['a_hha'].values, picker=True, cmap=plt.cm.coolwarm)#, markersize=200)
-    else:
-        ax.scatter(sc_df_fail['pc_rmsd'].values, sc_df_fail[y_axis_term].values, marker='x',
-                c=sc_df_fail['a_span_topo'].values, picker=True, cmap=plt.cm.coolwarm)#, markersize=200)
+    ax.scatter(sc_df_fail['pc_rmsd'].values, sc_df_fail[y_axis_term].values, marker='x',
+               c=sc_df_fail['a_span_topo'].values, picker=True, cmap=plt.cm.coolwarm)#, markersize=200)
 
     # af = PrintLabel(sc_df_pass, 'rmsd_calc', 'score', ['description', 'pass'])
     # fig.canvas.mpl_connect('button_press_event', af)

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.5
 """
 a class for making log files, during stdout print
 """
@@ -24,7 +25,7 @@ class Logger:
         self.log('given command: %s' % ' '.join(sys.argv))
         self.files_logged = {}
 
-    def log(self, string, to_print=True, emphasize=False, time_stamp=True):
+    def log(self, string, to_print=True, emphasize=False, time_stamp=True, skip_stamp: bool=False):
         # create time stamp
         log_ts = "%s" % time.strftime("%H:%M") if time_stamp else ""
         ts = colorama.Fore.RED + log_ts + colorama.Style.RESET_ALL
@@ -49,9 +50,12 @@ class Logger:
         if to_print:
             if emphasize:
                 print(colorama.Fore.RED + colorama.Back.GREEN + string + colorama.Style.RESET_ALL)
-            else:
+            elif not skip_stamp:
                 print('<%s@%s@%s> %s' % (pt, ts,lc, string))
-        self.log_file.write('<%s@%s@%s> %s\n' % (log_pt, log_ts, log_lc, string))
+                self.log_file.write('<%s@%s@%s> %s\n' % (log_pt, log_ts, log_lc, string))
+            else:
+                print(string)
+                self.log_file.write('%s\n' % string)
         self.log_file.flush()
         sys.stdout.flush()
 
@@ -79,6 +83,6 @@ class Logger:
         print('='*self.WIDTH)
         print('%s%s%s' % ('='*int((self.WIDTH-len(msg))/2), colorama.Fore.BLUE + msg + colorama.Style.RESET_ALL, '='*int((self.WIDTH-len(msg))/2)))
         print('='*self.WIDTH)
-        self.log_file.write('%s%s%s' % ('='*int((self.WIDTH-len(msg))/2), msg, '='*int((self.WIDTH-  len(msg))/2)))
+        self.log_file.write('%s%s%s\n' % ('='*int((self.WIDTH-len(msg))/2), msg, '='*int((self.WIDTH-  len(msg))/2)))
         self.log_file.flush()
-    ¦   sys.stdout.flush()
+        sys.stdout.flush()

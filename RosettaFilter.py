@@ -177,7 +177,7 @@ def df2boxplots(sc_df: pd.DataFrame) -> None:
     rows = 5
     cols = (len(sc_df.keys()) / 5) + 1
     for i, flt in enumerate(sc_df):
-        if flt == 'description':
+        if flt in ['description', 'SCORE:']:
             continue
         ax = plt.subplot(rows, cols, i+1)
         plt.boxplot(sc_df[flt].tolist())
@@ -185,7 +185,7 @@ def df2boxplots(sc_df: pd.DataFrame) -> None:
     plt.show()
 
 
-def score_file2df(score_file: str) -> pd.DataFrame:
+def score_file2df(score_file: str, names_file=None) -> pd.DataFrame:
     # return pd.read_table(score_file, sep='\s+').convert_objects(convert_numeric=True)
     df = pd.read_table(score_file, sep='\s+')
     score_column = [col for col in df if 'SCORE:' in col][0]
@@ -193,4 +193,8 @@ def score_file2df(score_file: str) -> pd.DataFrame:
 	    if column not in ['description', score_column]:
 		    df[column] = pd.to_numeric(df[column], errors='coerce')
     df.dropna()
+
+    if not names_file is None:
+        names_list = [a.rstrip('\n') for a in open(names_file, 'r')]
+        df = df[df['description'].isin(names_list)]
     return df
