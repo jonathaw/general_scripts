@@ -43,6 +43,7 @@ from scipy import interpolate
 
 # specific imports
 from RosettaFilter import score2dict, score_dict2df, df2boxplots
+import RosettaFilter as Rf
 from Logger import Logger
 
 mpl.rc_context(fname="/home/labs/fleishman/jonathaw/.matplotlib/publishable_matplotlibrc")
@@ -86,7 +87,8 @@ COLOR_MAP = {'full': 'blue', 'no_Menv': 'grey', 'ResSolv': 'purple',
              'fullCEN': 'blue', 'no_MenvCEN': 'grey', 'ResSolvCEN': 'purple',
              'elazar': 'red', 'diff_ips': 'orange', 'diff_ips_CEN': 'orange',
              'fa_intra_rep': 'green', 'fa_mpsolv': 'pink', 'fa_rep': 'black',
-             'p_aa_pp': 'blue', 'rama': 'brown', 'no_res_solv': 'blue'}
+             'p_aa_pp': 'blue', 'rama': 'brown', 'no_res_solv': 'blue', 'beta': 'blue',
+             'beta_no_res_solv': 'black'}
 RMSD_ITERATIONS = {aa: [] for aa in AAs}
 
 z_range_aa = {aa: [-20, +20] if aa not in ['R', 'K', 'H'] else [-23, +20] for
@@ -288,21 +290,39 @@ def calibrate_function(score_func='talaris2014_elazaridis', fa_cen='fa_standard'
 
     logger.create_header('creating and adjusting elazar profiles')
     elazar_ips = create_elazar_ips()
-    for aa in ['V', 'M', 'G', 'T', 'S']:
-        if aa not in ['S']:
+    if False:
+        for aa in ['V', 'M', 'G', 'T', 'S']:
+            if aa not in ['S']:
+                rhs_avg = np.mean([full_ips[aa].pos_score[pos] for pos in range(6, 17)])
+            elif aa == 'S':
+                rhs_avg = 0.5 # local maxima in elazar S profile
+            logger.log('for res %s found mean to be %.2f' % (aa, rhs_avg))
+            for pos in POS_RANGE:
+                if aa in ['V', 'M']:
+                    if elazar_ips[aa].pos_score[pos] > rhs_avg:
+                        elazar_ips[aa].pos_score[pos] = rhs_avg
+                if aa in ['G', 'T']:
+                    if elazar_ips[aa].pos_score[pos] < rhs_avg:
+                        elazar_ips[aa].pos_score[pos] = rhs_avg
+                if aa in ['S']:
+                        elazar_ips[aa].pos_score[pos] = rhs_avg
+    else:
+        for aa in AAs:
             rhs_avg = np.mean([full_ips[aa].pos_score[pos] for pos in range(6, 17)])
-        elif aa == 'S':
-            rhs_avg = 0.5 # local maxima in elazar S profile
-        logger.log('for res %s found mean to be %.2f' % (aa, rhs_avg))
-        for pos in POS_RANGE:
-            if aa in ['V', 'M']:
-                if elazar_ips[aa].pos_score[pos] > rhs_avg:
-                    elazar_ips[aa].pos_score[pos] = rhs_avg
-            if aa in ['G', 'T']:
-                if elazar_ips[aa].pos_score[pos] < rhs_avg:
-                    elazar_ips[aa].pos_score[pos] = rhs_avg
-            if aa in ['S']:
-                    elazar_ips[aa].pos_score[pos] = rhs_avg
+            logger.log('for %s found RHS mean to be %.2f' % (aa, rhs_avg))
+            for pos in POS_RANGE:
+                elazar_ips[aa].pos_score[pos] += rhs_avg
+            if aa in 'FVMTS':
+                logger.log('bounding %s to %.2f' % (aa, rhs_avg))
+                for pos in POS_RANGE:
+                    if aa in 'FVM':
+                        if elazar_ips[aa].pos_score[pos] > rhs_avg:
+                            elazar_ips[aa].pos_score[pos] = rhs_avg
+                    if aa in 'T':
+                        if elazar_ips[aa].pos_score[pos] < rhs_avg:
+                            elazar_ips[aa].pos_score[pos] = rhs_avg
+                    if aa == 'S':
+                        elazar_ips[aa].pos_score[pos] = rhs_avg + 0.5
 
     # calc the difference InsertionProfiles between Elazar and Rosetta. assign them as the polynom table
     diff_ips = {0: {k: subtract_IP_from_IP(elazar_ips[k], full_ips[k]) for k in AAs}}
@@ -382,7 +402,9 @@ def calibrate_function(score_func='talaris2014_elazaridis', fa_cen='fa_standard'
 
         draw_rmsd_plots()
         draw_filterscan_profiles(OrderedDict({'ResSolv': MPResSolv_current_ips[iter_num-1],
-                                              'elazar': elazar_ips}), cen_fa='%s_%s' % (score_func, fa_cen))
+                                              'elazar': elazar_ips,
+                                              'beta_no_res_solv': full_ips}),
+                                 cen_fa='%s_%s' % (score_func, fa_cen))
         logger.log('finished calibrating %s %s' % (score_func, fa_cen))
         logger.log('got these RMSDs:')
         for aa in AAs:
@@ -428,10 +450,15 @@ def draw_rosetta_profiles_fa_cen(args):
     PWD = os.getcwd()+'/'
     ### create files for running benchmark
     if args['full']:
-        create_polyA_fasta()
-        sequence_to_idealized_helix()
-        create_spanfile()
-        trunctate_2nd_mem_res()
+        if args['use_made_pdb']:
+            copy_path = '/home/labs/fleishman/jonathaw/elazaridis/file_safe/polyA_inMemb.pdb'
+            logger.log('USING THE PREMADE SAVE PDB !!! from %s' % copy_path)
+            shutil.copy(copy_path, 'polyA.pdb')
+        else:
+            create_polyA_fasta()
+            sequence_to_idealized_helix()
+            create_spanfile()
+            trunctate_2nd_mem_res()
     ###
     elazar_ips = create_elazar_ips()
 
@@ -466,11 +493,16 @@ def create_e_term_specific_profiles(args, path_pdbs: str, energy_func, res_solv_
     global PWD
     PWD = os.getcwd()+'/'
     if args['full']:
-        create_polyA_fasta()
-        sequence_to_idealized_helix()
-        create_spanfile()
-        trunctate_2nd_mem_res()
-        filterscan_analysis_energy_func('talaris2014_elazaridis',
+        if args['use_made_pdb']:
+            copy_path = '/home/labs/fleishman/jonathaw/elazaridis/file_safe/polyA_inMemb.pdb'
+            logger.log('USING THE PREMADE SAVE PDB !!! from %s' % copy_path)
+            shutil.copy(copy_path, 'polyA.pdb')
+        else:
+            create_polyA_fasta()
+            sequence_to_idealized_helix()
+            create_spanfile()
+            trunctate_2nd_mem_res()
+        filterscan_analysis_energy_func(energy_func,
                                         res_solv_weight=0.0,
                                         residues_to_test=AAs,
                                         to_dump_pdbs=True,
@@ -561,24 +593,32 @@ def just_draw_current_profiles():
     global PWD
     args['full'] = True
     PWD = os.getcwd()+'/'
-    create_polyA_fasta()
-    sequence_to_idealized_helix()
-    create_spanfile()
-    trunctate_2nd_mem_res()
+    if not args['use_made_pdb']:
+        logger.log('making a new polyA.pdb!!!!!!')
+        create_polyA_fasta()
+        sequence_to_idealized_helix()
+        create_polyA_fasta()
+        sequence_to_idealized_helix()
+    else:
+        copy_path = '/home/labs/fleishman/jonathaw/elazaridis/file_safe/polyA_inMemb.pdb'
+        logger.log('USING THE PREMADE SAVE PDB !!! from %s' % copy_path)
+        shutil.copy(copy_path, 'polyA.pdb')
+    # create_spanfile()
+    # trunctate_2nd_mem_res()
     elazar_ips = create_elazar_ips()
-    MPResSolv_current_ips = filterscan_analysis_energy_func('talaris2014_elazaridis', 
+    MPResSolv_current_ips = filterscan_analysis_energy_func('beta_nov15_elazaridis', 
                                                             0.0, 
                                                             'fa_standard', 
                                                             residues_to_test=AAs,
                                                             adjust_extra_membranal=False, 
                                                             to_dump_pdbs=False)
-    with_ressolv = filterscan_analysis_energy_func('talaris2014_elazaridis', 
+    with_ressolv = filterscan_analysis_energy_func('beta_nov15_elazaridis', 
                                                    1.0, 
                                                    'fa_standard', 
                                                    residues_to_test=AAs, 
                                                    adjust_extra_membranal=False, 
                                                    to_dump_pdbs=False)
-    dct = {'elazar': elazar_ips, 'ResSolv': with_ressolv, 'no_res_solv': MPResSolv_current_ips}
+    dct = {'elazar': elazar_ips, 'beta': with_ressolv, 'beta_no_res_solv': MPResSolv_current_ips}
     draw_filterscan_profiles(dct, show=True)
 
 
@@ -636,6 +676,7 @@ def create_elazar_ips() -> dict:
     logger.log('creating InsertionProfiles for Elazar')
     elazar_polyval = MakeHydrophobicityGrade()
     result = {}
+    original_ips = {}
     for aa in AAs:
         pos_score = {i+1: a for i, a in enumerate([np.polyval(elazar_polyval[aas_1_3[aa]], z)
                                                   if -20 <= z <= +20 else 0.0 for z in Z_total])}
@@ -682,7 +723,7 @@ def create_elazar_ips() -> dict:
             edge_pnts = [z_range_aa[aa][0], z_range_aa[aa][1]]
 
         logger.log('for %s setting the poly edges at %.2f, %.2f' % (aa, edge_pnts[0], edge_pnts[1]))
-
+        original_ips[aa] = InsertionProfile(aa, pos_score, edge_pnts) # for use only to create profiles in kcal/mol
         # adjust kcal/mol to REUs according to kcal/mol=0.57REU.
         # suggested by "Role of conformational sampling in computing mutation-induced changes in protein structure
         # and stability."
@@ -690,7 +731,34 @@ def create_elazar_ips() -> dict:
         ip = InsertionProfile(aa, pos_score=pos_score, poly_edges=edge_pnts)
         result[aa] = ip
     logger.log('adjusting kcal/mol to REU by REU=kcal/mol / 0.57')
-    return result
+    if args['mode'] == 'elazar_profiles':
+        logger.log('returning original profiles, in kcal/mol')
+        return original_ips
+    else:
+        return result
+
+
+def create_original_ips_table(args):
+    ips = create_elazar_ips()
+    polynoms = {}
+    plt.figure()
+    i = 0
+    pos_in_memb = [pos for pos in POS_RANGE if -15 <= POS_Z_DICT_total[pos] <= 15]
+    # z_in_memb = np.arane(-15, 15, 100)
+    for aa, ip in ips.items():
+        plt.subplot(5, 4, 1+i)
+        polynoms[aa] = np.polyfit([POS_Z_DICT_total[pos] for pos in pos_in_memb], [ip.pos_score[pos] for pos in pos_in_memb], LAZARIDIS_POLY_DEG)
+        plt.scatter([POS_Z_DICT_total[pos] for pos in pos_in_memb], [ip.pos_score[pos] for pos in pos_in_memb])
+        plt.plot([POS_Z_DICT_total[pos] for pos in pos_in_memb], [np.polyval(polynoms[aa], POS_Z_DICT_total[pos]) for pos in pos_in_memb])
+        plt.title(aa)
+        plt.ylim([-2, 2])
+        i += 1
+    plt.savefig('original_scatter_and_plot.png')
+    plt.show()
+
+    with open('original_ips.txt', 'w+') as fout:
+        for aa, pln in polynoms.items():
+            fout.write('%s %f %f %f %f %f\n' % (aa, pln[0], pln[1], pln[2], pln[3], pln[4]))
 
 
 def create_insertion_profiles(df: pd.DataFrame, column: str, adjust_extra_membranal: bool=True, smooth: bool=False) -> dict:
@@ -779,6 +847,9 @@ def filterscan_analysis_energy_func(energy_function: str, res_solv_weight: float
             if args['elec_memb_sig_die'] and 'beta' in energy_function:
                 command += ' -score::elec_memb_sig_die '
                 logger.log('ADD ELEC_MEMB_SIG_DIE')
+        if args['memb_fa_sol']:
+            command += ' -score:memb_fa_sol '
+            logger.log('USING MEMB_FA_SOL')
         logger.log('running FilterScan for the energy function %s protocol, issuing command:\n%s' %
                    (energy_function, command))
         logger.log_text_file('%s' % str(PROTOCOLS_PATH + MPFilterScanDifferentSFAAs), to_print=print_xml)
@@ -970,7 +1041,7 @@ def MakeHydrophobicityGrade():
     for line in hydrophobicity_grade:
         split = line.split()
         hydrophobicity_polyval[aas_1_3[split[0]].upper()] = [float(n) for n in split[1:6]]
-    logger.log('making T to be G with max at 1')
+    # logger.log('making T to be G with max at 1')
     hydrophobicity_polyval['THR'] = hydrophobicity_polyval['GLY'].copy()
     hydrophobicity_polyval['THR'][-1] = 1.0
     hydrophobicity_grade.close()
@@ -1287,6 +1358,36 @@ def create_resfile(file_name):
             fout.write('%i\tA\tPIKAA\t ACDEFGHIKLMNPQRSTVWY\n' % pos)
 
 
+def draw_hbonds_profiles(args):
+    global logger
+    if args['full']:
+        os.mkdir('hbonds_testing')
+        os.chdir('hbonds_testing')
+        command = "for i in `seq 1 86`;do ~/bin/fleish_sub_general.sh /home/labs/fleishman/jonathaw/Rosetta/main/source/bin/rosetta_scripts.default.linuxgccrelease -parser:protocol ~/elazaridis/protocols/scan_hbonds.xml -s polyA.pdb -script_vars energy_function=beta_nov15_elazaridis res_num=${i} -mp:scoring:hbond -corrections::beta_nov15 -score:elec_memb_sig_die -score:memb_fa_sol -overwrite -out:prefix ${i}_ ;done"
+        logger.log('issuing command\n%s' % command)
+        os.system(command)
+        os.system("head -2 1_score.sc|tail -1 > all_score.sc")
+        os.system("grep SCORE: *_score.sc|grep -v des >> all_score.sc")
+    else:
+        sc_df = Rf.score_file2df('all_score.sc')
+        zs, scs = [], []
+        for d, sc in zip(sc_df['description'].values, sc_df['a_e_res']):
+            zs.append(POS_Z_DICT_total[ int( d.split('_')[0] ) ])
+            scs.append(sc)
+        plt.scatter(zs, scs)
+        plt.savefig('hbonds.png')
+
+
+def create_current_elazar_splines_table(args):
+    fout = open('temp_original_elazar_spline.txt', 'w+')
+    args['mode'] = 'elazar_profiles'
+    ips = create_elazar_ips()
+    for k in AAs:
+        print(k)
+        fout.write('%s %s\n' % (k, ' '.join([str(ips[k].pos_score[pos]) for pos in POS_RANGE])))
+    fout.close()
+
+
 if __name__ == '__main__':
     global polyA_total_mean, logger, args
 
@@ -1304,6 +1405,7 @@ if __name__ == '__main__':
     parser.add_argument('-note', default=None, type=str, help='add note to spline files')
     parser.add_argument('-use_made_pdb', default=False)
     parser.add_argument('-elec_memb_sig_die', default=False)
+    parser.add_argument('-memb_fa_sol', default=False)
 
     logger = Logger('elazaridis_%s.log' % time.strftime("%H_%M_%d_%b"))
 
@@ -1356,6 +1458,15 @@ if __name__ == '__main__':
     elif args['mode'] == 'test':
         create_resfile('test.txt')
 
+    elif args['mode'] == 'elazar_profiles':
+        # this creates a table of 
+        create_original_ips_table(args)
+
+    elif args['mode'] == 'draw_hbonds_profiles':
+        draw_hbonds_profiles(args)
+
+    elif args['mode'] == 'create_current_elazar_splines_table':
+        create_current_elazar_splines_table(args)
     else:
         print('unknown mode')
 

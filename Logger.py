@@ -46,6 +46,9 @@ class Logger:
             log_pt = "%s" % s[-1]
             pt = colorama.Fore.GREEN + log_pt + colorama.Style.RESET_ALL
 
+        if len('<%s@%s@%s> %s' % (pt, ts,lc, string)) > self.WIDTH-2:
+            string = '\n--> %s' % string
+
         # print or not and log
         if to_print:
             if emphasize:

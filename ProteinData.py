@@ -54,10 +54,10 @@ def main():
             
     elif args['mode'] == 'just':
         j_data = J_data()
-        all_names = ['j829.A', 'j5711.A', 'j5517.A', 'j5106.A', 'j5093.A', 'j4286.A', 'j3622.A', 'j1647.A', 'j4398.A',
-                     'j3983.A', 'j3626.A', 'j4518.A', 'j4653.A', '1ohz.A', 'j829.B', 'j5711.B', 'j5517.B', 'j5106.B',
-                     'j5093.B', 'j1526.B', 'j3622.B', 'j1647.B', 'j4398.B', 'j3983.B', 'j3626.B', 'j4518.B', 'j4653.B',
-                     '1ohz.B']
+        coh_names = ['j829.A', 'j5711.A', 'j5517.A', 'j5106.A', 'j5093.A', 'j4286.A', 'j3622.A', 'j1647.A', 'j4398.A',
+                     'j3983.A', 'j3626.A', 'j4518.A', 'j4653.A', '1ohz.A']
+        doc_names = ['j829.B', 'j5711.B', 'j5517.B', 'j5106.B', 'j5093.B', 'j1526.B', 'j3622.B', 'j1647.B', 'j4398.B', 'j3983.B', 'j3626.B', 'j4518.B', 'j4653.B', '1ohz.B']
+        all_names = doc_names
         input_dict = OrderedDict()
         for name in all_names:
             input_dict[name] = {'name': name,

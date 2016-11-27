@@ -38,6 +38,9 @@ def main():
     parser.add_argument('-names', default=None, help='file list of names to show')
     parser.add_argument('-log_path', default='./', help='path to place log file')
     parser.add_argument('-percent', type=int, default=100)
+    parser.add_argument('-best', type=bool, default=False)
+    parser.add_argument('-terms', nargs='+', default=['score', 'a_shape', 'a_pack', 'a_ddg', 'res_solv'])
+    parser.add_argument('-threshold', type=int, default=5)
 
     args = vars(parser.parse_args())
     args['logger'] = Logger('logeer_%s.log' % time.strftime("%d.%0-m"), args['log_path'])
@@ -59,6 +62,10 @@ def main():
 
     elif args['mode'] == 's_by_s':
         side_by_side(args)
+
+    elif args['mode'] == 'test':
+        sc_df = Rf.score_file2df(args['sc'])
+        new = Rf.get_best_of_best(sc_df)
 
     else:
         print('no mode')
@@ -263,22 +270,31 @@ def quick_rmsd_total(args):
     args['logger'].log('examining %s with span_topo threshold %f' % (args['sc'], args['span_threshold']))
     fig, ax = plt.subplots()
 
-    args['logger'].log('total of %i models in score' % len(sc_df))
-    sc_df = sc_df[sc_df['a_tms_span_fa'] > 0.5]
-    args['logger'].log('%i models pass tms_span' % len(sc_df))
-    threshold = np.percentile(sc_df[y_axis_term], args['percent'])
-    sc_df = sc_df[ sc_df[y_axis_term] < threshold ]
-    args['logger'].log('for percent %.2f found threshold to be %.2f and %i strucutres pass it' % (args['percent'], threshold, len(sc_df)))
-    # sc_df = sc_df[sc_df['a_shape'] >= 0.6]
-    # sc_df = sc_df[sc_df['a_sasa'] > 900]
-    sc_df = sc_df[sc_df['a_ddg'] < -6]
-    # sc_df = sc_df[sc_df['a_pack'] > 0.6]
-    sc_df['pass'] = sc_df['a_span_topo'] > args['span_threshold']
+    if args['best']:
+        # sc_df = sc_df[ sc_df['a_span_topo'] >= 0.95 ]
+        sc_df_pass = Rf.get_best_of_best(sc_df, args['terms'], args['threshold'])
+        sc_df_fail = sc_df[ ~sc_df['description'].isin( sc_df_pass['description'] ) ]
+        args['logger'].log('%i models returned from BEST' % len(sc_df_pass))
+    else:
+        args['logger'].log('total of %i models in score' % len(sc_df))
+        sc_df = sc_df[sc_df['a_tms_span_fa'] > 0.5]
+        args['logger'].log('%i models pass tms_span' % len(sc_df))
+        threshold = np.percentile(sc_df[y_axis_term], args['percent'])
+        sc_df = sc_df[ sc_df[y_axis_term] < threshold ]
+        args['logger'].log('for percent %.2f found threshold to be %.2f and %i strucutres pass it' % (args['percent'], threshold, len(sc_df)))
+        sc_df = sc_df[sc_df['a_shape'] >= 0.6]
+        # sc_df = sc_df[sc_df['a_sasa'] > 900]
+        sc_df = sc_df[sc_df['a_ddg'] < -6]
+        args['logger'].log('%i passed ddg' % len(sc_df))
+        # sc_df = sc_df[sc_df['a_pack'] > 0.6]
+        sc_df = sc_df[sc_df['a_unsat'] < 1]
+        args['logger'].log('%i passed unsat' % len(sc_df))
+        sc_df['pass'] = sc_df['a_span_topo'] > args['span_threshold']
 
-    sc_df_pass = sc_df[sc_df['a_span_topo'] > args['span_threshold']]
-    args['logger'].log('%i models passed span_topo threshold' % len(sc_df_pass))
-    sc_df_fail = sc_df[sc_df['a_span_topo'] <= args['span_threshold']]
-    args['logger'].log('%i models failed span_topo threshold' % len(sc_df_fail))
+        sc_df_pass = sc_df[sc_df['a_span_topo'] > args['span_threshold']]
+        args['logger'].log('%i models passed span_topo threshold' % len(sc_df_pass))
+        sc_df_fail = sc_df[sc_df['a_span_topo'] <= args['span_threshold']]
+        args['logger'].log('%i models failed span_topo threshold' % len(sc_df_fail))
 
     # ax.scatter(sc_df_fail['rmsd_calc'].values, sc_df_fail['score'].values, color='r', marker='.')
 
@@ -296,18 +312,18 @@ def quick_rmsd_total(args):
     plt.xlim([0, 30])
     plt.title(args['sc']+'_pass')
 
-    if 'a_hha' in sc_df.columns:
-        ax.scatter(sc_df_fail['pc_rmsd'].values, sc_df_fail[y_axis_term].values, marker='x',
-                c=sc_df_fail['a_hha'].values, picker=True, cmap=plt.cm.coolwarm)#, markersize=200)
-    else:
-        ax.scatter(sc_df_fail['pc_rmsd'].values, sc_df_fail[y_axis_term].values, marker='x',
-                c=sc_df_fail['a_span_topo'].values, picker=True, cmap=plt.cm.coolwarm)#, markersize=200)
+    # if 'a_hha' in sc_df.columns:
+        # ax.scatter(sc_df_fail['pc_rmsd'].values, sc_df_fail[y_axis_term].values, marker='x',
+                # c=sc_df_fail['a_hha'].values, picker=True, cmap=plt.cm.coolwarm, s=5, alpha=90)#, markersize=200)
+    # else:
+        # ax.scatter(sc_df_fail['pc_rmsd'].values, sc_df_fail[y_axis_term].values, marker='x',
+                # c=sc_df_fail['a_span_topo'].values, picker=True, cmap=plt.cm.coolwarm, s=5, alpha=90)#, markersize=200)
 
     # af = PrintLabel(sc_df_pass, 'rmsd_calc', 'score', ['description', 'pass'])
     # fig.canvas.mpl_connect('button_press_event', af)
-    pl = PointLabel(sc_df_pass, ax, fig, 'pc_rmsd', y_axis_term,
-                    ['description', 'a_sasa', 'a_res_solv',
-                     'a_pack', 'a_span_topo', 'a_ddg'], args['logger']) # a_shape ???
+    point_label_cols = list(set(args['terms'] + ['description', 'a_sasa', 'a_res_solv', 'a_pack', 'a_span_topo', 'a_ddg', 'fa_elec']))
+    pl = PointLabel(sc_df_pass, ax, fig, 'pc_rmsd', y_axis_term, point_label_cols, 
+                    args['logger']) # a_shape ???
     fig.canvas.mpl_connect('pick_event', pl.onpick)
     # print('for pass')
     # print_best_scores(sc_df_pass, 'score', percentile=0.05)
@@ -316,8 +332,6 @@ def quick_rmsd_total(args):
     plt.xlabel('RMSD')
     plt.ylabel(y_axis_term)
     plt.show()
-
-    # Rf.df2boxplots(sc_df_pass)
 
 
 class PointLabel:
@@ -329,6 +343,8 @@ class PointLabel:
         self.x_axis = x_axis
         self.y_axis = y_axis
         self.labels = labels
+        if 'score' in self.labels:
+            self.labels.remove('score')
         self.has_written_title = False
         if file_ is not None:
             self.file_handler = file_
@@ -349,9 +365,6 @@ class PointLabel:
               (row[self.x_axis], row[self.y_axis],
                '\t'.join("%.2f" % row[label] for label in self.labels if label != 'description'),
                row['description']), skip_stamp=True)
-        # self.axis.text(row[self.x_axis], row[self.y_axis], row['description'], transform=self.axis.transAxes,
-        #                bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
-        # self.fig.canvas.draw()
 
 
 class PrintLabel(object):

@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
+
 class Filter:
     def __init__(self, name: str, typ: str, threshold: float, limits: list, under_over: str,
                  g_name: str=None):
@@ -198,3 +200,21 @@ def score_file2df(score_file: str, names_file=None) -> pd.DataFrame:
         names_list = [a.rstrip('\n') for a in open(names_file, 'r')]
         df = df[df['description'].isin(names_list)]
     return df
+
+
+def get_best_of_best(sc_df: pd.DataFrame, terms: list=['score', 'a_ddg', 'a_pack'], percentile=10) -> pd.DataFrame:
+    sets_dict = {}
+    for term in terms:
+        if term in ['score', 'a_ddg', 'a_res_solv']:
+            threshold = np.percentile(sc_df[term], percentile)
+            sets_dict[term] = set(sc_df[sc_df[term] <= threshold]['description'].values)
+            print('for %s found threshold %.2f, %i pass' % (term, threshold, len(sets_dict[term])))
+        elif term in ['a_sasa', 'a_pack', 'a_shape']:
+            threshold = np.percentile(sc_df[term], 100-percentile)
+            sets_dict[term] = set(sc_df[sc_df[term] >= threshold]['description'].values)
+            print('for %s found threshold %.2f, %i pass' % (term, threshold, len(sets_dict[term])))
+    final_set = set.intersection(*sets_dict.values())
+    return sc_df[ sc_df['description'].isin(final_set) ]
+
+
+

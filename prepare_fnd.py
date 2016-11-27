@@ -14,11 +14,14 @@ import subprocess
 from AASeq import AASeq, read_seq
 from Logger import Logger
 import seq_funcs
+from MyPDB import parse_PDB
 
 
 rosetta_path = '/home/labs/fleishman/jonathaw/Rosetta/'
 rosetta_bin_path = '/home/labs/fleishman/jonathaw/Rosetta/main/source/bin/'
 
+fnd_protocol = '/home/labs/fleishman/jonathaw/elazaridis/protocols/fnd_27Jun.xml'
+design_protocol = '/home/labs/fleishman/jonathaw/elazaridis/protocols/design_13Nov.xml'
 # rosetta_path = '/home/labs/fleishman/sarel/rosetta/'
 # rosetta_bin_path = '/home/labs/fleishman/sarel/rosetta/main/source/bin/'
 
@@ -26,6 +29,7 @@ rosetta_bin_path = '/home/labs/fleishman/jonathaw/Rosetta/main/source/bin/'
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-name', type=str, help='prtoein name')
+    parser.add_argument('-mode', type=str, default='fnd')
     parser.add_argument('-fasta', type=str, default=None, help='path to fasta file')
     parser.add_argument('-seq', type=str, default=None, help='sequence to model')
     parser.add_argument('-path', type=str, default=os.getcwd()+'/', help='path to create files in')
@@ -37,23 +41,25 @@ def main():
     parser.add_argument('-symm_type', type=str, default='cn', help='symmetry type (cn)')
     parser.add_argument('-symm_num', type=int, default=2, help='number of units in symmetry')
     parser.add_argument('-is_symm', type=bool, default=True, help='is this symmetric?')
-    parser.add_argument('-fnd_protocol', type=str, default='/home/labs/fleishman/jonathaw/elazaridis/protocols/fnd_27Jun.xml', help='rosetta script for fold & dock')
+    parser.add_argument('-fnd_protocol', type=str, default=fnd_protocol, help='rosetta script for fold & dock')
+    parser.add_argument('-design_protocol', type=str, default=design_protocol)
     parser.add_argument('-nstruct', type=int, default=100, help='nstruct argument to pass to rosetta')
     parser.add_argument('-num_jobs', type=int, default=1000, help='number of jobs to create')
     parser.add_argument('-queue', type=str, default='fleishman', help='queue to run on')
     parser.add_argument('-avoid_psipred', type=bool, default=False, help='whether to use psipred')
     parser.add_argument('-database', default='/home/labs/fleishman/jonathaw/Rosetta/main/database')
-    parser.add_argument('-energy_func', default=['ResSolv', 'mpframework'], type=str, nargs='+')
+    parser.add_argument('-energy_func', default=['beta', 'mpframework'], type=str, nargs='+')
     parser.add_argument('-ss2_file', default=None, help='whther an external ss2 file is provided')
     parser.add_argument('-1st_span_orient', default=None, help='predetermine the 1st spans orientation')
+    parser.add_argument('-chain', default='A', help='if only a pdb is given, which chains to use')
     args = vars(parser.parse_args())
     if args['some_pdb'] is None:
         args['some_pdb'] = args['native_pdb']
 
-    test_input(args)
-
     args['time'] = time.strftime("%d.%0-m")
     args['logger'] = Logger('log_file_%s.log' % args['time'])
+
+    test_input(args)
 
     make_data(args)
     make_bin(args)
@@ -63,9 +69,28 @@ def main():
 
 
 def test_input(args):
+    if args['seq'] is None:
+        pdb = parse_PDB(args['native_pdb'])
+        seq_dict = pdb.get_seq()
+        args['seq'] = seq_dict[args['chain']]
+        if args['topo_string'] is None:
+            args['topo_string'] = 'H' * len(args['seq'])
+            args['logger'].log('NO TOPO-STRING GIVEN, using helix only, creating file')
+            with open('%s.ts' % args['name'], 'w+') as fout:
+                fout.write('>%s\n' % args['name'])
+                fout.write('%s' % args['topo_string'])
+        args['logger'].log('NO SEQ GIVEN, using %s, %i AAs' % (args['seq'], len(args['seq'])))
+
     ok = len(args['seq']) == len(args['topo_string'])
+    if args['mode'] == 'fnd':
+        args['xml'] = fnd_protocol
+    elif args['mode'] == 'design':
+        args['xml'] = design_protocol
+    else:
+        sys.exit('mode was neither design nor fnd...')
     if not ok:
         sys.exit('sequence and topo string not same length')
+
 
 def make_fnd_jobs(args):
     for energy_func in args['energy_func']:
@@ -139,23 +164,36 @@ def create_fnd_flags(args) -> None:
         args['flags_file_%s' % energy_func] = 'fnd_%s_%s_%s.flags' % (args['name'], args['time'], energy_func)
         args['logger'].log('creating flag file at %s' % args['flags_file_%s' % energy_func])
         with open(args['flags_file_%s' % energy_func], 'w+') as fout:
-            fout.write('-parser:protocol %s\n' % args['fnd_protocol'])
+            fout.write('# general data\n')
+            fout.write('-parser:protocol %s\n' % args['xml'])
             fout.write('-database %s\n' % args['database'])
             fout.write('-in:file:fasta %s%s\n' % (args['path_data'], args['fasta']))
+            fout.write('-in:file:native %s%s\n\n' % (args['path_data'], args['native_pdb'].split('/')[-1]))
+            fout.write('# membrane adjustments\n')
             fout.write('-mp:scoring:hbond\n')
+            if energy_func not in  ['ResSolv', 'beta']:
+                fout.write('-parser:script_vars steepness=10\n')
+                fout.write('-parser:script_vars membrane_core=15\n')
+                fout.write('-in:file:spanfile %s%s.span\n' % (args['path_data'], args['name']))
+            else:
+                fout.write('-parser:script_vars steepness=4\n')
+                fout.write('-parser:script_vars membrane_core=10\n')
+            fout.write('\n')
+
             # fout.write('-mp:setup:spanfiles %s%s.span\n' % (args['path_data'], args['name']))
             # fout.write('-in:file:spanfile %s%s.span\n' % (args['path_data'], args['name']))
-            fout.write('-overwrite\n')
-            fout.write('-parser:script_vars energy_function=%s\n' % energy_func)
-            # fout.write('-parser:script_vars score_func=mpframework_docking_cen_ELazaridis\n')
-            fout.write('-parser:script_vars frags9mers=%sfrags.200.9mers\n' % args['path_data'])
-            fout.write('-parser:script_vars frags3mers=%sfrags.200.3mers\n' % args['path_data'])
-            fout.write('-parser:script_vars symm_file=%s\n' % (args['path_data'] + 'C%i.symm' % args['symm_num']))
-            # fout.write('-parser:script_vars start_res=%i\n' % 1)
-            # fout.write('-parser:script_vars end_res=%i\n' % len(args['AASeq'])*number_of_units)
-            fout.write('-in:file:native %s%s\n' % (args['path_data'], args['native_pdb'].split('/')[-1]))
             fout.write('-nstruct %i\n' % args['nstruct'])
             fout.write('-mute all\n')
+            fout.write('-overwrite\n\n')
+            # fout.write('-parser:script_vars energy_function=%s\n' % energy_func)
+            # fout.write('-parser:script_vars score_func=mpframework_docking_cen_ELazaridis\n')
+            fout.write('# fragment stuff\n')
+            fout.write('-parser:script_vars frags9mers=%sfrags.200.9mers\n' % args['path_data'])
+            fout.write('-parser:script_vars frags3mers=%sfrags.200.3mers\n' % args['path_data'])
+            fout.write('-parser:script_vars symm_file=%s\n\n' % (args['path_data'] + 'C%i.symm' % args['symm_num']))
+            # fout.write('-parser:script_vars start_res=%i\n' % 1)
+            # fout.write('-parser:script_vars end_res=%i\n' % len(args['AASeq'])*number_of_units)
+            fout.write('# membrane spans:\n')
             for i, span in enumerate(spans):
                 fout.write('-parser:script_vars span_start_%i=%i\n' % (i+1, span['start']))
                 fout.write('-parser:script_vars span_end_%i=%i\n' % (i+1, span['end']))
@@ -166,14 +204,23 @@ def create_fnd_flags(args) -> None:
             else:
                 for i in [0, 1, 2, 3, 5]:
                     fout.write('-parser:script_vars score_func_%i=score%i_%s\n' %
-                               (i, i, 'elazaridis' if energy_func == 'ResSolv' else ''))
-            if energy_func != 'ResSolv':
-                fout.write('-parser:script_vars steepness=10\n')
-                fout.write('-parser:script_vars membrane_core=15\n')
-                fout.write('-in:file:spanfile %s%s.span\n' % (args['path_data'], args['name']))
-            else:
-                fout.write('-parser:script_vars steepness=10\n')
-                fout.write('-parser:script_vars membrane_core=15\n')
+                               (i, i, 'elazaridis' if energy_func in ['ResSolv', 'beta'] else ''))
+            fout.write('\n')
+            # if energy_func != 'ResSolv':
+                # fout.write('-parser:script_vars steepness=10\n')
+                # fout.write('-parser:script_vars membrane_core=15\n')
+                # fout.write('-in:file:spanfile %s%s.span\n' % (args['path_data'], args['name']))
+            # else:
+                # fout.write('-parser:script_vars steepness=10\n')
+                # fout.write('-parser:script_vars membrane_core=15\n')
+            fout.write('# energy function stuff:\n')
+            if args['mode'] == 'fnd':
+                fout.write('-parser:script_vars energy_function=%s\n' % energy_func)
+            if energy_func in ['ResSolv', 'beta']:
+                fout.write('-score::elec_memb_sig_die\n')
+                fout.write('-corrections::beta_nov15\n')
+                fout.write('-score:memb_fa_sol\n')
+                fout.write('\n')
 
 
 def get_spans_from_topo_string(args) -> list:
@@ -242,7 +289,7 @@ def create_psipred(args):
 
 
 def create_symm(args):
-    cmd = '%s%s -symm_type %s -nsub %i > %s' % (rosetta_path,
+    cmd = 'python2.7 %s%s -symm_type %s -nsub %i > %s' % (rosetta_path,
                                            'main/source/src/apps/public/symmetry/make_symmdef_file_denovo.py',
                                            args['symm_type'], args['symm_num'], 'C%i.symm' % args['symm_num'])
     args['logger'].log('creating symmetry file using command: %s' % cmd)
