@@ -727,7 +727,8 @@ def create_elazar_ips() -> dict:
         # adjust kcal/mol to REUs according to kcal/mol=0.57REU.
         # suggested by "Role of conformational sampling in computing mutation-induced changes in protein structure
         # and stability."
-        pos_score = {k: v/0.57 for k, v in pos_score.items()}
+        # pos_score = {k: v/0.57 for k, v in pos_score.items()}
+        pos_score = {k: v/2.94 for k, v in pos_score.items()}
         ip = InsertionProfile(aa, pos_score=pos_score, poly_edges=edge_pnts)
         result[aa] = ip
     logger.log('adjusting kcal/mol to REU by REU=kcal/mol / 0.57')

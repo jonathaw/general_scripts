@@ -307,6 +307,7 @@ def analyse_cliques(cliques):
                         print('doc symm diff', switches_differ({}, res1_doc_symm, res2.doc_switch))
                         print('doc BB dif', are_docs_from_diff_clusters(res1.doc_wt, res2.doc_wt))
                         print('coh diff', switches_differ({}, res1.coh_switch, res2.coh_switch))
+                        N
             print('for clq %r found the following results:' % clq)
             print('doc_bb_diffs', doc_bb_diffs)
             print('doc_diffs', doc_diffs)
@@ -329,6 +330,17 @@ def analyse_cliques(cliques):
                 df[coh][doc] = coh_doc_purples[coh][doc]
         show_prediction_heat_map(df)
 
+def draw_heatmap_for_chosen_designs(cliques):
+    chosen_desins = ['j5517', 'j4518', 'j3622', 'j3983', 'j1647', 'j4286', 'j4653', 'j5711', 'j5093', 'j3626', 'j4398', 'j829', 'j5106', 'j1526']
+    coh_doc_purples = creat_coh_doc_purples()
+    df = pd.DataFrame(index=chosen_desins, columns=chosen_desins)
+    for coh in chosen_desins:
+        for doc in chosen_desins:
+            df[coh][doc] = coh_doc_purples[coh][doc]
+    print(df)
+    show_prediction_heat_map(df)
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -349,6 +361,10 @@ if __name__ == '__main__':
     elif args['mode'] == 'analyse_cliques':
         cliques = find_predicted_cliques()
         analyse_cliques(cliques)
+
+    elif args['mode'] == 'draw_chosen':
+        cliques = find_predicted_cliques()
+        draw_heatmap_for_chosen_designs(cliques)
 
     else:
         print('no mode found')

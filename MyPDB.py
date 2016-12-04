@@ -393,10 +393,13 @@ class MyPDB:
 
     @property
     def __repr__(self) -> str:
-        msg = u"PDB {0:s} has {1:d} chains".format(self.name, len(self.chains))
+        msg = u"PDB {0:s} has {1:d} chains ".format(self.name, len(self.chains))
         for c in self.chains:
             msg += repr(self.chains[c])
         return msg
+
+    def __str__(self):
+        return self.__repr__
 
     def __getitem__(self, item: str) -> Chain:
         return self.chains[item]
@@ -405,10 +408,19 @@ class MyPDB:
         for k, v in self.chains.items():
             yield k, v
 
+    def seq_length(self):
+        return sum([len(v) for k, v in self])
+
     def iter_all_res(self):
         for ch in sorted(self.chains.keys()):
             for res in sorted(self.chains[ch].residues.keys()):
                 yield self[ch][res]
+
+    def res_items(self):
+        for ch in sorted(self.chains.keys()):
+            for id, res in sorted(self.chains[ch].residues.items()):
+                yield id, res
+
 
     def get_res(self, res_num: int) -> Residue:
         for cid, c in self:
@@ -624,7 +636,7 @@ def parse_PDB(file_in: str, name: str = None, with_non_residue: bool = True) -> 
                 continue
             atom = Atom(header=s[0], serial_num=int(l[6:11]), name=l[12:16].replace(' ', ''),
                         alternate=l[16] if l[16] != ' ' else None,
-                        res_type_3=l[17:20], chain=l[21].upper(), res_seq_num=int(l[22:26]), achar=l[26],
+                        res_type_3=l[17:20], chain=l[21], res_seq_num=int(l[22:26]), achar=l[26],
                         x=float(l[30:38]),
                         y=float(l[38:46]), z=float(l[47:55]), occupancy=float(l[55:61]), temp=float(l[60:66]),
                         si=l[72:76].replace(' ', ''), element=l[76:78].replace(' ', ''),
@@ -641,11 +653,18 @@ def parse_PDB(file_in: str, name: str = None, with_non_residue: bool = True) -> 
 
 def write_PDB(file_out: str, pdb: MyPDB) -> None:
     atoms = []
+    print('sss', sorted(pdb.chains.keys()))
     for cid in sorted(pdb.chains.keys()):
+        print('aaa', pdb[cid].residues)
+        print('asdasdas', sorted(pdb[cid].residues.keys()))
         for rid in sorted(pdb[cid].residues.keys()):
+            print('asdasdas', sorted(pdb[cid].residues.keys()))
             for aid in sorted(pdb[cid][rid].keys()):
+                print('ASDASDASDASDASD')
                 atoms.append(pdb[cid][rid][aid])
-    with open(file_out, 'w') as fout:
+    print('AAAAAAAAAAAAA')
+    print(atoms)
+    with open(file_out, 'w+') as fout:
         for a in sorted(atoms):
             fout.write(str(a) + '\n')
 

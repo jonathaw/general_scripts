@@ -15,10 +15,10 @@ def download_and_get_chains():
                         io.save(pdb.get_id() + '_' + chain.get_id() + '.pdb')
             except:
                 failed.append((pdb_e, chain_e))
-    print "failures:", failed
+    print("failures:", failed)
 
 
-def download_pdb():
+def download_pdb(args):
     from Bio.PDB import PDBParser, PDBIO, PDBList
     io = PDBIO()
     pdbl = PDBList()
@@ -36,4 +36,4 @@ if __name__ == '__main__':
     parser.add_argument('-path', type=str, default='./')
     args = vars(parser.parse_args())
     if args['mode'] == 'single':
-        download_pdb()
+        download_pdb(args)

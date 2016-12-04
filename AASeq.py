@@ -258,8 +258,6 @@ class AASeq():
         return protein_analysis.isoelectric_point()
 
 
-
-
 def compare_2_seqs(seq_1: AASeq, seq_2: AASeq, start=0) -> None:
     """
     :param seq_1: an AASeq instance

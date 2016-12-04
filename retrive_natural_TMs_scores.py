@@ -85,7 +85,6 @@ def find_topo(ts):
             print('dont know what to do')
             sys.exit()
         result.append([ h[0], h[1], ori ])
-        # print(ts[h[0]-1 : h[1]+2], ori)
     return result
 
 
@@ -97,8 +96,30 @@ def parse_rost_db():
         if 'PDBTM' in par:
             d = par.split('\n')
             name = d[0].split('|')[0].lower()
-            result[name] = {'name': name, 'seq': d[1], 'ts': d[2]}
+            pdb = d[0].split('|')[1].split(':')[0]
+            if pdb == '3arc': pdb = '3wu2'
+            if pdb == '3hgc': pdb = '4nyk'
+            if pdb == '2jlo': pdb = '4d1b'
+            chain = d[0].split('|')[1].split(':')[1].split('_')[0]
+            result[name] = {'name': name, 'seq': d[1], 'ts': d[2], 'pdb': pdb, 'chain': chain}
     return result
+
+
+def create_AddMembrane_xml(spans: list, file_name: str):
+    with open(file_name, 'w+') as fout:
+        fout.write('<dock_design>\n')
+        fout.write('  <MOVERS>\n')
+        fout.write('    <AddMembraneMover name=add_memb membrane_core=10 steepness=4>\n')
+        for span in spans:
+            fout.write('      <Span start=%i end=%i orientation=%s/>\n' % (span[0], span[1], 'in2out' if span[2] == 'fwd' else 'out2in'))
+        fout.write('    </AddMembraneMover>\n')
+        fout.write('  </MOVERS>\n')
+        fout.write('  <PROTOCOLS>\n')
+        fout.write('    <Add mover=add_memb/>\n')
+        fout.write('  </PROTOCOLS>\n')
+        fout.write('</dock_design>\n')
+
+
 
 if __name__ == '__main__':
     main()
