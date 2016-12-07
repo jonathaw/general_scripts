@@ -250,12 +250,12 @@ def calibrate_energy_functions(args):
         # dict(score0='centroid', score1='centroid', score2='centroid', score3='centroid', score5='centroid',
              # talaris2014='fa_standard'))
     # fa_cen_for_scores = OrderedDict(dict(score5='centroid', talaris2014='fa_standard'))
-    fa_cen_for_scores = OrderedDict(dict(score5='centroid', beta_nov15='fa_standard'))
+    fa_cen_for_scores = OrderedDict(dict(score5='centroid', beta_nov16='fa_standard'))
     score_funcs_to_calibrate = list(fa_cen_for_scores.keys())
     original_dir = os.getcwd()
     logger.log("will calibrate the score functions %r" % score_funcs_to_calibrate)
     for en_func in score_funcs_to_calibrate:
-        if en_func != 'beta_nov15':
+        if en_func != 'beta_nov16':
             continue
         # if en_func != 'talaris2014': continue
         os.mkdir('%s/%s' % (original_dir, en_func))
@@ -843,7 +843,7 @@ def filterscan_analysis_energy_func(energy_function: str, res_solv_weight: float
                    energy_function, ''.join(residues_to_test), 1 if to_dump_pdbs else 0, res_solv_weight, fa_cen)
         # -mp:setup:spanfiles %s , PWD + POLY_A_NAME + '.span'
         if 'beta' in energy_function:
-            command += ' -corrections::beta_nov15 '
+            command += ' -corrections::beta_nov16 '
             logger.log('ADDING CORRECTIONS FOR beta')
             if args['elec_memb_sig_die'] and 'beta' in energy_function:
                 command += ' -score::elec_memb_sig_die '

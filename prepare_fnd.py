@@ -218,7 +218,7 @@ def create_fnd_flags(args) -> None:
                 fout.write('-parser:script_vars energy_function=%s\n' % energy_func)
             if energy_func in ['ResSolv', 'beta']:
                 fout.write('-score::elec_memb_sig_die\n')
-                fout.write('-corrections::beta_nov15\n')
+                fout.write('-corrections::beta_nov16\n')
                 fout.write('-score:memb_fa_sol\n')
                 fout.write('\n')
 

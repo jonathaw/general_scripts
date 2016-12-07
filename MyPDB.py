@@ -8,7 +8,7 @@ from math import sqrt
 three_2_one = {'ALA': 'A', 'CYS': 'C', 'ASP': 'D', 'GLU': 'E', 'PHE': 'F', 'GLY': 'G', 'HIS': 'H', 'ILE': 'I',
                'LYS': 'K', 'LEU': 'L', 'MET': 'M', 'ASN': 'N', 'PRO': 'P', 'GLN': 'Q', 'ARG': 'R', 'SER': 'S',
                'THR': 'T', 'VAL': 'V', 'TRP': 'W', 'TYR': 'Y'}
-
+one_2_three = {v: k for k, v in three_2_one.items()}
 
 class XYZ:
     def __init__(self, x: float = None, y: float = None, z: float = None):
@@ -50,6 +50,9 @@ class XYZ:
 
     def __add__(self, other):
         return XYZ(x=self.x + other.x, y=self.y + other.y, z=self.z + other.z)
+
+    def scalar_multi(self, scalar) -> None:
+        return XYZ( self.x * scalar, self.y * scalar, self.z * scalar )
 
     def cross(self, other):
         """
@@ -102,6 +105,11 @@ class XYZ:
         from math import sqrt
         return sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2)
 
+    def as_list(self) -> list:
+        return [self.x, self.y, self.z]
+
+    def as_nparray(self) -> np.array:
+        return np.array(self.as_list())
 
 class MembraneResidue:
     def __init__(self):
@@ -119,9 +127,9 @@ class MembraneResidue:
 
 
 class Atom:
-    def __init__(self, header=None, serial_num=None, name=None, alternate=None, res_type_3=None, chain=None,
-                 res_seq_num=None, x=None, y=None, z=None, achar=None, occupancy=None, temp=None, si=None, element=None,
-                 charge=None):
+    def __init__(self, header=None, serial_num=None, name=None, alternate='', res_type_3=None, chain=None,
+                 res_seq_num=None, x=None, y=None, z=None, achar='', occupancy=1.0, temp=1.0, si='', element='',
+                 charge=0):
         self.header = header
         self.serial_num = serial_num
         self.name = name
@@ -141,13 +149,14 @@ class Atom:
         self.xyz = XYZ(x=x, y=y, z=z)
 
     def __repr__(self) -> str:
-        return "%-6s%5d  %-3s%1s%3s %1s%4d%1s   %8.3f%8.3f%8.3f%6.2f%6.2f          %2s%2s\n" % \
-               (self.header, self.serial_num, self.name, self.achar, self.res_type_3, self.chain, self.res_seq_num,
-                self.si, self.xyz.x, self.xyz.y, self.xyz.z, self.occupancy, self.temp, self.element, self.charge)
+        return self.__str__
+        # return "%-6s%5d  %-3s%1s%3s %1s%4d%1s   %8.3f%8.3f%8.3f%6.2f%6.2f          %2s%2s\n" % \
+               # (self.header, self.serial_num, self.name, self.achar, self.res_type_3, self.chain, self.res_seq_num,
+                # self.si, self.xyz.x, self.xyz.y, self.xyz.z, self.occupancy, self.temp, self.element, self.charge)
 
     def __str__(self) -> str:
-        return "%-6s%5d  %-3s%1s%3s %1s%4d%1s   %8.3f%8.3f%8.3f%6.2f%6.2f          %2s%2s" % \
-               (self.header, self.serial_num, self.name, self.achar, self.res_type_3, self.chain, self.res_seq_num,
+        return "%-6s%5d%s%-3s%1s%3s %1s%4d%1s   %8.3f%8.3f%8.3f%6.2f%6.2f          %2s%2s" % \
+               (self.header, self.serial_num, '  ' if len(self.name) < 4 else ' ', self.name, self.achar, self.res_type_3, self.chain, self.res_seq_num,
                 self.si, self.xyz.x, self.xyz.y, self.xyz.z, self.occupancy, self.temp, self.element, self.charge)
 
     def __cmp__(self, other) -> bool:
@@ -161,6 +170,10 @@ class Atom:
 
     def __ge__(self, other) -> bool:
         return self.serial_num >= other.serial_num
+
+    def dot_me(self, m: np.ndarray):
+        vec = np.dot(m, self.xyz.as_list())
+        self.xyz = XYZ(vec[0], vec[1], vec[2])
 
     def set_temp(self, temp: float) -> None:
         """
@@ -193,7 +206,10 @@ class Atom:
         :param xyz: XYZ point
         :return: None. translate atom by x, y, z
         """
-        self.xyz += xyz
+        self.xyz = self.xyz + xyz
+
+    def set_xyz(self, xyz: XYZ):
+        self.xyz = xyz
 
 
 class Residue:
@@ -290,6 +306,12 @@ class Residue:
         for aid, a in self:
             a.translate_xyz(xyz)
 
+    def dot_matrix_me(self, m: np.ndarray) -> None:
+        for a in self.values():
+            a.dot_me( m )
+
+
+
     def D_or_L(self) -> str:
         """
         return enantiomer of self, either D or L
@@ -305,6 +327,10 @@ class Residue:
         CB_infront = cp.dot(CB-CA) > 0
         print(CB_infront)
         return 'D' if CB_infront else 'L'
+
+    def print_as_pdb(self) -> None:
+        for atom in self.atoms.values():
+            print(atom)
 
 
 class Chain:
@@ -393,7 +419,8 @@ class MyPDB:
 
     @property
     def __repr__(self) -> str:
-        msg = u"PDB {0:s} has {1:d} chains ".format(self.name, len(self.chains))
+        # msg = u"PDB {0:s} has {1:d} chains ".format(self.name, len(self.chains))
+        msg = "PDB %s has %i chains " % (self.name, len(self.chains))
         for c in self.chains:
             msg += repr(self.chains[c])
         return msg
@@ -420,7 +447,6 @@ class MyPDB:
         for ch in sorted(self.chains.keys()):
             for id, res in sorted(self.chains[ch].residues.items()):
                 yield id, res
-
 
     def get_res(self, res_num: int) -> Residue:
         for cid, c in self:
@@ -629,8 +655,8 @@ def parse_PDB(file_in: str, name: str = None, with_non_residue: bool = True) -> 
             if not with_non_residue:
                 if l[17:20] not in three_2_one.keys():
                     continue
-            if 'H' in s[2] and ('1' in s[2] or '2' in s[2] or '3' in s[2]):
-                continue
+            # if 'H' in s[2] and ('1' in s[2] or '2' in s[2] or '3' in s[2]):
+                # continue
             if s[3] == 'MEM':
                 memb_res.append(l)
                 continue
@@ -653,17 +679,11 @@ def parse_PDB(file_in: str, name: str = None, with_non_residue: bool = True) -> 
 
 def write_PDB(file_out: str, pdb: MyPDB) -> None:
     atoms = []
-    print('sss', sorted(pdb.chains.keys()))
     for cid in sorted(pdb.chains.keys()):
-        print('aaa', pdb[cid].residues)
-        print('asdasdas', sorted(pdb[cid].residues.keys()))
         for rid in sorted(pdb[cid].residues.keys()):
-            print('asdasdas', sorted(pdb[cid].residues.keys()))
             for aid in sorted(pdb[cid][rid].keys()):
-                print('ASDASDASDASDASD')
                 atoms.append(pdb[cid][rid][aid])
-    print('AAAAAAAAAAAAA')
-    print(atoms)
+    # print(atoms)
     with open(file_out, 'w+') as fout:
         for a in sorted(atoms):
             fout.write(str(a) + '\n')
