@@ -4,26 +4,37 @@
 import os
 import sys
 import copy
+import time
 import argparse
 import numpy as np
+import scipy as sc
 import pandas as pd
+from matplotlib import cm
 import matplotlib.pyplot as plt
 
 import MyPDB as mp
 import MyPDB_funcs as mpf
 import RosettaFilter as rf
+from Logger import Logger
 from draw_dielectric_membrane_mesh import create_xml_flags
+from RosettaData import rosetta_atom_radii
+from draw_dielectric_membrane_mesh import rosetta_dz_model, parse_rosetta_log
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-mode')
     parser.add_argument('-stage')
+    parser.add_argument('-sc', type=str, default='scores/all_scores.score')
     parser.add_argument('-z', default=0, type=float)
     parser.add_argument('-in_membrane', type=bool, default=True)
     parser.add_argument('-memb_sig', type=bool, default=True)
+    parser.add_argument('-log')
+    parser.add_argument('-plot_type', default='1ds')
     args = vars(parser.parse_args())
 
+    args['logger'] = Logger('logeer_%s_%s.log' % (args['mode'], time.strftime("%d.%0-m")))
+    args['res_maker'] = ResMaker()
     ds = np.append( np.arange(0.1, 5, 0.1), np.arange(5, 50, 5) )
     zs = np.append( np.arange(0.0, 2.5, 0.1), np.arange(2.5, 25, 2.5) )
 
@@ -34,28 +45,160 @@ def main():
     if args['mode'] == 'setup':
         prepare_scan( args, ds, zs )
 
-    elif args['mode'] == 'analyse':
-        analyse_scan( args, ds, zs )
+    elif args['mode'] == 'analyse_z0':
+        analyse_scan_z0( args, ds, zs )
+
+    elif args['mode'] == 'analyse_dz':
+        analyse_dz( args, ds, zs )
 
     elif args['mode'] == 'test':
         create_pdb_AA_AA_d_z('D', 'R', 1.4, 0, ResMaker())
+
+    elif args['mode'] == 'caca':
+        CaCa_d_by_z(args)
 
     else:
         print('no mode given')
 
 
-def analyse_scan( args, ds, zs ):
+def analyse_dz( args: dict, ds: np.arange, zs: np.arange ) -> None:
+    df = read_all_scores( 'scores/all_scores.score', args )
+    df = df[ df['d'] < 10 ]
+
+    fig = plt.figure()
+    plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.15, hspace=0.45)
+    i = 0
+    for aa1 in ['D', 'S']:
+        for aa2 in ['K', 'R']:
+            plt.subplot(2, 2, 1+i)
+            mini_df = df[ (df['aa1'] == aa1) & (df['aa2'] == aa2) ]
+            mini_df.sort_values('d', inplace=1)
+            args['logger'].create_header('analysing %s - %s' % ( aa1, aa2 ))
+            for n in ['d', 'z', 'fa_elec']:
+                args['logger'].log('for %s there are %i values, mean %.2f, min %.2f, max %.2f' %
+                                   (n, len(mini_df[n]), mini_df[n].mean(), mini_df[n].min(), mini_df[n].max()))
+                args['logger'].log('the set for %s is %r' % (n, np.round(sorted(list(set(mini_df[n].values))), 2)))
+
+            D, Z, E = [], [], []
+            for d in ds:
+                if d >= 10:
+                    continue
+                for z in zs:
+                    # if z > 5: continue
+                    D.append( d )
+                    Z.append( z )
+                    E.append( mini_df[ (mini_df['d'] >= d-0.01) &
+                                       (mini_df['d'] <= d+0.01) &
+                                       (mini_df['z'] == z) ]['fa_elec'].values[0] )
+            args['logger'].log('finished transforming dataframe to lists')
+
+            D_, Z_ = np.meshgrid( D, Z )
+
+            levels = np.linspace( np.min(E), np.max(E), 500 )
+            E_ = sc.interpolate.griddata( (D, Z), E, (D_, Z_), method='cubic' )
+            cs = plt.contourf( D_, Z_, E_, levels=levels, cmap=cm.coolwarm)
+            plt.xlabel('d (A)')
+            plt.ylabel('z (A)')
+            plt.title('%s vs. %s' % ( aa1, aa2 ))
+            fig.colorbar(cs, format="%.2f")
+            i += 1
+            # break
+        # break
+    plt.show()
+
+
+def CaCa_d_by_z( args: dict ) -> None:
+    df = rf.score_file2df( args['sc'] )
+    desc = df['description'].str.split('_')
+
+    spline_log = parse_rosetta_log( args )
+    spline_log_df = pd.DataFrame({'z': spline_log[0], 'd': spline_log[1], 'e': spline_log[2]})
+
+    df['d'] = desc.str.get( 0 ).astype( np.float64 )
+    df['z'] = desc.str.get( 1 ).astype( np.float64 )
+
+    ds_sorted = np.round(sorted(list(set(df['d'].values))), 2)
+    zs_sorted = np.round(sorted(list(set(df['z'].values))), 2)
+    D, Z, E = [], [], []
+    model_E = []
+    spline_log_E = []
+    for d in ds_sorted:
+        if d >= 10:
+            continue
+        for z in zs_sorted:
+            # if z > 5: continue
+            D.append( d )
+            Z.append( z )
+            E.append( df[ (df['d'] >= d-0.01) &
+                          (df['d'] <= d+0.01) &
+                          (df['z'] == z) ]['fa_elec'].values[0] / 4 )
+            model_E.append( rosetta_dz_model( d, z ))
+            spline_log_E.append( spline_log_df[ (spline_log_df['d'] >= d-0.01) &
+                                               (spline_log_df['d'] <= d+0.01) &
+                                              (spline_log_df['z'] == z)]['e'].values[0] )
+
+    args['logger'].log('finished preparing lists')
+    master_df = pd.DataFrame({'d': D, 'z': Z, 'e_caca': E,
+                              'model_e': model_E, 'spline_log_e': spline_log_E})
+
+    if args['plot_type'] == '1ds':
+        args['logger'].log('making 1d plots')
+        fig = plt.figure()
+        plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.15, hspace=0.45)
+        i = 0
+        for i, z in enumerate(zs_sorted[::2]):
+            plt.subplot(5, 4, 1+i)
+            d_df = master_df[ master_df['z'] == z ]
+            plt.plot( d_df['d'], d_df['e_caca'].values, label='e_caca', c='r' )
+            plt.plot( d_df['d'], d_df['model_e'].values, label='model_e', c='b' )
+            plt.plot( d_df['d'], d_df['spline_log_e'].values, label='spline_log_e', c='g' )
+            plt.title('z=%.2f' % z)
+            plt.xlabel('d')
+            plt.ylabel('e')
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        plt.show()
+
+
+
+    if args['plot_type'] == 'contourf':
+        D_, Z_ = np.meshgrid( D, Z )
+
+        levels = np.linspace( np.min(E), np.max(E), 1000 )
+
+        E_ = sc.interpolate.griddata( (D, Z), E, (D_, Z_), method='cubic')
+        model_E_ = sc.interpolate.griddata( (D, Z), model_E, (D_, Z_), method='cubic')
+        spline_log_E_ = sc.interpolate.griddata( (D, Z), spline_log_E, (D_, Z_), method='cubic' )
+
+        fig = plt.figure()
+        plt.subplot(1, 2, 1)
+        cs = plt.contourf( D_, Z_, E_, levels=levels, cmap=cm.coolwarm )
+        plt.xlabel('d (A)')
+        plt.ylabel('z (A)')
+        fig.colorbar(cs, format="%.2f")
+
+        plt.subplot(1, 2, 2)
+        cs = plt.contourf( D_, Z_, model_E_, levels=levels, cmap=cm.coolwarm  )
+        plt.xlabel('d (A)')
+        plt.ylabel('z (A)')
+        fig.colorbar(cs, format="%.2f")
+        plt.show()
+
+
+def analyse_scan_z0( args, ds, zs ):
     """
     analyse the scores generated for the PDBs
     """
-    df = read_all_scores('scores/all_scores.score')
+    df = read_all_scores('scores/all_scores.score', args)
     plt.figure()
     plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.15, hspace=0.45)
     i = 0
     for aa1 in ['D', 'S']:
         for aa2 in ['K', 'R']:
             plt.subplot(2, 2, 1+i)
-            mini_df = df[ (df['aa1'] == aa1) & (df['aa2'] == aa2) & (df['z'] == args['z']) ]
+            args['logger'].create_header('working on %s - %s' % (aa1, aa2))
+            d_min = args['res_maker'].get_maximal_main_radii( aa1 ) + args['res_maker'].get_maximal_main_radii( aa2 )
+            args['logger'].log('the sum of radii for pair is %.2f' % d_min)
+            mini_df = df[ (df['aa1'] == aa1) & (df['aa2'] == aa2) & (df['z'] == args['z']) & (df['d'] > d_min) ]
             mini_df.sort_values( 'd', inplace=1 )
             mini_df.to_csv('%s_%s_z%.2f.csv' % (aa1, aa2, args['z']),
                            columns=['aa1', 'aa2', 'd', 'z', 'fa_elec'],
@@ -63,7 +206,7 @@ def analyse_scan( args, ds, zs ):
             # plt.scatter( mini_df['d'], mini_df['fa_elec'])
             plt.plot( mini_df['d'], mini_df['fa_elec'])
 
-            plt.xlim([-1, np.max(ds)])
+            plt.xlim([0, 10])#np.max(ds)])
             plt.ylim([np.min( mini_df['fa_elec'].values ) - 1, 1])
             plt.xlabel('d')
             plt.ylabel('fa_elec')
@@ -73,20 +216,23 @@ def analyse_scan( args, ds, zs ):
     plt.show()
 
 
-def read_all_scores(file_name: str) -> pd.DataFrame:
+def read_all_scores( file_name: str, args=dict() ) -> pd.DataFrame:
     """
     if necessary gather scores, and coalesce into dataframe with resiudes, ds and zs
     """
-    if not os.path.exists('scores/all_scores.sc'):
-        os.system('grep description scores/%s > scores/all_scores.score' %
-                  [a for a in os.listdir('scores/') if '.sc' in a][0])
-        os.system('grep SCORE: scores/*.sc | grep -v description >> scores/all_scores.score')
+    if not os.path.exists(args['sc']):
+        args['logger'].logger('bo score file found. gathering scores to %s' % args['sc'])
+        os.system('grep description scores/%s > %s' %
+                  ( args['sc'], [a for a in os.listdir('scores/') if '.sc' in a][0] ))
+        os.system('grep SCORE: scores/*.sc | grep -v description >> %s' % args['sc'])
     df = rf.score_file2df( file_name )
+    args['logger'].log('found %i entries in score file' % len( df ))
     desc_spl = df['description'].str.split('_')
     df['aa1'] = desc_spl.str.get( 0 )
     df['aa2'] = desc_spl.str.get( 1 )
-    df['d'] = desc_spl.str.get( 2 ).astype( float )
-    df['z'] = desc_spl.str.get( 3 ).astype( float )
+    df['d'] = desc_spl.str.get( 2 ).astype( np.float64 )
+    df['z'] = desc_spl.str.get( 3 ).astype( np.float64 )
+    df = df.round( {'d': 2, 'z': 2} )
     return df
 
 
@@ -176,6 +322,7 @@ class ResMaker:
         self.residues = {}
         self.set_main_residues_atoms()
         self.parse_residues_file()
+        self.atom_radii = rosetta_atom_radii
 
     def set_main_residues_atoms( self ) -> None:
         result = {}
@@ -193,6 +340,19 @@ class ResMaker:
         for res in pdb['A'].values():
             mpf.translate_and_rotate_res_to_xy_plane( res, self.main_residue_atoms[res.res_type] )
             self.residues[res.res_type] = res
+
+    def get_main_atom_types( self, aa: str, atom_num: int ) -> str:
+        atom = self.main_residue_atoms[ aa ][ atom_num ]
+        if atom[0] in ['1', '2']:
+            return atom[1]
+        else:
+            return atom[0]
+
+    def get_main_atom_radius( self, aa: str, atom_num: int ) -> float:
+        return self.atom_radii[ self.get_main_atom_types( aa, atom_num ) ]
+
+    def get_maximal_main_radii( self, aa ) -> float:
+        return max( [ self.get_main_atom_radius( aa, 1 ), self.get_main_atom_radius( aa, 2 )] )
 
 
 if __name__ == '__main__':

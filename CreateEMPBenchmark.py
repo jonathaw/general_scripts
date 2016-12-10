@@ -1,25 +1,4 @@
 #!/usr/bin/env python3.5
-# :noTabs=true:
-# (c) Copyright Rosetta Commons Member Institutions.
-# (c) This file is part of the Rosetta software suite and is made available
-# (c) under license.
-# (c) The Rosetta software is developed by the contributing members of the
-# (c) Rosetta Commons.
-# (c) For more information, see http://www.rosettacommons.org.
-# (c) Questions about this can be addressed to University of Washington UW
-# (c) TechTransfer, email: license@u.washington.edu.
-"""Brief:   this script creates a polyval table to read by MPResSolvEnergy. it optimises the fit of the Rosetta energy
-            function for membranes to the dsTBL experimental hydrophobicity scale
-
-Params:  use --help to get all params
-
-Example: CreateEMPBenchmark.py -mode main -change_rosetta_table True -full Tru
-
-Remarks: Blah blah blah, blah, blah.
-
-Author:  Jonathan Weinstein
-
-"""
 # general imports
 import argparse
 import os
@@ -502,7 +481,7 @@ def create_e_term_specific_profiles(args, path_pdbs: str, energy_func, res_solv_
             sequence_to_idealized_helix()
             create_spanfile()
             trunctate_2nd_mem_res()
-        filterscan_analysis_energy_func(energy_func,
+        filterscan_analysis_energy_func('beta_nov16',
                                         res_solv_weight=0.0,
                                         residues_to_test=AAs,
                                         to_dump_pdbs=True,
@@ -606,13 +585,13 @@ def just_draw_current_profiles():
     # create_spanfile()
     # trunctate_2nd_mem_res()
     elazar_ips = create_elazar_ips()
-    MPResSolv_current_ips = filterscan_analysis_energy_func('beta_nov15_elazaridis', 
+    MPResSolv_current_ips = filterscan_analysis_energy_func('beta_nov16_elazaridis', 
                                                             0.0, 
                                                             'fa_standard', 
                                                             residues_to_test=AAs,
                                                             adjust_extra_membranal=False, 
                                                             to_dump_pdbs=False)
-    with_ressolv = filterscan_analysis_energy_func('beta_nov15_elazaridis', 
+    with_ressolv = filterscan_analysis_energy_func('beta_nov16_elazaridis', 
                                                    1.0, 
                                                    'fa_standard', 
                                                    residues_to_test=AAs, 
@@ -633,8 +612,8 @@ def draw_filterscan_profiles(ips_dict: OrderedDict, cen_fa='fa', show: bool = Fa
         for name, ips in ips_dict.items():
             plt.plot(Z_total, [ips[aa].pos_score[pos] for pos in POS_RANGE], color=COLOR_MAP[name], label=name)
         plt.title(aa.upper())
-        if aa != 'P':
-            plt.ylim([-5, 5])
+        # if aa != 'P':
+            # plt.ylim([-5, 5])
         plt.xlim([-50, 50])
         plt.axvline(z_range_aa[aa][0], color='grey')
         plt.axvline(z_range_aa[aa][1], color='grey')
@@ -728,7 +707,7 @@ def create_elazar_ips() -> dict:
         # suggested by "Role of conformational sampling in computing mutation-induced changes in protein structure
         # and stability."
         # pos_score = {k: v/0.57 for k, v in pos_score.items()}
-        pos_score = {k: v/2.94 for k, v in pos_score.items()}
+        pos_score = {k: v*2.94 for k, v in pos_score.items()}
         ip = InsertionProfile(aa, pos_score=pos_score, poly_edges=edge_pnts)
         result[aa] = ip
     logger.log('adjusting kcal/mol to REU by REU=kcal/mol / 0.57')
@@ -830,6 +809,7 @@ def filterscan_analysis_energy_func(energy_function: str, res_solv_weight: float
     energy_function = which energy function to calibrate
     run the FilteScan protocol on the ployA and return InsertionProfiles dict for energy_function
     """
+    span_ins_weight = 1
     # run FilterScan protocol to create sclog files for both full and no M env score functions
     if args['full']: # -unmute core.scoring.membrane.MPResSolvEnergy
         if energy_function is None:
@@ -837,10 +817,10 @@ def filterscan_analysis_energy_func(energy_function: str, res_solv_weight: float
             sys.exit() # -corrections::beta_nov15 -score::elec_memb_sig_die
         command = '%s%s -database %s -parser:protocol %s -s %s -nstruct %i -overwrite ' \
                   '-mp:scoring:hbond -mute all -ex1 -ex2 -ex3 -ex4 -parser:script_vars energy_function=%s ' \
-                'residues_to_test=%s to_dump=%i res_solv_weight=%.2f fa_or_cen=%s' % \
+                'residues_to_test=%s to_dump=%i res_solv_weight=%.2f fa_or_cen=%s span_ins_weight=%.2f' % \
                   (ROSETTA_EXECUTABLES_PATH, ROSETTA_SCRIPTS_EXEC_PATH, ROSETTA_DATABASE_PATH,
                    PROTOCOLS_PATH + MPFilterScanDifferentSFAAs, PWD + POLY_A_NAME + '.pdb', NSTRUCT,
-                   energy_function, ''.join(residues_to_test), 1 if to_dump_pdbs else 0, res_solv_weight, fa_cen)
+                   energy_function, ''.join(residues_to_test), 1 if to_dump_pdbs else 0, res_solv_weight, fa_cen, span_ins_weight)
         # -mp:setup:spanfiles %s , PWD + POLY_A_NAME + '.span'
         if 'beta' in energy_function:
             command += ' -corrections::beta_nov16 '
@@ -1404,14 +1384,14 @@ if __name__ == '__main__':
     parser.add_argument('-energy_func_fa', default='talaris2014_elazaridis')
     parser.add_argument('-energy_func_cen')
     parser.add_argument('-note', default=None, type=str, help='add note to spline files')
-    parser.add_argument('-use_made_pdb', default=False)
-    parser.add_argument('-elec_memb_sig_die', default=False)
-    parser.add_argument('-memb_fa_sol', default=False)
+    parser.add_argument('-use_made_pdb', default=True)
+    parser.add_argument('-elec_memb_sig_die', default=True)
+    parser.add_argument('-memb_fa_sol', default=True)
 
     logger = Logger('elazaridis_%s.log' % time.strftime("%H_%M_%d_%b"))
 
     args = vars(parser.parse_args())
-    
+
     if args['mode'] == 'main':
         global PWD
         PWD = os.getcwd() + '/'

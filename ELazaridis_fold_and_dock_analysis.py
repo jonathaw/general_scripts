@@ -41,6 +41,7 @@ def main():
     parser.add_argument('-best', type=bool, default=False)
     parser.add_argument('-terms', nargs='+', default=['score', 'a_shape', 'a_pack', 'a_ddg', 'res_solv'])
     parser.add_argument('-threshold', type=int, default=5)
+    parser.add_argument('-show', default='show')
 
     args = vars(parser.parse_args())
     args['logger'] = Logger('logeer_%s.log' % time.strftime("%d.%0-m"), args['log_path'])
@@ -331,7 +332,10 @@ def quick_rmsd_total(args):
     # print_best_scores(sc_df_fail, 'score', percentile=0.05)
     plt.xlabel('RMSD')
     plt.ylabel(y_axis_term)
-    plt.show()
+    if args['show'] == 'show':
+        plt.show()
+    else:
+        plt.savefig('%s.png' % args['sc'].split('.score')[0])
 
 
 class PointLabel:

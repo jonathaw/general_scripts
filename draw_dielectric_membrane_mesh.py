@@ -54,13 +54,13 @@ def beta_nov16_rosetta_coefficents() -> dict:
             'hi_poly_': {'c0': -43.5752, 'c1': 31.3588, 'c2': -7.0817, 'c3': 0.512837}}
 
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-log')
     parser.add_argument('-mode', default='3d')
     parser.add_argument('-stage', default=0, type=int)
     parser.add_argument('-memb_sig', type=bool, default=True)
+    parser.add_argument('-plot_type', default='contour')
     args = vars(parser.parse_args())
 
     args['logger'] = Logger('logeer_%s_%i_%s.log' % (args['mode'], args['stage'], time.strftime("%d.%0-m"))
@@ -82,6 +82,18 @@ def main():
 
     else:
         print('no mode given')
+
+
+def rosetta_dz_model( d: float, z: float ) -> float:
+    rosetta_coefs = beta_nov16_rosetta_coefficents()
+    f_d = calc_rosetta_d_func( d, rosetta_coefs )
+    g_z = (rosetta_coefs['min_dis_score_'] * rosetta_coefs['low_poly_start_'] *
+                             ( 1 - (( z / 10  )**4 / ( 1 + ( z / 10  ) ** 4  ) )  ) / d)
+    if d <= rosetta_coefs['low_poly_start_']:
+        e = rosetta_coefs['min_dis_score_']
+    else:
+        e = np.max( [ f_d, g_z   ] )
+    return e
 
 
 def draw_desired_model(args):
@@ -190,7 +202,7 @@ def sigmoid_eps( d: float, c: dict ) -> float:
 
 
 def draw_rosetta_d_by_z_model(args):
-    ds = np.arange(0, 15, 0.1)
+    ds = np.arange(2.2, 20, 0.1) # Ca VDW radius ±2.31A
     zs = np.arange(0, 20, 0.5)
     if args['stage'] == 1:
         args['logger'].log('creating pdbs and jobs for \nds %r\nzs %r' % (ds, zs))
@@ -206,19 +218,44 @@ def draw_rosetta_d_by_z_model(args):
             print('for %s mean: %.2f min %.2f max %.2f count %i' % (name, np.mean(vals), np.min(vals), np.max(vals), len(vals)))
         data = [{'d': d, 'z': z, 'e': e} for d, z, e in zip(ds, zs, es)]
         df = pd.DataFrame(data, columns=['d', 'z', 'e'])
+        df = df.sort_values( by=['d', 'z'] )
         df.to_csv('dze.csv', sep="\t")
 
-        D, Z = np.meshgrid( ds, zs )
-        E = griddata((ds, zs,), es, (D, Z), method='cubic')
-        fig = plt.figure()
-        ax = fig.gca(projection='3d')
-        surf = ax.plot_surface(D, Z, E, rstride=50, cstride=50, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-        # surf = ax.scatter(D, Z, E, c=E)
-        ax.zaxis.set_major_locator(LinearLocator(10))
-        ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
-        ax.set_xlabel('D')
-        ax.set_ylabel('Z')
-        ax.set_zlabel('fa_elec')
+        D, Z, E = [], [], []
+        for d in np.round(sorted(list(set(df['d'].values))), 2):
+            for z in np.round(sorted(list(set(df['z'].values))), 2):
+                D.append( d )
+                Z.append( z )
+                E.append( df[ (df['d'] == d) & (df['z'] == z) ].values[0] )
+
+        D_, Z_ = np.meshgrid( D, Z )
+        E_ = griddata((D, Z), E, (D_, Z_), method='cubic')
+        print('E_', E_)
+        print('D', D[:10])
+        print('Z', Z[:10])
+
+        print('D_', D_.shape, len(D_) )
+        print('Z_', Z_.shape, len(Z_))
+        print('E_', E_.shape, len(E_))
+
+        if args['plot_type'] == 'contour':
+            fig = plt.figure()
+            levels = np.linspace( np.min( E ), np.max( E ), 500 )
+            cs = plt.contourf( D_, Z_, E_, levels=levels, cmap=cm.coolwarm )
+            fig.colorbar(cs, format="%.2f")
+            plt.xlabel('D')
+            plt.ylabel('Z')
+
+        if args['plot_type'] == '3d':
+            fig = plt.figure()
+            ax = fig.gca(projection='3d')
+            surf = ax.plot_surface(D, Z, E, rstride=50, cstride=50, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+            # surf = ax.scatter(D, Z, E, c=E)
+            ax.zaxis.set_major_locator(LinearLocator(10))
+            ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+            ax.set_xlabel('D')
+            ax.set_ylabel('Z')
+            ax.set_zlabel('fa_elec')
         plt.show()
     else:
         print('invalid stage, use 1 or 2')
@@ -244,6 +281,7 @@ def get_rosetta_dielectric_constants_for_range(args, ds: list, zs: list, in_memb
     # args['logger'].log('creating jobs, pdbs, flags etc with in_membrane %r nad memb_sig %r' % (in_membrane, memb_sig))
 
     pwd = os.getcwd()
+    create_xml_flags( in_membrane, memb_sig )
     os.mkdir('pdbs')
     os.mkdir('jobs')
     os.mkdir('scores')
@@ -258,10 +296,11 @@ def get_rosetta_dielectric_constants_for_range(args, ds: list, zs: list, in_memb
                 job.write('/home/labs/fleishman/jonathaw/Rosetta/main/source/bin/rosetta_scripts.default.linuxgccrelease  -s pdbs/%.2f_%.2f.pdb @%s/%s -out:file:scorefile scores/%s.sc -out:path:pdb pdbs_0001/ -script_vars scfxn=beta_nov16%s\n' % (d, z, pwd, 'in_memb.flags' if in_membrane else 'no_memb.flags', name, '_elazaridis' if in_membrane else ''))
 
                 os.system('chmod +x jobs/job.%s' % name)
-                cmd.write('bsub -L /bin/bash -N -u /dev/null -G fleishman-wx-grp-lsf -q fleishman -o /dev/null 2>&1 -e /dev/null 2>&1 %s/jobs/job.%s\n' % (pwd, name))
+                command_line = 'bsub -L /bin/bash -N -u /dev/null -G fleishman-wx-grp-lsf -q fleishman -o /dev/null 2>&1 -e /dev/null 2>&1 %s/jobs/job.%s\n' % (pwd, name)
+                os.system(command_line)
+                cmd.write(command_line)
     cmd.close()
     os.system('sh jobs/command')
-    create_xml_flags( in_membrane, memb_sig )
     os.system('sh jobs/command')
 
 

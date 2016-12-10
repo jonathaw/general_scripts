@@ -32,7 +32,7 @@ def find_helix_vector(pdb: MyPDB, start: int, end: int):
     return linepts, data
 
 
-def find_points_of_closest_distance(l1, l2) -> tuple( float, float ):
+def find_points_of_closest_distance(l1, l2) -> tuple:
     u = l1[1] - l1[0]
     v = l2[1] - l2[0]
     w = l1[0] - l2[0]
