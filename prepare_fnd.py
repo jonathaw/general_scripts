@@ -20,7 +20,7 @@ from MyPDB import parse_PDB
 rosetta_path = '/home/labs/fleishman/jonathaw/Rosetta/'
 rosetta_bin_path = '/home/labs/fleishman/jonathaw/Rosetta/main/source/bin/'
 
-fnd_protocol = '/home/labs/fleishman/jonathaw/elazaridis/protocols/fnd_27Jun.xml'
+fnd_protocol = '/home/labs/fleishman/jonathaw/elazaridis/protocols/fnd_7Dec.xml'
 design_protocol = '/home/labs/fleishman/jonathaw/elazaridis/protocols/design_13Nov.xml'
 # rosetta_path = '/home/labs/fleishman/sarel/rosetta/'
 # rosetta_bin_path = '/home/labs/fleishman/sarel/rosetta/main/source/bin/'
@@ -59,6 +59,21 @@ def main():
     args['time'] = time.strftime("%d.%0-m")
     args['logger'] = Logger('log_file_%s.log' % args['time'])
 
+    if args['mode'] == 'fnd':
+        fnd(args)
+
+    elif args['mode'] == 'from_design':
+        from_design(args)
+
+    else:
+        print('no mode')
+
+
+def from_design(args):
+    pass
+
+
+def fnd(args):
     test_input(args)
 
     make_data(args)
@@ -229,12 +244,14 @@ def get_spans_from_topo_string(args) -> list:
     hhh = re.compile('[hH]*')
     h_list = [(a.start(), a.end()) for a in hhh.finditer(topo_string) if a.end() - a.start() > 1
               and a.end() - a.start() >= 1]
+
+    if args['1st_span_orient'] is None:
+        direction = 'fwd' if topo_string[h_list[0][0] - 1] == '1' else 'rev'
+    else:
+        direction = args['1st_span_orient']
     for h in h_list:
-        if args['1st_span_orient'] is None:
-            direction = 'fwd' if topo_string[h[0] - 1] == '1' else 'rev'
-        else:
-            direction = args['1st_span_orient']
         topology_list.append((h[0]+1, h[1], direction))
+        direction = 'fwd' if direction == 'rev' else 'rev'
     spans = []
     for span in topology_list:
         ori = ''
@@ -252,9 +269,10 @@ def get_spans_from_topo_string(args) -> list:
             new_span['start'] += len(args['seq'])
             new_span['end'] += len(args['seq'])
             new_spans.append(new_span)
-    args['logger'].log('found the following spans for symmetry %i' % args['symm_num'])
-    for span in new_spans:
-        args['logger'].log('start: %i end: %i orientation: %s' % (span['start'], span['end'], span['orientation']))
+    if 'logger' in args.keys():
+        args['logger'].log('found the following spans for symmetry %i' % args['symm_num'])
+        for span in new_spans:
+            args['logger'].log('start: %i end: %i orientation: %s' % (span['start'], span['end'], span['orientation']))
     return new_spans
 
 

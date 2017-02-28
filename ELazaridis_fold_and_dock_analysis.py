@@ -6,6 +6,9 @@ import pickle
 import matplotlib as mpl
 # mpl.use('Agg')
 import matplotlib.pyplot as plt
+from sklearn import linear_model
+from sklearn.preprocessing import Imputer
+from sklearn.metrics import r2_score
 from matplotlib.widgets import Slider
 import RosettaFilter as Rf
 from Logger import Logger
@@ -42,6 +45,8 @@ def main():
     parser.add_argument('-terms', nargs='+', default=['score', 'a_shape', 'a_pack', 'a_ddg', 'res_solv'])
     parser.add_argument('-threshold', type=int, default=5)
     parser.add_argument('-show', default='show')
+    parser.add_argument('-all4', default=False)
+    parser.add_argument('-dir', help='which folder to use for fnd results')
 
     args = vars(parser.parse_args())
     args['logger'] = Logger('logeer_%s.log' % time.strftime("%d.%0-m"), args['log_path'])
@@ -68,9 +73,106 @@ def main():
         sc_df = Rf.score_file2df(args['sc'])
         new = Rf.get_best_of_best(sc_df)
 
+    elif args['mode'] == 'mutant_table':
+        mutant_table( args )
+
     else:
         print('no mode')
     args['logger'].close()
+
+
+def mutant_table( args: dict ):
+    """
+    a function to find and display the correlation between ResSolv and MPFrameWork and experimental
+    results from both Doung 2006 and Assaf
+    """
+    scores_dir = '/home/labs/fleishman/jonathaw/elazaridis/fold_and_dock/gpa/mutant_results/%s' % args['dir']
+    mp_dir = '/home/labs/fleishman/jonathaw/elazaridis/fold_and_dock/gpa/mutant_results/mpframework_18Dec/'
+    main_df = pd.read_csv('/home/labs/fleishman/jonathaw/elazaridis/fold_and_dock/gpa/mutant_results/experimental_results.tsv', sep='\s+')
+    wt_beta_score_file = [a for a in os.listdir( scores_dir ) if 'wt' in a and '.score' in a][0]
+    wt_beta_df = Rf.score_file2df( scores_dir + '/' + wt_beta_score_file )
+    wt_beta_ddg = Rf.get_term_by_threshold( wt_beta_df, 'score', 5, 'a_ddg', 'mean' )
+    wt_mp_df = Rf.score_file2df('%sall_gpav1_wt_mpframework_25Oct.score' % mp_dir)
+    wt_mp_ddg = Rf.get_term_by_threshold( wt_mp_df, 'score', 5, 'a_ddg', 'mean' )
+    results = {'rs': {}, 'mp': {}}
+
+    for sc_file in [a for a in os.listdir(scores_dir)+os.listdir(mp_dir) if '.score' in a]:
+        if 'mpframework' in sc_file:
+            df = Rf.score_file2df( '%s/%s' % (mp_dir, sc_file) )
+        else:
+            df = Rf.score_file2df( '%s/%s' % (scores_dir, sc_file) )
+        name = sc_file.split('_')[2]
+        threshold = np.percentile( df['score'].values, 5 )
+        min_ddg =Rf.get_term_by_threshold( df, 'score', 5, 'a_ddg', 'mean')
+        if 'mpframework' in sc_file:
+            results['mp'][name] = min_ddg
+            main_df.set_value( main_df['name'] == name, 'mp', min_ddg - wt_mp_ddg )
+        else:
+            results['rs'][name] = min_ddg
+            main_df.set_value( main_df['name'] == name, 'rs', min_ddg - wt_beta_ddg )
+
+    print( main_df )
+    main_df = main_df.dropna( how='any' )
+    args['logger'].log(main_df)
+
+    if args['all4']:
+        fig = plt.figure(figsize=(10, 10), facecolor='w')
+        i = 1
+        for scfxn in ['rs', 'mp']:
+            for exp in ['dstbl', 'Doung']:
+                ax = plt.subplot(2, 2, i)
+                model = linear_model.LinearRegression()
+                model.fit( main_df[scfxn].to_frame(), main_df[exp].to_frame() )
+                line_x = np.linspace( main_df[scfxn].min(), main_df[scfxn].max() )
+                line_y = model.predict(line_x[:, np.newaxis])
+                r2 = r2_score( main_df[exp].values , model.predict( main_df[scfxn].to_frame()  ))
+                plt.scatter( main_df[scfxn], main_df[exp] )
+                plt.plot(line_x, line_y)
+                scfxn_name = 'ResSolv' if scfxn == 'rs' else 'MPFrameWork'
+                exp_name = 'Doung 2006' if exp == 'Doung' else r'dsT$\beta$L'
+                plt.title( '%s Vs. %s' % (scfxn_name, exp_name) )
+                plt.text(0.8, 0.1, r'$R^2=%.2f$' % r2, fontsize=15, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
+                plt.axhline( 0, color='k' )
+                plt.axvline( 0, color='k' )
+                if i == 3:
+                    plt.xlabel( 'Rosetta ∆∆G', fontsize=18 )
+                    plt.ylabel( 'Experimental ∆∆G', fontsize=18 )
+                i += 1
+        plt.show()
+
+    else:
+        fig = plt.figure( facecolor='w' )
+        ax1 = plt.subplot(1, 2, 1)
+        model = linear_model.LinearRegression()
+        model.fit( main_df['rs'].to_frame(), main_df['dstbl'].to_frame() )
+        line_x = np.linspace( main_df['rs'].min(), main_df['rs'].max() )
+        line_y = model.predict(line_x[:, np.newaxis])
+        r2 = r2_score( main_df['dstbl'].values , model.predict( main_df['rs'].to_frame()  ))
+        plt.scatter( main_df['rs'], main_df['dstbl'] )
+        plt.plot(line_x, line_y)
+        plt.title( '%s Vs. %s' % ('ResSolv', r'dsT$\beta$L')  )
+        plt.text(0.8, 0.1, r'$R^2=%.2f$' % r2, fontsize=15, horizontalalignment='center', verticalalignment='center', transform=ax1.transAxes)
+        plt.axhline( 0, color='k' )
+        plt.axvline( 0, color='k' )
+        plt.xlabel( 'Rosetta ∆∆G', fontsize=18 )
+        plt.ylabel( r'dsT$\beta$L experimental results', fontsize=18 )
+
+        ax2 = plt.subplot(1, 2, 2)
+        model = linear_model.LinearRegression()
+        model.fit( main_df['mp'].to_frame(), main_df['dstbl'].to_frame() )
+        line_x = np.linspace( main_df['mp'].min(), main_df['mp'].max() )
+        line_y = model.predict(line_x[:, np.newaxis])
+        r2 = r2_score( main_df['dstbl'].values , model.predict( main_df['mp'].to_frame()  ))
+        plt.scatter( main_df['mp'], main_df['dstbl'] )
+        plt.plot(line_x, line_y)
+        plt.title( '%s Vs. %s' % ('MPFrameWork', r'dsT$\beta$L')  )
+        plt.text(0.8, 0.1, r'$R^2=%.2f$' % r2, fontsize=15, horizontalalignment='center', verticalalignment='center', transform=ax2.transAxes)
+        plt.axhline( 0, color='k' )
+        plt.axvline( 0, color='k' )
+        # plt.xlabel( 'Rosetta ∆∆G', fonctsize=18 )
+        # plt.ylabel( r'dsT$\beta$L experimental results', fonctsize=18 )
+        plt.show()
+        plt.savefig( '%s/dsTbL_alone.pdf' % scores_dir )
 
 
 def analyse_wj(args):
@@ -177,8 +279,6 @@ def generate_score(file_name, filters: list):
             # try:
             # print({filter: float(s[fields[filter]]) for filter in filters})
             yield s[fields['description']], {filter: float(s[fields[filter]]) for filter in filters}
-            # except:
-            #     pass
 
 
 def get_rmsds_from_table(pymol_calc_file:str) -> pd.DataFrame:
@@ -204,6 +304,7 @@ def slide_ddg(args):
 
     ddg_slider.on_changed(update)
     plt.show()
+
 
 def update(val):
     global scat#, ax
@@ -272,7 +373,10 @@ def quick_rmsd_total(args):
     fig, ax = plt.subplots()
 
     if args['best']:
-        # sc_df = sc_df[ sc_df['a_span_topo'] >= 0.95 ]
+        sc_df = sc_df[sc_df['a_tms_span_fa'] > 0.5 ]
+        threshold = np.percentile(sc_df[y_axis_term], args['percent'])
+        sc_df = sc_df[ sc_df[y_axis_term] < threshold ]
+        sc_df = sc_df[ sc_df['a_span_topo'] >= 0.99 ]
         sc_df_pass = Rf.get_best_of_best(sc_df, args['terms'], args['threshold'])
         sc_df_fail = sc_df[ ~sc_df['description'].isin( sc_df_pass['description'] ) ]
         args['logger'].log('%i models returned from BEST' % len(sc_df_pass))
@@ -285,7 +389,7 @@ def quick_rmsd_total(args):
         args['logger'].log('for percent %.2f found threshold to be %.2f and %i strucutres pass it' % (args['percent'], threshold, len(sc_df)))
         sc_df = sc_df[sc_df['a_shape'] >= 0.6]
         # sc_df = sc_df[sc_df['a_sasa'] > 900]
-        sc_df = sc_df[sc_df['a_ddg'] < -6]
+        sc_df = sc_df[sc_df['a_ddg'] < -5]
         args['logger'].log('%i passed ddg' % len(sc_df))
         # sc_df = sc_df[sc_df['a_pack'] > 0.6]
         sc_df = sc_df[sc_df['a_unsat'] < 1]
@@ -310,7 +414,7 @@ def quick_rmsd_total(args):
     min_energy = np.nanmin(list(sc_df_pass[y_axis_term].values))
     max_energy = np.nanmax(list(sc_df_pass[y_axis_term].values))
     plt.ylim([min_energy - 1, max_energy + 1])
-    plt.xlim([0, 30])
+    plt.xlim([0, 15])
     plt.title(args['sc']+'_pass')
 
     # if 'a_hha' in sc_df.columns:
@@ -354,6 +458,7 @@ class PointLabel:
             self.file_handler = file_
         else:
             self.file_handler = Logger('point_label.log')
+        self.label_order = [ self.x_axis, self.y_axis ] + [label for label in self.labels if label != 'description']
 
     def onpick(self, event):
         """
@@ -362,13 +467,17 @@ class PointLabel:
         ind = event.ind[0]
         row = self.df.iloc[ind]
         if not self.has_written_title:
-            self.file_handler.log('picker %s %s %s description' %
-                  (self.x_axis, self.y_axis, '\t'.join(label for label in self.labels if label != 'description')), skip_stamp=True)
+            # self.file_handler.log('%s %s %s description' %
+                                  # (self.x_axis, self.y_axis, ''.join('{:>10}'.format( label ) for label in self.labels if label != 'description')), skip_stamp=True)
+            self.file_handler.log(''.join('{:<10}'.format( label ) for label in self.label_order+['description']))
             self.has_written_title = True
-        self.file_handler.log('picker %.2f\t%.2f\t%s %s' %
-              (row[self.x_axis], row[self.y_axis],
-               '\t'.join("%.2f" % row[label] for label in self.labels if label != 'description'),
-               row['description']), skip_stamp=True)
+        ord_row = [ row[self.x_axis], row[self.y_axis] ] + [row[label] for label in self.labels if label != 'description']
+        # self.file_handler.log('picker %.2f\t%.2f\t%s %s' %
+              # (row[self.x_axis], row[self.y_axis],
+               # '\t'.join("%.2f" % row[label] for label in self.labels if label != 'description'),
+               # row['description']), skip_stamp=True)
+        # print( ord_row )
+        self.file_handler.log('%s %s' % ( ''.join(['{:<10.2f}'.format( r ) for r in ord_row]), row['description'] ), skip_stamp=1)
 
 
 class PrintLabel(object):

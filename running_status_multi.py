@@ -4,21 +4,56 @@ import sys
 import time
 import curses
 import subprocess
+import functools
 
 HEIGHT, WIDTH = (int(a) for a in os.popen('stty size', 'r').read().split())
 
-
+@functools.total_ordering
 class User:
     def __init__(self, name):
         self.name = name
-        self.run = 0
-        self.pend = 0
-        self.susp = 0
-        self.ssusp = 0
-        self.unkwn = 0
+        self.run = {}
+        self.pend = {}
+        self.susp = {}
+        self.ssusp = {}
+        self.unkwn = {}
+
+    def __repr__( self ):
+        return "%s: run: %i pend: %i" % ( self.name, self.run, self.pend )
+
+    def __eq__( self, other ):
+        return self.total() == other.total()
+
+    def __lt__( self, other ):
+        return self.total() > other.total()
+
+    def update_queues( self, q: str ) -> None:
+        if q not in self.run.keys(): self.run[q] = 0
+        if q not in self.pend.keys(): self.pend[q] = 0
+        if q not in self.susp.keys(): self.susp[q] = 0
+        if q not in self.ssusp.keys(): self.ssusp[q] = 0
+        if q not in self.unkwn.keys(): self.unkwn[q] = 0
 
     def draw_at(self, pos: int):
         pass
+
+    def graphic_status( self ) -> str:
+        fle_run = round( self.run['fleishman'] / 100 )
+        fle_pnd = round( self.pend['fleishman'] / 100 )
+
+        new_run = round( self.run['new-all.q']  / 100 )
+        new_pnd = round( self.pend['new-all.q'] / 100 )
+
+        msg = '|' * fle_run
+        msg += '/' * fle_pnd
+        msg += '!' * new_run
+        msg += 'i' * new_pnd
+        msg += '%i, %i' % (self.run['fleishman'], self.pend['fleishman'])
+        msg += '/%i, %i' % (self.run['new-all.q'], self.pend['new-all.q'])
+        return msg
+
+    def total( self ) -> int:
+        return self.run['fleishman'] + self.run['new-all.q'] + self.pend['fleishman'] + self.pend['new-all.q']
 
 
 def main(stdscr):
@@ -44,17 +79,26 @@ def main(stdscr):
                 # stat[user] = {'RUN': 0, 'PEND': 0}
                 stat[user] = User(user)
             msg = '%s RUN: %i PEND: %i [%s%s]               \r' % (time.strftime("%H:%M:%S"),
-                                                        stat[user].run,
-                                                        stat[user].pend,
+                                                        stat[user].run['fleishman'],
+                                                        stat[user].pend['fleishman'],
                                                         '-'*i, ' '*(time_to_sleep-1-i))
             sys.stdout.write('\33[%i;%iH%s' % (loc_y,
                                                (WIDTH-len(msg))/2,
                                                msg))
-            if stat[user].run + stat[user].pend > total_last:
+            y_delta = round(HEIGHT/2 - ( len(stat.keys()) -1 )/2 -  1)
+            sorted_users = sorted( list(stat.values()) )
+            for u in sorted_users:
+                if loc_y-2 <= y_delta <= loc_y+2:
+                    y_delta += 1
+                    continue
+                sys.stdout.write('\33[%i;%iH%s\t->\t%s' % ( y_delta, 0, u.name, u.graphic_status() ))
+                y_delta += 1
+
+            if stat[user].run['fleishman'] + stat[user].pend['fleishman'] > total_last:
                 time_to_sleep = 15
             else:
                 time_to_sleep = 6
-            total_last = stat[user].run + stat[user].pend
+            total_last = stat[user].run['fleishman'] + stat[user].pend['fleishman']
 
             sys.stdout.flush()
             time.sleep(1)
@@ -94,20 +138,25 @@ def get_all_status():
         if len(s) >= 2:
             if s[1] not in result.keys():
                 result[s[1]] = {'RUN': 0, 'PEND': 0, 'SUSP': 0, 'UNKWN': 0,
-                                'SSUSP': 0, 'USUSP': 0, 'PSUSP': 0}
+                                'SSUSP': 0, 'USUSP': 0}
                 user_list[s[1]] = User(s[1])
             result[s[1]][s[2]] += 1
+            queue = s[3]
+            user_list[s[1]].update_queues( queue )
             if s[2] == 'RUN':
-                user_list[s[1]].run += 1
+                user_list[s[1]].run[queue] += 1
             elif s[2] == 'PEND':
-                user_list[s[1]].pend += 1
+                user_list[s[1]].pend[queue] += 1
             elif s[2] == 'SSUSP':
-                user_list[s[1]].ssusp += 1
+                user_list[s[1]].ssusp[queue] += 1
             elif s[2] == 'unkwn':
-                user_list[s[1]].unkwn += 1
+                user_list[s[1]].unkwn[queue] += 1
             elif s[2] == 'SUSP':
-                user_list[s[1]].susp += 1
+                user_list[s[1]].sus[queue] += 1
 
+    for k, v in user_list.items():
+        v.update_queues( 'fleishman' )
+        v.update_queues( 'new-all.q')
     return user_list
 
 

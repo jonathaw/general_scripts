@@ -301,7 +301,7 @@ def calibrate_function(score_func='talaris2014_elazaridis', fa_cen='fa_standard'
                         if elazar_ips[aa].pos_score[pos] < rhs_avg:
                             elazar_ips[aa].pos_score[pos] = rhs_avg
                     if aa == 'S':
-                        elazar_ips[aa].pos_score[pos] = rhs_avg + 0.5
+                        elazar_ips[aa].pos_score[pos] = rhs_avg + 0.84
 
     # calc the difference InsertionProfiles between Elazar and Rosetta. assign them as the polynom table
     diff_ips = {0: {k: subtract_IP_from_IP(elazar_ips[k], full_ips[k]) for k in AAs}}
@@ -1385,7 +1385,7 @@ if __name__ == '__main__':
     parser.add_argument('-energy_func_cen')
     parser.add_argument('-note', default=None, type=str, help='add note to spline files')
     parser.add_argument('-use_made_pdb', default=True)
-    parser.add_argument('-elec_memb_sig_die', default=True)
+    parser.add_argument('-elec_memb_sig_die', default=False)
     parser.add_argument('-memb_fa_sol', default=True)
 
     logger = Logger('elazaridis_%s.log' % time.strftime("%H_%M_%d_%b"))

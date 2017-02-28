@@ -58,11 +58,11 @@ def main():
             args['rngy'][i] = - int(t[1:])
         else:
             args['rngy'][i] = int(t)
-    print args
+    print(args)
     x = np.array(np.arange(args['rngx'][0], args['rngx'][1], 0.01))
-    print x
+    print(x)
     res = eval(args['eq'])
-    print 'res', res
+    print('res', res)
     plt.xlim(args['rngx'])
     plt.ylim(args['rngy'])
     plt.plot(x, res)

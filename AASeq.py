@@ -1,5 +1,6 @@
 #!/usr/bin/env python3.5
 import math
+import argparse
 
 from List1 import List1
 from Bio.SeqUtils import molecular_weight
@@ -270,7 +271,7 @@ def compare_2_seqs(seq_1: AASeq, seq_2: AASeq, start=0) -> None:
         if aa != seq_2[i]:
             print('%s%i%s' % (aa, i, seq_2[i]))
             changes.append(i)
-    print('found %i changes' % len(changes))
+    print('found %i changes, thats is %.2f%% differences' % (len(changes), 100*len(changes)/len(seq_1)))
     print('select changes, resi %s' % '+'.join([str(change+start) for change in changes]))
 
 
@@ -283,13 +284,24 @@ def read_seq(file_name: str) -> AASeq:
 
 
 if __name__ == '__main__':
-    a = AASeq(string='ABCDEFG')
-    b = AASeq(string='ABCFG')
-    a.align(b)
-    print(a)
-    print(b)
-    print(a.aligned_identity(b))
-    c = AASeq(string='ABCDEG')
-    a.align(c)
-    print(a)
-    print(a.aligned_identity(c))
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-seq1')
+    parser.add_argument('-seq2')
+    parser.add_argument('-mode', default='compare')
+    args = vars(parser.parse_args())
+
+    if args['mode'] == 'compare':
+        s1 = AASeq(string=args['seq1'])
+        s2 = AASeq(string=args['seq2'])
+        compare_2_seqs( s1, s2 )
+
+    # a = AASeq(string='ABCDEFG')
+    # b = AASeq(string='ABCFG')
+    # a.align(b)
+    # print(a)
+    # print(b)
+    # print(a.aligned_identity(b))
+    # c = AASeq(string='ABCDEG')
+    # a.align(c)
+    # print(a)
+    # print(a.aligned_identity(c))

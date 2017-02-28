@@ -49,17 +49,18 @@ def best_in_cluster(args):
         logger.log(n)
 
 
-
-
-
 def parse_cluster_log(file_name, verbose=False):
     saw_summary = 0
     results = {}
     current_cluster = 999
+    summary_n = 0
+    for l in open(file_name, 'r'):
+        if '---------- Summary ---------------------------------' in l:
+            summary_n += 1
     for l in open(file_name, 'r'):
         if '---------- Summary ---------------------------------' in l:
             saw_summary += 1
-        if saw_summary == 2:
+        if saw_summary == summary_n:
             s = re.split('\s+', l.rstrip())
             if len(s) == 3 and 'Clusters:' not in s and 'Structures:' not in s:
                 results[ current_cluster ][s[1]] = float(s[2])

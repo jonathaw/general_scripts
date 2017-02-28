@@ -1,0 +1,768 @@
+FUNCTION  <SNR>78_syn_stack()
+Called 1 time
+Total time:   0.000182
+ Self time:   0.000182
+
+count  total (s)   self (s)
+    1              0.000013     if !exists('*synstack')
+                                    return []
+                                endif
+    1              0.000160     return map(synstack(line('.'), col('.') - 1), "synIDattr(v:val, 'name')")
+
+FUNCTION  <SNR>76_GetIndent()
+Called 27 times
+Total time:   0.001222
+ Self time:   0.001222
+
+count  total (s)   self (s)
+   27              0.000329     let ind = indent(a:lnum)
+   27              0.000180     let line = getline(a:lnum)
+   27              0.000374     if line =~# '^\s*):\s*$'
+                                    let ind = 4 + ind
+                                endif
+   27              0.000104     return ind
+
+FUNCTION  anyfold#init()
+Called 13 times
+Total time:   0.000726
+ Self time:   0.000726
+
+count  total (s)   self (s)
+                            
+   13              0.000291     if exists("g:anyfold_activate")
+                                    let b:anyfold_activate = g:anyfold_activate
+                                endif
+                            
+   13              0.000070     if !exists("b:anyfold_activate")
+   13              0.000049         return
+                                elseif !b:anyfold_activate
+                                    return
+                                endif
+                            
+                                " make sure initialisation only happens once
+                                if exists("b:anyfold_initialised")
+                                    return
+                                else
+                                    let b:anyfold_initialised = 1
+                                endif
+                            
+                                " Options and defaults
+                                if !exists('g:_ANYFOLD_DEFAULTS')
+                                    let g:_ANYFOLD_DEFAULTS = { 'identify_comments':            1, 'fold_comments':                0, 'fold_toplevel':                0, 'fold_display':                 1, 'motion':                       1, 'debug':                        0, }
+                                    lockvar! g:_ANYFOLD_DEFAULTS
+                                endif
+                            
+                                for s:key in keys(g:_ANYFOLD_DEFAULTS)
+                                    if !exists('g:anyfold_' . s:key)
+                                        let g:anyfold_{s:key} = copy(g:_ANYFOLD_DEFAULTS[s:key])
+                                    endif
+                                endfor
+                            
+                                " Option dependencies
+                                if g:anyfold_fold_comments
+                                    let g:anyfold_identify_comments = 1
+                                endif
+                            
+                                " Create list with indents / foldlevels
+                            
+                                call s:InitIndentList()
+                            
+                                " Set folds if not in diff mode
+                                if !&diff
+                                    setlocal foldmethod=expr
+                                    setlocal foldexpr=b:anyfold_ind_buffer[v:lnum-1]
+                                endif
+                            
+                                " Fold display
+                                if g:anyfold_fold_display
+                                    setlocal foldtext=MinimalFoldText()
+                                endif
+                            
+                                " folds are always updated when buffer has changed
+                                autocmd TextChanged <buffer> :call s:ReloadFolds(line('.'))
+                            
+                                if g:anyfold_motion
+                                    noremap <script> <buffer> <silent> ]] :<c-u>call <SID>JumpFoldEnd(0,v:count1)<cr>
+                            
+                                    noremap <script> <buffer> <silent> [[ :<c-u>call <SID>JumpFoldStart(0,v:count1)<cr>
+                            
+                                    noremap <script> <buffer> <silent> ]k :<c-u>call <SID>JumpPrevFoldEnd(0,v:count1)<cr>
+                            
+                                    noremap <script> <buffer> <silent> [j :<c-u>call <SID>JumpNextFoldStart(0,v:count1)<cr>
+                            
+                                    vnoremap <script> <buffer> <silent> ]] :<c-u>call <SID>JumpFoldEnd(1,v:count1)<cr>
+                            
+                                    vnoremap <script> <buffer> <silent> [[ :<c-u>call <SID>JumpFoldStart(1,v:count1)<cr>
+                            
+                                    vnoremap <script> <buffer> <silent> ]k :<c-u>call <SID>JumpPrevFoldEnd(1,v:count1)<cr>
+                            
+                                    vnoremap <script> <buffer> <silent> [j :<c-u>call <SID>JumpNextFoldStart(1,v:count1)<cr>
+                                endif
+                            
+                                " mappings for debugging
+                                if g:anyfold_debug
+                                    noremap <script> <buffer> <silent> <F10> :call <SID>EchoIndents(1)<cr>
+                                    noremap <script> <buffer> <silent> <F11> :call <SID>EchoIndents(2)<cr>
+                                    noremap <script> <buffer> <silent> <F12> :call <SID>EchoIndents(3)<cr>
+                                endif
+                            
+                                silent doautocmd User anyfoldLoaded
+
+FUNCTION  <SNR>76_NumContainingDefs()
+Called 16 times
+Total time:   0.006260
+ Self time:   0.004309
+
+count  total (s)   self (s)
+                                " Recall memoized result if it exists in the cache
+   16              0.000222     if has_key(b:cache_NumContainingDefs, a:lnum)
+                                    return b:cache_NumContainingDefs[a:lnum]
+                                endif
+                            
+   16   0.001631   0.000841     let this_ind = s:GetIndent(a:lnum)
+                            
+   16              0.000071     if this_ind == 0
+    5              0.000010         return 0
+                                endif
+                            
+                                " Walk backwards to the previous non-blank line with a lower indent level
+                                " than this line
+   11              0.000054     let i = a:lnum - 1
+   12              0.000044     while 1
+   12   0.001051   0.000659         if s:GetLine(i) !~# s:blank_regex
+   11   0.000999   0.000567             let i_ind = s:GetIndent(i)
+   11              0.000052             if i_ind < this_ind
+    4              0.000100                 let ncd = s:NumContainingDefs(i) + (s:GetLine(i) =~# b:def_regex)
+    4              0.000022                 break
+                                        elseif i_ind == this_ind && has_key(b:cache_NumContainingDefs, i)
+    7              0.000045                 let ncd = b:cache_NumContainingDefs[i]
+    7              0.000012                 break
+                                        endif
+                                    endif
+                            
+    1              0.000007         let i -= 1
+                            
+                                    " If we hit the beginning of the buffer before finding a line with a
+                                    " lower indent level, there must be no definitions containing this
+                                    " line. This explicit check is required to prevent infinite looping in
+                                    " the syntactically invalid pathological case in which the first line
+                                    " or lines has an indent level greater than 0.
+    1              0.000002         if i <= 1
+                                        let ncd = s:GetLine(1) =~# b:def_regex
+                                        break
+                                    endif
+                            
+    1              0.000003     endwhile
+                            
+                                " Memoize the return value to avoid duplication of effort on subsequent
+                                " lines
+   11              0.000097     let b:cache_NumContainingDefs[a:lnum] = ncd
+                            
+   11              0.000026     return ncd
+                            
+
+FUNCTION  <SNR>76_NextNonBlankOrCommentLine()
+Called 2 times
+Total time:   0.000206
+ Self time:   0.000148
+
+count  total (s)   self (s)
+    2              0.000015     let nnb = a:lnum + 1
+    2              0.000008     while nnb > 0
+    2              0.000011         let nnb = nextnonblank(nnb)
+    2   0.000152   0.000094         if nnb == 0 || s:GetLine(nnb) !~# s:blank_regex
+    2              0.000008             return nnb
+                                    endif
+                            
+                                    let nnb += 1
+                                endwhile
+                                " this return statement should never be reached, since nextnonblank()
+                                " should never return a negative number.  It returns 0 when it reaches EOF.
+                                return -2
+
+FUNCTION  Mode()
+Called 65 times
+Total time:   0.134776
+ Self time:   0.134776
+
+count  total (s)   self (s)
+   64              0.129086     redraw
+   64              0.001088     let l:mode = mode()
+                                
+   64              0.003270     if     mode ==# "n"  | exec 'hi User1 '.g:NeatStatusLine_color_normal  | return "NORMAL"
+   15              0.000754     elseif mode ==# "i"  | exec 'hi User1 '.g:NeatStatusLine_color_insert  | return "INSERT"
+                                elseif mode ==# "R"  | exec 'hi User1 '.g:NeatStatusLine_color_replace | return "REPLACE"
+                                elseif mode ==# "v"  | exec 'hi User1 '.g:NeatStatusLine_color_visual  | return "VISUAL"
+                                elseif mode ==# "V"  | exec 'hi User1 '.g:NeatStatusLine_color_visual  | return "V-LINE"
+                                elseif mode ==# "" | exec 'hi User1 '.g:NeatStatusLine_color_visual  | return "V-BLOCK"
+                                else                 | return l:mode
+                                endif
+
+FUNCTION  <SNR>76_GetLine()
+Called 222 times
+Total time:   0.023756
+ Self time:   0.023756
+
+count  total (s)   self (s)
+  222              0.002732     let line = getline(a:lnum)
+  222              0.007464     if line =~# '^\s*):\s*$'
+                                    let line = '    ' . line
+                                endif
+  222              0.000956     return line
+
+FUNCTION  jedi#complete_string()
+Called 1 time
+Total time:   0.000454
+ Self time:   0.000103
+
+count  total (s)   self (s)
+    1   0.000417   0.000066     if a:is_popup_on_dot && !(g:jedi#popup_on_dot && jedi#do_popup_on_dot_in_highlight())
+                                    return ''
+                                endif
+    1              0.000006     if pumvisible() && !a:is_popup_on_dot
+                                    return "\<C-n>"
+                                else
+    1              0.000016         return "\<C-x>\<C-o>\<C-r>=jedi#complete_opened(".a:is_popup_on_dot.")\<CR>"
+                                endif
+
+FUNCTION  <SNR>76_FoldExpr()
+Called 12 times
+Total time:   0.001514
+ Self time:   0.001099
+
+count  total (s)   self (s)
+                                " If the very next line starts a definition with the same fold level as
+                                " this one, explicitly indicate that a fold ends here
+   12   0.001314   0.000899     if s:GetLine(a:lnum + 1) =~# b:def_regex && SimpylFold(a:lnum + 1) == a:foldlevel
+                                    return '<' . a:foldlevel
+                                else
+   12              0.000028         return a:foldlevel
+                                endif
+
+FUNCTION  GetPythonIndent()
+Called 1 time
+Total time:   0.006273
+ Self time:   0.000514
+
+count  total (s)   self (s)
+                            
+                                " First line has indent 0
+    1              0.000010     if a:lnum == 1
+                                    return 0
+                                endif
+                                
+                                " If we can find an open parenthesis/bracket/brace, line up with it.
+    1              0.000010     call cursor(a:lnum, 1)
+    1   0.003566   0.000124     let parlnum = s:SearchParensPair()
+    1              0.000009     if parlnum > 0
+                                    let parcol = col('.')
+                                    let closing_paren = match(getline(a:lnum), '^\s*[])}]') != -1
+                                    if match(getline(parlnum), '[([{]\s*$', parcol - 1) != -1
+                                        if closing_paren
+                                            return indent(parlnum)
+                                        else
+                                            return indent(parlnum) + &shiftwidth
+                                        endif
+                                    else
+                                        if closing_paren
+                                            return parcol - 1
+                                        else
+                                            return parcol
+                                        endif
+                                    endif
+                                endif
+                                
+                                " Examine this line
+    1              0.000010     let thisline = getline(a:lnum)
+    1              0.000006     let thisindent = indent(a:lnum)
+                            
+                                " If the line starts with 'elif' or 'else', line up with 'if' or 'elif'
+    1              0.000027     if thisline =~ '^\s*\(elif\|else\)\>'
+                                    let bslnum = s:BlockStarter(a:lnum, '^\s*\(if\|elif\)\>')
+                                    if bslnum > 0
+                                        return indent(bslnum)
+                                    else
+                                        return -1
+                                    endif
+                                endif
+                                    
+                                " If the line starts with 'except' or 'finally', line up with 'try'
+                                " or 'except'
+    1              0.000011     if thisline =~ '^\s*\(except\|finally\)\>'
+                                    let bslnum = s:BlockStarter(a:lnum, '^\s*\(try\|except\)\>')
+                                    if bslnum > 0
+                                        return indent(bslnum)
+                                    else
+                                        return -1
+                                    endif
+                                endif
+                                
+                                " Examine previous line
+    1              0.000006     let plnum = a:lnum - 1
+    1              0.000007     let pline = getline(plnum)
+    1   0.002391   0.000074     let sslnum = s:StatementStart(plnum)
+                                
+                                " If the previous line is blank, keep the same indentation
+    1              0.000019     if pline =~ '^\s*$'
+                                    return -1
+                                endif
+                                
+                                " If this line is explicitly joined, try to find an indentation that looks
+                                " good. 
+    1              0.000009     if pline =~ '\\$'
+                                    let compound_statement = '^\s*\(if\|while\|for\s.*\sin\|except\)\s*'
+                                    let maybe_indent = matchend(getline(sslnum), compound_statement)
+                                    if maybe_indent != -1
+                                        return maybe_indent
+                                    else
+                                        return indent(sslnum) + &sw * 2
+                                    endif
+                                endif
+                                
+                                " If the previous line ended with a colon, indent relative to
+                                " statement start.
+    1              0.000008     if pline =~ ':\s*$'
+                                    return indent(sslnum) + &sw
+                                endif
+                            
+                                " If the previous line was a stop-execution statement or a pass
+    1              0.000026     if getline(sslnum) =~ '^\s*\(break\|continue\|raise\|return\|pass\)\>'
+                                    " See if the user has already dedented
+                                    if indent(a:lnum) > indent(sslnum) - &sw
+                                        " If not, recommend one dedent
+                                        return indent(sslnum) - &sw
+                                    endif
+                                    " Otherwise, trust the user
+                                    return -1
+                                endif
+                            
+                                " In all other cases, line up with the start of the previous statement.
+    1              0.000005     return indent(sslnum)
+
+FUNCTION  <SNR>83_StatementStart()
+Called 1 time
+Total time:   0.002317
+ Self time:   0.000193
+
+count  total (s)   self (s)
+    1              0.000015     let lnum = a:lnum
+    1              0.000005     while 1
+    1              0.000024         if getline(lnum - 1) =~ '\\$'
+                                        let lnum = lnum - 1
+                                    else
+    1              0.000008             call cursor(lnum, 1)
+    1   0.002235   0.000111             let maybe_lnum = s:SearchParensPair()
+    1              0.000010             if maybe_lnum < 1
+    1              0.000003                 return lnum
+                                        else
+                                            let lnum = maybe_lnum
+                                        endif
+                                    endif
+                                endwhile
+
+FUNCTION  <SNR>83_SearchParensPair()
+Called 2 times
+Total time:   0.005566
+ Self time:   0.005566
+
+count  total (s)   self (s)
+    2              0.000028     let line = line('.')
+    2              0.000010     let col = col('.')
+                                
+                                " Skip strings and comments and don't look too far
+    2              0.000058     let skip = "line('.') < " . (line - s:maxoff) . " ? dummy :" . 'synIDattr(synID(line("."), col("."), 0), "name") =~? ' . '"string\\|comment"'
+                            
+                                " Search for parentheses
+    2              0.000019     call cursor(line, col)
+    2              0.004293     let parlnum = searchpair('(', '', ')', 'bW', skip)
+    2              0.000054     let parcol = col('.')
+                            
+                                " Search for brackets
+    2              0.000024     call cursor(line, col)
+    2              0.000423     let par2lnum = searchpair('\[', '', '\]', 'bW', skip)
+    2              0.000038     let par2col = col('.')
+                            
+                                " Search for braces
+    2              0.000018     call cursor(line, col)
+    2              0.000396     let par3lnum = searchpair('{', '', '}', 'bW', skip)
+    2              0.000074     let par3col = col('.')
+                            
+                                " Get the closest match
+    2              0.000016     if par2lnum > parlnum || (par2lnum == parlnum && par2col > parcol)
+                                    let parlnum = par2lnum
+                                    let parcol = par2col
+                                endif
+    2              0.000007     if par3lnum > parlnum || (par3lnum == parlnum && par3col > parcol)
+                                    let parlnum = par3lnum
+                                    let parcol = par3col
+                                endif 
+                            
+                                " Put the cursor on the match
+    2              0.000004     if parlnum > 0
+                                    call cursor(parlnum, parcol)
+                                endif
+    2              0.000008     return parlnum
+
+FUNCTION  jedi#completions()
+Called 2 times
+Total time:   0.001517
+ Self time:   0.001340
+
+count  total (s)   self (s)
+    1   0.001513   0.001336     PythonJedi jedi_vim.completions()
+
+FUNCTION  jedi#_vim_exceptions()
+Called 12 times
+Total time:   0.000712
+ Self time:   0.000712
+
+count  total (s)   self (s)
+   11              0.000189     let l:result = {}
+   11              0.000046     try
+   11              0.000036         if a:is_eval
+   11              0.000131             let l:result.result = eval(a:str)
+   11              0.000017         else
+                                        execute a:str
+                                        let l:result.result = ''
+                                    endif
+   11              0.000026     catch
+                                    let l:result.exception = v:exception
+                                    let l:result.throwpoint = v:throwpoint
+                                endtry
+   11              0.000026     return l:result
+
+FUNCTION  jedi#show_call_signatures()
+Called 1 time
+Total time:   0.341184
+ Self time:   0.340899
+
+count  total (s)   self (s)
+    1              0.000023     if s:_init_python == 0
+                                    return 1
+                                endif
+    1              0.000024     let [line, col] = [line('.'), col('.')]
+    1              0.000008     let curline = getline(line)
+    1              0.000003     let reload_signatures = 1
+                            
+                                " Caching.  On the same line only.
+    1              0.000012     if line == s:show_call_signatures_last[0]
+                                    " Check if the number of commas and parenthesis before or after the
+                                    " cursor has not changed since the last call, which means that the
+                                    " argument position was not changed and we can skip repainting.
+                                    let prevcol = s:show_call_signatures_last[1]
+                                    let prevline = s:show_call_signatures_last[2]
+                                    if substitute(curline[:col-2], '[^,()]', '', 'g') == substitute(prevline[:prevcol-2], '[^,()]', '', 'g') && substitute(curline[(col-2):], '[^,()]', '', 'g') == substitute(prevline[(prevcol-2):], '[^,()]', '', 'g')
+                                        let reload_signatures = 0
+                                    endif
+                                endif
+    1              0.000008     let s:show_call_signatures_last = [line, col, curline]
+                            
+    1              0.000002     if reload_signatures
+    1   0.341044   0.340759         PythonJedi jedi_vim.show_call_signatures()
+    1              0.000013     endif
+
+FUNCTION  SimpylFoldText()
+Called 165 times
+Total time:   0.049815
+ Self time:   0.028205
+
+count  total (s)   self (s)
+  164              0.005707     let next = nextnonblank(v:foldstart + 1)
+  164   0.031046   0.009436     let docstring = s:GetLine(next)
+  164              0.001106     let ds_prefix = '^\s*\%(\%(["'']\)\{3}\|[''"]\ze[^''"]\)'
+  164              0.004064     if docstring =~# ds_prefix
+                                    let quote_char = docstring[match(docstring, '["'']')]
+                                    let docstring = substitute(docstring, ds_prefix, '', '')
+                                    if docstring =~# s:blank_regex
+                                        let docstring = substitute(s:GetLine(nextnonblank(next + 1)), '^\s*', '', '')
+                                    endif
+                                    let docstring = substitute(docstring, quote_char . '\{,3}$', '', '')
+                                    return ' ' . docstring
+                                endif
+  164              0.000336     return ''
+
+FUNCTION  <SNR>67_Highlight_Matching_Pair()
+Called 19 times
+Total time:   0.002912
+ Self time:   0.002912
+
+count  total (s)   self (s)
+                              " Remove any previous match.
+   19              0.000217   if exists('w:paren_hl_on') && w:paren_hl_on
+                                3match none
+                                let w:paren_hl_on = 0
+                              endif
+                            
+                              " Avoid that we remove the popup menu.
+                              " Return when there are no colors (looks like the cursor jumps).
+   19              0.000251   if pumvisible() || (&t_Co < 8 && !has("gui_running"))
+                                return
+                              endif
+                            
+                              " Get the character under the cursor and check if it's in 'matchpairs'.
+   19              0.000157   let c_lnum = line('.')
+   19              0.000104   let c_col = col('.')
+   19              0.000046   let before = 0
+                            
+   19              0.000254   let c = getline(c_lnum)[c_col - 1]
+   19              0.000580   let plist = split(&matchpairs, '.\zs[:,]')
+   19              0.000159   let i = index(plist, c)
+   19              0.000051   if i < 0
+                                " not found, in Insert mode try character before the cursor
+   19              0.000145     if c_col > 1 && (mode() == 'i' || mode() == 'R')
+    6              0.000018       let before = 1
+    6              0.000047       let c = getline(c_lnum)[c_col - 2]
+    6              0.000027       let i = index(plist, c)
+    6              0.000010     endif
+   19              0.000031     if i < 0
+                                  " not found, nothing to do
+   19              0.000039       return
+                                endif
+                              endif
+                            
+                              " Figure out the arguments for searchpairpos().
+                              if i % 2 == 0
+                                let s_flags = 'nW'
+                                let c2 = plist[i + 1]
+                              else
+                                let s_flags = 'nbW'
+                                let c2 = c
+                                let c = plist[i - 1]
+                              endif
+                              if c == '['
+                                let c = '\['
+                                let c2 = '\]'
+                              endif
+                            
+                              " Find the match.  When it was just before the cursor move it there for a
+                              " moment.
+                              if before > 0
+                                let save_cursor = winsaveview()
+                                call cursor(c_lnum, c_col - before)
+                              endif
+                            
+                              " When not in a string or comment ignore matches inside them.
+                              " We match "escape" for special items, such as lispEscapeSpecial.
+                              let s_skip ='synIDattr(synID(line("."), col("."), 0), "name") ' . '=~?  "string\\|character\\|singlequote\\|escape\\|comment"'
+                              execute 'if' s_skip '| let s_skip = 0 | endif'
+                            
+                              " Limit the search to lines visible in the window.
+                              let stoplinebottom = line('w$')
+                              let stoplinetop = line('w0')
+                              if i % 2 == 0
+                                let stopline = stoplinebottom
+                              else
+                                let stopline = stoplinetop
+                              endif
+                            
+                              " Limit the search time to 300 msec to avoid a hang on very long lines.
+                              " This fails when a timeout is not supported.
+                              if mode() == 'i' || mode() == 'R'
+                                let timeout = exists("b:matchparen_insert_timeout") ? b:matchparen_insert_timeout : g:matchparen_insert_timeout
+                              else
+                                let timeout = exists("b:matchparen_timeout") ? b:matchparen_timeout : g:matchparen_timeout
+                              endif
+                              try
+                                let [m_lnum, m_col] = searchpairpos(c, '', c2, s_flags, s_skip, stopline, timeout)
+                              catch /E118/
+                                " Can't use the timeout, restrict the stopline a bit more to avoid taking
+                                " a long time on closed folds and long lines.
+                                " The "viewable" variables give a range in which we can scroll while
+                                " keeping the cursor at the same position.
+                                " adjustedScrolloff accounts for very large numbers of scrolloff.
+                                let adjustedScrolloff = min([&scrolloff, (line('w$') - line('w0')) / 2])
+                                let bottom_viewable = min([line('$'), c_lnum + &lines - adjustedScrolloff - 2])
+                                let top_viewable = max([1, c_lnum-&lines+adjustedScrolloff + 2])
+                                " one of these stoplines will be adjusted below, but the current values are
+                                " minimal boundaries within the current window
+                                if i % 2 == 0
+                                  if has("byte_offset") && has("syntax_items") && &smc > 0
+                            	let stopbyte = min([line2byte("$"), line2byte(".") + col(".") + &smc * 2])
+                            	let stopline = min([bottom_viewable, byte2line(stopbyte)])
+                                  else
+                            	let stopline = min([bottom_viewable, c_lnum + 100])
+                                  endif
+                                  let stoplinebottom = stopline
+                                else
+                                  if has("byte_offset") && has("syntax_items") && &smc > 0
+                            	let stopbyte = max([1, line2byte(".") + col(".") - &smc * 2])
+                            	let stopline = max([top_viewable, byte2line(stopbyte)])
+                                  else
+                            	let stopline = max([top_viewable, c_lnum - 100])
+                                  endif
+                                  let stoplinetop = stopline
+                                endif
+                                let [m_lnum, m_col] = searchpairpos(c, '', c2, s_flags, s_skip, stopline)
+                              endtry
+                            
+                              if before > 0
+                                call winrestview(save_cursor)
+                              endif
+                            
+                              " If a match is found setup match highlighting.
+                              if m_lnum > 0 && m_lnum >= stoplinetop && m_lnum <= stoplinebottom 
+                                exe '3match MatchParen /\(\%' . c_lnum . 'l\%' . (c_col - before) . 'c\)\|\(\%' . m_lnum . 'l\%' . m_col . 'c\)/'
+                                let w:paren_hl_on = 1
+                              endif
+
+FUNCTION  jedi#do_popup_on_dot_in_highlight()
+Called 1 time
+Total time:   0.000351
+ Self time:   0.000169
+
+count  total (s)   self (s)
+    1   0.000262   0.000080     let highlight_groups = s:syn_stack()
+    2              0.000013     for a in highlight_groups
+    1              0.000004         if a ==# 'pythonDoctest'
+                                        return 1
+                                    endif
+    1              0.000002     endfor
+                            
+    2              0.000005     for a in highlight_groups
+    4              0.000010         for b in ['pythonString', 'pythonComment', 'pythonNumber']
+    3              0.000008             if a == b
+                                            return 0
+                                        endif
+    3              0.000003         endfor
+    1              0.000001     endfor
+    1              0.000002     return 1
+
+FUNCTION  SimpylFold()
+Called 14 times
+Total time:   0.016174
+ Self time:   0.006698
+
+count  total (s)   self (s)
+                                " If we are starting a new sweep of the buffer (i.e. the current line
+                                " being folded comes before the previous line that was folded), initialize
+                                " the cache of results of calls to `s:NumContainingDefs`
+   14              0.000226     if !exists('b:last_folded_line') || b:last_folded_line > a:lnum
+    4              0.000053         let b:cache_NumContainingDefs = {}
+    4              0.000016         let b:in_docstring = 0
+    4              0.000010         let b:in_import = 0
+    4              0.000011     endif
+   14              0.000056     let b:last_folded_line = a:lnum
+   14   0.001382   0.000711     let line = s:GetLine(a:lnum)
+                            
+                                " If this line is blank, its fold level is equal to the minimum of its
+                                " neighbors' fold levels, but if the next line begins a definition, then
+                                " this line should fold at one level below the next
+   14              0.000209     if line =~# s:blank_regex
+    2   0.000331   0.000125         let next_line = s:NextNonBlankOrCommentLine(a:lnum)
+    2              0.000011         if next_line == 0
+                                        return 0
+                                    elseif s:GetLine(next_line) =~# b:def_regex
+    1              0.000020             return SimpylFold(next_line) - 1
+                                    else
+    1              0.000002             return -1
+                                    endif
+                                endif
+                            
+   12              0.000029     if b:in_docstring
+                                    if line =~# b:docstring_end_regex
+                                        let b:in_docstring = 0
+                                    endif
+                            
+                                    if s:docstring_level == -1
+                                        return s:FoldExpr(a:lnum, s:NumContainingDefs(a:lnum) + s:fold_docstrings)
+                                    else
+                                        return s:FoldExpr(a:lnum, s:docstring_level)
+                                    end
+                                endif
+                            
+   12              0.000373     let docstring_match = matchlist(line, s:docstring_start_regex)
+   12   0.001043   0.000639     let prev_line = s:GetLine(a:lnum - 1)
+   12              0.000097     if !empty(docstring_match) && (prev_line =~# b:def_regex || prev_line =~# s:multiline_def_end_regex)
+                                    let b:in_docstring = 1
+                            
+                                    if docstring_match[1] ==# '"""'
+                                        let b:docstring_end_regex = s:docstring_end_double_regex
+                                    else
+                                        let b:docstring_end_regex = s:docstring_end_single_regex
+                                    endif
+                            
+                                    if s:docstring_level == -1
+                                        return s:FoldExpr(a:lnum, s:NumContainingDefs(a:lnum) + s:fold_docstrings)
+                                    else
+                                        return s:FoldExpr(a:lnum, s:docstring_level)
+                                    end
+                            
+                                endif
+                            
+   12              0.000027     if b:in_import
+                                    if line =~# b:import_end_regex
+                                        let b:in_import = 0
+                                    endif
+                            
+                                    if s:import_level == -1
+                                        return s:FoldExpr(a:lnum, s:NumContainingDefs(a:lnum) + s:fold_imports)
+                                    else
+                                        return s:FoldExpr(a:lnum, s:import_level)
+                                    end
+                                elseif match(line, s:import_start_regex) != -1
+                                    let b:in_import = 1
+                            
+                                    let import_cont_match = matchlist(line, s:import_cont_regex)
+                                    if len(import_cont_match) && import_cont_match[1] ==# '('
+                                        let b:import_end_regex = s:import_end_paren_regex
+                                    elseif len(import_cont_match) && import_cont_match[2] ==# '\'
+                                        let b:import_end_regex = s:import_end_esc_regex
+                                    else
+                                        let b:in_import = 0
+                                    end
+                            
+                                    if s:import_level == -1
+                                        return s:FoldExpr(a:lnum, s:NumContainingDefs(a:lnum) + s:fold_imports)
+                                    else
+                                        return s:FoldExpr(a:lnum, s:import_level)
+                                    end
+                                endif
+                            
+                                " Otherwise, its fold level is equal to its number of containing
+                                " definitions, plus 1, if this line starts a definition of its own
+   12   0.009121   0.001834     return s:FoldExpr(a:lnum, s:NumContainingDefs(a:lnum) + (line =~# b:def_regex))
+
+FUNCTIONS SORTED ON TOTAL TIME
+count  total (s)   self (s)  function
+    1   0.341184   0.340899  jedi#show_call_signatures()
+   65   0.134776             Mode()
+  165   0.049815   0.028205  SimpylFoldText()
+  222   0.023756             <SNR>76_GetLine()
+   14   0.016174   0.006698  SimpylFold()
+    1   0.006273   0.000514  GetPythonIndent()
+   16   0.006260   0.004309  <SNR>76_NumContainingDefs()
+    2   0.005566             <SNR>83_SearchParensPair()
+   19   0.002912             <SNR>67_Highlight_Matching_Pair()
+    1   0.002317   0.000193  <SNR>83_StatementStart()
+    2   0.001517   0.001340  jedi#completions()
+   12   0.001514   0.001099  <SNR>76_FoldExpr()
+   27   0.001222             <SNR>76_GetIndent()
+   13   0.000726             anyfold#init()
+   12   0.000712             jedi#_vim_exceptions()
+    1   0.000454   0.000103  jedi#complete_string()
+    1   0.000351   0.000169  jedi#do_popup_on_dot_in_highlight()
+    2   0.000206   0.000148  <SNR>76_NextNonBlankOrCommentLine()
+    1   0.000182             <SNR>78_syn_stack()
+
+FUNCTIONS SORTED ON SELF TIME
+count  total (s)   self (s)  function
+    1   0.341184   0.340899  jedi#show_call_signatures()
+   65              0.134776  Mode()
+  165   0.049815   0.028205  SimpylFoldText()
+  222              0.023756  <SNR>76_GetLine()
+   14   0.016174   0.006698  SimpylFold()
+    2              0.005566  <SNR>83_SearchParensPair()
+   16   0.006260   0.004309  <SNR>76_NumContainingDefs()
+   19              0.002912  <SNR>67_Highlight_Matching_Pair()
+    2   0.001517   0.001340  jedi#completions()
+   27              0.001222  <SNR>76_GetIndent()
+   12   0.001514   0.001099  <SNR>76_FoldExpr()
+   13              0.000726  anyfold#init()
+   12              0.000712  jedi#_vim_exceptions()
+    1   0.006273   0.000514  GetPythonIndent()
+    1   0.002317   0.000193  <SNR>83_StatementStart()
+    1              0.000182  <SNR>78_syn_stack()
+    1   0.000351   0.000169  jedi#do_popup_on_dot_in_highlight()
+    2   0.000206   0.000148  <SNR>76_NextNonBlankOrCommentLine()
+    1   0.000454   0.000103  jedi#complete_string()
+

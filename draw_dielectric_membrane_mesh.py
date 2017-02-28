@@ -80,15 +80,42 @@ def main():
     elif args['mode'] == 'draw_desired_model':
         draw_desired_model(args)
 
+    elif args['mode'] == 'draw_d_model':
+        draw_d_model( args )
+
     else:
         print('no mode given')
 
 
+def draw_d_model( args ):
+    ds = np.arange(0.1, 10, 0.1)
+    es = []
+    for d in ds:
+        es.append( rosetta_dz_model( d, 50 ) )
+    fig = plt.figure( facecolor='w' )
+    plt.plot( ds, es )
+    plt.axvline( 1.35 )
+    plt.rcParams['axes.facecolor']='white'
+    plt.xlabel('d', fontsize=20)
+    plt.ylabel('coefficient', fontsize=20)
+    plt.tick_params(axis='both', which='major', labelsize=20)
+    plt.show()
+
+
 def rosetta_dz_model( d: float, z: float ) -> float:
+    if d >= 8:
+        return 0.0
     rosetta_coefs = beta_nov16_rosetta_coefficents()
     f_d = calc_rosetta_d_func( d, rosetta_coefs )
-    g_z = (rosetta_coefs['min_dis_score_'] * rosetta_coefs['low_poly_start_'] *
-                             ( 1 - (( z / 10  )**4 / ( 1 + ( z / 10  ) ** 4  ) )  ) / d)
+
+    if z <= 10:
+        g_z = (rosetta_coefs['min_dis_score_'] * rosetta_coefs['low_poly_start_'] *
+                                ( 1 - (( z / 10  )**4 / ( 1 + ( z / 10  ) ** 4  ) )  ) / d)
+    elif 10 < z <= 15:
+        g_z = (rosetta_coefs['min_dis_score_'] * rosetta_coefs['low_poly_start_']) * ( 1 - (0.1*z -0.5) ) / d
+    else:
+        g_z = 0
+
     if d <= rosetta_coefs['low_poly_start_']:
         e = rosetta_coefs['min_dis_score_']
     else:

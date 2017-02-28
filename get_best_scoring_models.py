@@ -18,8 +18,11 @@ def main():
     parser.add_argument('-mode', default='%')
     parser.add_argument('-over_under', type=str, default='under', help='under/over score should be over/under threshold')
     parser.add_argument('-result', type=str, default=None, help='should the names be written to a file separate from the log file')
+    parser.add_argument('-terms', nargs='+', default=['score', 'a_shape', 'a_pack', 'a_ddg', 'res_solv'])
+    parser.add_argument('-thresholds', nargs='+', type=float)
+    parser.add_argument('-percentile', default=10, type=int)
     args = vars(parser.parse_args())
-    
+
     logger = Logger('top_%.1f_%s.log' % (args['percent'], args['filter']))
 
     # read in the score file, determine the threshold for the percentile
@@ -41,11 +44,27 @@ def main():
         sc_df.sort_values(args['filter'], inplace=True)
         pass_df = sc_df.head(args['num'])
 
+    if args['mode'] == 'best_of_best':
+        threshold = np.percentile(score, args['percent'])
+        sc_df = sc_df[sc_df[args['filter']] <= threshold]
+        pass_df = Rf.get_best_of_best(sc_df, args['terms'], args['percentile'])
+
+    if args['mode'] == 'thresholds':
+        for term, thrs in zip(args['terms'], args['thresholds']):
+            if term in ['a_sasa', 'a_pack', 'a_shape', 'a_tms_span_fa',
+                        'a_tms_span', 'a_span_topo']:
+                sc_df = sc_df[sc_df[term] > thrs]
+            elif term in ['a_mars', 'a_ddg', 'score', 'total_score',
+                          'a_res_solv', 'a_span_ins']:
+                sc_df = sc_df[sc_df[term] < thrs]
+            threshold = np.percentile(score, args['percent'])
+            pass_df = sc_df[sc_df[args['filter']] < threshold]
+
     # output the names (description) of models that pass the threshold, either to the logger file, or to a separate file
     if args['result'] is None:
         logger.create_header('models passing the threshold:')
-        for name in pass_df['description']:
-            logger.log(name, skip_stamp=True)
+        for idx, row in pass_df.iterrows():
+            logger.log('%s %f' % (row['description'], row['score']), skip_stamp=True)
     else:
         with open(args['result'], 'w+') as fout:
             for name in pass_df['description']:

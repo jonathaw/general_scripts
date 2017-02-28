@@ -31,6 +31,7 @@ def main():
     parser.add_argument('-memb_sig', type=bool, default=True)
     parser.add_argument('-log')
     parser.add_argument('-plot_type', default='1ds')
+    parser.add_argument('-dslk_scores')
     args = vars(parser.parse_args())
 
     args['logger'] = Logger('logeer_%s_%s.log' % (args['mode'], time.strftime("%d.%0-m")))
@@ -57,8 +58,35 @@ def main():
     elif args['mode'] == 'caca':
         CaCa_d_by_z(args)
 
+    elif args['mode'] == 'just_model':
+        draw_just_the_model( args )
+
     else:
         print('no mode given')
+
+
+def draw_just_the_model( args: dict ):
+    ds = np.arange(0.1, 15, 0.1)
+    zs = np.arange(0, 25, 0.5)
+
+    # D, Z, E = [], [], []
+    df = pd.DataFrame(columns=['d', 'z', 'e'])
+    for d in ds:
+        for z in zs:
+            # D.append( d )
+            # Z.append( z )
+            # E.append( rosetta_dz_model( d, z ))
+            df = df.append({'d': d, 'z': z, 'e': rosetta_dz_model( d, z )}, ignore_index=1)
+    fig = plt.figure()
+    fig.subplots_adjust(hspace=.5)
+    i = 0
+    for z in np.arange(0, 20, 1):
+        plt.subplot(4, 5, 1+i)
+        plt.plot( df[ df['z' ] == z]['d'], df[ df['z'] == z ]['e'] )
+        plt.title('z=%i' % z)
+        plt.xlim([0, 16])
+        i += 1
+    plt.show()
 
 
 def analyse_dz( args: dict, ds: np.arange, zs: np.arange ) -> None:
@@ -108,20 +136,25 @@ def analyse_dz( args: dict, ds: np.arange, zs: np.arange ) -> None:
 
 
 def CaCa_d_by_z( args: dict ) -> None:
+    # reading the Ca-Ca reuslts, from args['sc']
     df = rf.score_file2df( args['sc'] )
     desc = df['description'].str.split('_')
+    df['d'] = desc.str.get( 0 ).astype( np.float64 )
+    df['z'] = desc.str.get( 1 ).astype( np.float64 )
 
+    # get data from spline log
     spline_log = parse_rosetta_log( args )
     spline_log_df = pd.DataFrame({'z': spline_log[0], 'd': spline_log[1], 'e': spline_log[2]})
 
-    df['d'] = desc.str.get( 0 ).astype( np.float64 )
-    df['z'] = desc.str.get( 1 ).astype( np.float64 )
+    # get DSRK data as well
+    dslk_df = read_all_scores( args['dslk_scores'], args )
 
     ds_sorted = np.round(sorted(list(set(df['d'].values))), 2)
     zs_sorted = np.round(sorted(list(set(df['z'].values))), 2)
     D, Z, E = [], [], []
     model_E = []
     spline_log_E = []
+    dre, dke, sre, ske = [], [], [], []
     for d in ds_sorted:
         if d >= 10:
             continue
@@ -136,6 +169,19 @@ def CaCa_d_by_z( args: dict ) -> None:
             spline_log_E.append( spline_log_df[ (spline_log_df['d'] >= d-0.01) &
                                                (spline_log_df['d'] <= d+0.01) &
                                               (spline_log_df['z'] == z)]['e'].values[0] )
+
+    # gather DSLK data in lists to make plots later
+    dslk_D, dslk_Z = [], []
+    dre, dke, sre, ske = [], [], [], []
+    for d in np.round(sorted(list(set(dslk_df['d'].values))), 2):
+        for z in np.round(sorted(list(set(dslk_df['z'].values))), 2):
+            dslk_D.append( d )
+            dslk_Z.append( z )
+            dre.append( dslk_df[ (dslk_df['aa1']=='D')&(dslk_df['aa2']=='R')&(dslk_df['d']==d)&(dslk_df['z']==z) ]['fa_elec'].values[0])
+            dke.append( dslk_df[ (dslk_df['aa1']=='D')&(dslk_df['aa2']=='K')&(dslk_df['d']==d)&(dslk_df['z']==z)  ]['fa_elec'].values[0] )
+            sre.append( dslk_df[ (dslk_df['aa1']=='D')&(dslk_df['aa2']=='R')&(dslk_df['d']==d)&(dslk_df['z']==z)  ]['fa_elec'].values[0] )
+            ske.append( dslk_df[ (dslk_df['aa1']=='D')&(dslk_df['aa2']=='K')&(dslk_df['d']==d)&(dslk_df['z']==z)  ]['fa_elec'].values[0] )
+
 
     args['logger'].log('finished preparing lists')
     master_df = pd.DataFrame({'d': D, 'z': Z, 'e_caca': E,
@@ -220,11 +266,11 @@ def read_all_scores( file_name: str, args=dict() ) -> pd.DataFrame:
     """
     if necessary gather scores, and coalesce into dataframe with resiudes, ds and zs
     """
-    if not os.path.exists(args['sc']):
-        args['logger'].logger('bo score file found. gathering scores to %s' % args['sc'])
-        os.system('grep description scores/%s > %s' %
-                  ( args['sc'], [a for a in os.listdir('scores/') if '.sc' in a][0] ))
-        os.system('grep SCORE: scores/*.sc | grep -v description >> %s' % args['sc'])
+    # if not os.path.exists(args['sc']):
+        # args['logger'].logger('bo score file found. gathering scores to %s' % args['sc'])
+        # os.system('grep description scores/%s > %s' %
+                  # ( args['sc'], [a for a in os.listdir('scores/') if '.sc' in a][0] ))
+        # os.system('grep SCORE: scores/*.sc | grep -v description >> %s' % args['sc'])
     df = rf.score_file2df( file_name )
     args['logger'].log('found %i entries in score file' % len( df ))
     desc_spl = df['description'].str.split('_')

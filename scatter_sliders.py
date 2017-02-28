@@ -147,7 +147,7 @@ def update(val):
     new_df = sc_df.copy()
     for term in args['terms']:
         thresholds[term] = sliders[term].val
-        if 'sasa' in term or 'pack' in term or 'span' in term:
+        if 'sasa' in term or 'pack' in term or 'tms_span' in term:
             new_df = new_df[ new_df[term] > thresholds[term]]
         else:
             new_df = new_df[ new_df[term] < thresholds[term] ]

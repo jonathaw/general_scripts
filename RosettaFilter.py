@@ -205,7 +205,7 @@ def score_file2df(score_file: str, names_file=None) -> pd.DataFrame:
 def get_best_of_best(sc_df: pd.DataFrame, terms: list=['score', 'a_ddg', 'a_pack'], percentile=10) -> pd.DataFrame:
     sets_dict = {}
     for term in terms:
-        if term in ['score', 'a_ddg', 'a_res_solv']:
+        if term in ['score', 'a_ddg', 'a_res_solv', 'a_mars', 'span_ins']:
             threshold = np.percentile(sc_df[term], percentile)
             sets_dict[term] = set(sc_df[sc_df[term] <= threshold]['description'].values)
             print('for %s found threshold %.2f, %i pass' % (term, threshold, len(sets_dict[term])))
@@ -217,4 +217,9 @@ def get_best_of_best(sc_df: pd.DataFrame, terms: list=['score', 'a_ddg', 'a_pack
     return sc_df[ sc_df['description'].isin(final_set) ]
 
 
-
+def get_term_by_threshold( sc_df: pd.DataFrame, score: str, p: float, term: str, func: str ) -> float:
+    threshold = np.percentile( sc_df[score], p )
+    if func == 'min':
+        return sc_df[ sc_df[score] <= threshold ][term].min()
+    elif func == 'mean':
+        return sc_df[ sc_df[score] <= threshold ][term].mean()
