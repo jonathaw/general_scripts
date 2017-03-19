@@ -504,11 +504,11 @@ def make_jobs(args, job_args, script_vars=None):
     with open(cmdname, 'a+') as cmd:
         if args['queue'] == 'new-all.q':
             cmd.write(str(
-                'bsub -C 1024 -u /dev/null -N -u /dev/null -R rusage[mem=1024] -L /bin/bash -G fleishman-wx-grp-lsf -q ' +
+                'bsub -C 1024 -u /dev/null -N -u /dev/null -R rusage[mem=1024] -G fleishman-wx-grp-lsf -q ' +
                 args['queue'] + ' -o ' + outname + ' -e ' + errname + ' /apps/RH6U4/blcr/0.8.5/bin/cr_run ' +
                 jobname + '\n'))
         else:
-            cmd.write(str('bsub -L /bin/bash -N -u /dev/null -G fleishman-wx-grp-lsf -q ' + args['queue'] + ' -o ' +
+            cmd.write(str('bsub -N -u /dev/null -G fleishman-wx-grp-lsf -q ' + args['queue'] + ' -o ' +
                           outname + ' -e ' + errname + ' ' + jobname + '\n'))
     subprocess.call(['chmod', '+x', jobname])
 

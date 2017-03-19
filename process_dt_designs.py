@@ -41,7 +41,7 @@ def main():
                     fout.write('cd %s\n' % os.getcwd())
                     fout.write('/apps/RH6U4/python/3.5.0/bin/python3.5 /home/labs/fleishman/jonathaw/scripts/general_scripts/binding_decision_tree2.py -mode predict_by_coh -coh_name %s' % dzn)
                 subprocess.call(['chmod', '+x', '%sjob_%s.j' % (job_root, dzn)])
-                cmd.write(str('bsub -L /bin/bash -N -u /dev/null -G fleishman-wx-grp-lsf -q fleishman -o out.%s -e err.%s %s \n' %
+                cmd.write(str('bsub -N -u /dev/null -G fleishman-wx-grp-lsf -q fleishman -o out.%s -e err.%s %s \n' %
                               (dzn, dzn, '%sjob_%s.j' % (job_root, dzn))))
         subprocess.call(['chmod', '+x', '%scommand' % job_root])
 

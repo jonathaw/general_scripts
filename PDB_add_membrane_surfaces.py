@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.5
+#!/usr/bin/env python3
 """
 a script to add a membrane cage to a pdb
 """
@@ -33,16 +33,22 @@ def determine_membrane_chain(pdb):
 
 
 def determine_highest_serial_num(pdb):
-    return max([a.serial_num for c in pdb.chains.values() for r in c.values() for a in r.values()])
+    return max([a.serial_num for c in pdb.chains.values() for r in c.values()
+                for a in r.values()])
 
 
 def create_and_add_MBR_residue(pdb, memb_chain, highest_atom_number):
     inn = MyPDB.Residue('INN', 1, memb_chain)
     atom_num = 1
-    i=1
+    i = 1
     for x in range(-30, 30):
         for y in range(-30, 30):
-            inn.add_atom(MyPDB.Atom(serial_num=highest_atom_number+atom_num, name='%i' % i , res_type_3='INN', chain=memb_chain, res_seq_num=1, x=x, y=y, z=-15, element='N', charge='', occupancy=1, temp=1, header='HETATM', alternate='', achar='', si=''))
+            inn.add_atom(MyPDB.Atom(serial_num=highest_atom_number+atom_num,
+                                    name='%i' % i, res_type_3='INN',
+                                    chain=memb_chain, res_seq_num=1, x=x, y=y,
+                                    z=-15, element='N', charge='', occupancy=1,
+                                    temp=1, header='HETATM', alternate='',
+                                    achar='', si=''))
             atom_num += 1
             i += 1
 
@@ -50,7 +56,13 @@ def create_and_add_MBR_residue(pdb, memb_chain, highest_atom_number):
     i = 1
     for x in range(-30, 30):
         for y in range(-30, 30):
-            out.add_atom(MyPDB.Atom(serial_num=highest_atom_number+atom_num, name='%i' % i, res_type_3='MID', chain=memb_chain, res_seq_num=2, x=x, y=y, z=15, element='O', charge='', occupancy=1, temp=1, header='HETATM', alternate='', achar='', si=''))
+            out.add_atom(MyPDB.Atom(serial_num=highest_atom_number+atom_num,
+                                    name='%i' % i, res_type_3='MID',
+                                    chain=memb_chain, res_seq_num=2,
+                                    x=x, y=y, z=15, element='O',
+                                    charge='', occupancy=1, temp=1,
+                                    header='HETATM', alternate='', achar='',
+                                    si=''))
             atom_num += 1
             i += 1
 

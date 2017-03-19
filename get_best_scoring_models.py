@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.5
+#!/usr/bin/env python3
 """
 a script to read a score file, and print a list of X% besto scoring models
 """

@@ -892,10 +892,10 @@ def filterscan_parallel(energy_function: str, res_solv_weight: float, fa_cen: st
                         % PWD)
                 os.system('chmod +x job.%s' % name)
                 job.write('%s\n' % command)
-            res = subprocess.check_output('bsub -L /bin/bash -N -u /dev/null -G fleishman-wx-grp-lsf -q fleishman -o /dev/null 2>&1 -e /dev/null 2>&1 %sjob.%s' % (PWD, name), shell=True)#, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            res = subprocess.check_output('bsub -N -u /dev/null -G fleishman-wx-grp-lsf -q fleishman -o /dev/null 2>&1 -e /dev/null 2>&1 %sjob.%s' % (PWD, name), shell=True)#, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
             # print('[%s%s]\r' % ('-'*num, ' '*(len(POS_RANGE)*len(residues_to_test)-num)))
             num += 1
-            cmd.write('bsub -L /bin/bash -N -u /dev/null -G fleishman-wx-grp-lsf -q fleishman -o /dev/null 2>&1 -e /dev/null 2>&1 %sjob.%s\n' % (PWD, name))
+            cmd.write('bsub -N -u /dev/null -G fleishman-wx-grp-lsf -q fleishman -o /dev/null 2>&1 -e /dev/null 2>&1 %sjob.%s\n' % (PWD, name))
     cmd.close()
     logger.log('finished submitting jobs')
     logger.log('running FilterScan for the energy function %s protocol, issuing command:' % energy_function)
@@ -1137,11 +1137,11 @@ def make_jobs(aa: str, pos: int, job_args: dict, script_vars: dict=None) -> None
     with open(cmdname, 'a+') as cmd:
         if args['queue'] == 'new-all.q':
             cmd.write(str(
-                'bsub -C 1024 -u /dev/null -N -u /dev/null -R rusage[mem=1024] -L /bin/bash -G fleishman-wx-grp-lsf -q ' +
+                'bsub -C 1024 -u /dev/null -N -u /dev/null -R rusage[mem=1024] -G fleishman-wx-grp-lsf -q ' +
                 args['queue'] + ' -o ' + outname + ' -e ' + errname + ' /apps/RH6U4/blcr/0.8.5/bin/cr_run ' +
                 jobname + '\n'))
         else:
-            cmd.write(str('bsub -L /bin/bash -N -u /dev/null -G fleishman-wx-grp-lsf -q ' + args['queue'] + ' -o ' +
+            cmd.write(str('bsub -N -u /dev/null -G fleishman-wx-grp-lsf -q ' + args['queue'] + ' -o ' +
                           outname + ' -e ' + errname + ' ' + jobname + '\n'))
     os.system('chmod +x %s' % jobname)
 

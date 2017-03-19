@@ -137,6 +137,5 @@ def parse_mutations_table() -> dict:
             result[int(s[0])][s[2]] = float(s[-1])
     return result
 
-
 if __name__ == '__main__':
     main()

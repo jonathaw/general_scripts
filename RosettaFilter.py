@@ -223,3 +223,41 @@ def get_term_by_threshold( sc_df: pd.DataFrame, score: str, p: float, term: str,
         return sc_df[ sc_df[score] <= threshold ][term].min()
     elif func == 'mean':
         return sc_df[ sc_df[score] <= threshold ][term].mean()
+
+
+def get_best_num_by_term(sc_df: pd.DataFrame,
+                         num: int=10,
+                         term: str='score') -> pd.DataFrame:
+    sc_df.sort_values(by=term, inplace=True)
+    new_df = sc_df.head(num)
+    return new_df
+
+
+def get_z_score_by_rmsd_percent(sc_df: pd.DataFrame,
+                                rmsd_name: str='pc_rmsd') -> (float, float):
+    rmsd_threshold = np.nanpercentile(list(sc_df[rmsd_name]), 10)
+    rmsd_threshold = 3
+    e_low = sc_df[sc_df[rmsd_name] <= rmsd_threshold]['score']
+    e_hi = sc_df[sc_df[rmsd_name] > rmsd_threshold]['score']
+    return (np.mean(e_hi) - np.mean(e_low)) / np.std(e_hi), rmsd_threshold
+
+
+def remove_failed(df: pd.DataFrame, term: str, ou: str,
+                  threshold: float) -> (pd.DataFrame, str):
+    if ou == 'over':
+        temp_df = df[df[term] >= threshold]
+    else:
+        if term == 'total_score':
+            temp_df = df[df['score'] <= threshold]
+        else:
+            temp_df = df[df[term] <= threshold]
+    return temp_df, '%s left %i with threshold %.2f' % (term, len(temp_df),
+                                                        threshold)
+
+def remove_failed_dict(df: pd.DataFrame,
+                       term_thresh: dict) -> (pd.DataFrame, dict):
+    message = {}
+    for k, v in term_thresh.items():
+        df, msg = remove_failed(df, k, v['ou'], v['threshold'])
+        message[k] = msg
+    return df, message

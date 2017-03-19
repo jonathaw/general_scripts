@@ -290,11 +290,11 @@ def MakeJobs(arguments, args_outer, queue='fleishman'):
             # if args_outer['stop_at_purples']:
             #     command.write('echo ' + os.getcwd() + ' >> /home/labs/fleishman/jonathaw/general_lists/dirs_running_jobs\n')
         if queue == 'new-all.q':
-            command.write(str('bsub -C 1024 -u /dev/null -N -u /dev/null -R rusage[mem=1024] -L /bin/bash -G fleishman-wx-grp-lsf -q ' +
+            command.write(str('bsub -C 1024 -u /dev/null -N -u /dev/null -R rusage[mem=1024] -G fleishman-wx-grp-lsf -q ' +
                               queue + ' -o ' + outname + ' -e ' + errname + ' /apps/RH6U4/blcr/0.8.5/bin/cr_run ' +
                               jobname + '\n'))
         else:
-            command.write(str('bsub -L /bin/bash -N -u /dev/null -G fleishman-wx-grp-lsf -q ' + queue + ' -o ' + outname + ' -e ' + errname
+            command.write(str('bsub -N -u /dev/null -G fleishman-wx-grp-lsf -q ' + queue + ' -o ' + outname + ' -e ' + errname
                           + ' ' + jobname + '\n'))
     subprocess.call(['chmod', '+x', jobname])
 

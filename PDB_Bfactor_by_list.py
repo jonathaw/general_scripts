@@ -22,6 +22,11 @@ def parse_Bfactor_list(file_name: str) -> dict:
             result[i] = float(s[0])
             i += 1
     talk = False
+    min_ = min(result.values()) + 0.01
+    print(min_)
+    for k, v in result.items():
+        print(k, v, v-min_)
+        result[k] = v - min_
     for k, v in result.items():
         if v < 0.001:
             result[k] = 0
@@ -33,6 +38,7 @@ def parse_Bfactor_list(file_name: str) -> dict:
     max_ = max(result.values())
     new_results = {}
     for k, v in result.items():
+        print(k, v)
         new_results[k] = (v - min_) / ( max_ - min_ ) * 50.0
     return new_results
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3.5
 import math
 import argparse
+from collections import OrderedDict
 
 from List1 import List1
 from Bio.SeqUtils import molecular_weight
@@ -123,7 +124,8 @@ class AASeq():
         with open(file_name, 'w+') as fout:
             fout.write('>%s\n%s\n' % (self.name, self.get_seq()))
 
-    def align(self, other, matrix=None, gap_open=-10, gap_extend=-0.5) -> (float, int, int):
+    def align(self, other, matrix=None, gap_open=-10,
+              gap_extend=-0.5) -> (float, int, int):
         """
         :param other: another AASeq
         :param matrix: a matrix
@@ -133,7 +135,8 @@ class AASeq():
         from Bio.SubsMat import MatrixInfo as matlist
         if matrix is None:
             matrix = matlist.blosum62
-        alns = pairwise2.align.globalds(self.get_seq(), other.get_seq(), matrix, gap_open, gap_extend)[0]
+        alns = pairwise2.align.globalds(self.get_seq(), other.get_seq(), matrix,
+                                        gap_open, gap_extend)[0]
         aln1, aln2, score, begin, end = alns
         self.aligned = '0' + aln1
         other.aligned = '0' + aln2
@@ -177,7 +180,8 @@ class AASeq():
     def aligned_identity(self, other) -> float:
         """
         :param other: another AASeq
-        :return: identity percentage, calculated by number of identical positions in alignment,
+        :return: identity percentage,
+        calculated by number of identical positions in alignment,
         devided by length of self.seq
         >>> a = AASeq(string='ABCDEFGTTT', aligned='ABCDEFGTTT')
         >>> b = AASeq(string='ABCFGRRR',   aligned='ABC--FGRRR')
@@ -214,7 +218,8 @@ class AASeq():
     def non_aligned_identity(self, other) -> float:
         """
         :param other: another AASeq
-        :return: identity percentage, calculated by number of identical positions in non_alignment,
+        :return: identity percentage, calculated by number of identical
+        positions in non_alignment,
         devided by length of self.seq
         >>> a = AASeq(string='ABCDEFGTTT')
         >>> b = AASeq(string='ABCDTTGTTT')
@@ -234,8 +239,9 @@ class AASeq():
 
     def calc_extinction_coefficient(self, reduced=True) -> float:
         """
-        data and equation from http://web.expasy.org/protparam/protparam-doc.html
-        :param reduced: whether to calculate cysteins as SS bonds or not. if True then cys contribution is 0
+        data and equation from web.expasy.org/protparam/protparam-doc.html
+        :param reduced: whether to calculate cysteins as SS bonds or not. if
+        True then cys contribution is 0
         :return: computed extinction coefficient
         """
         # AA extinction coefficients:
@@ -252,11 +258,41 @@ class AASeq():
 
     def calc_isoelectric_point(self) -> float:
         """
-        using http://biopython.org/DIST/docs/api/Bio.SeqUtils.ProtParam-pysrc.html
+        using biopython.org/DIST/docs/api/Bio.SeqUtils.ProtParam-pysrc.html
         :return: calculates the sequence's isoelectric point
         """
         protein_analysis = ProteinAnalysis(self.get_seq())
         return protein_analysis.isoelectric_point()
+
+    def aa_frequency(self, aa: str, start: int=1, end: int=-1) -> float:
+        """
+        >>> a= AASeq(string='ABCDEFGHIJ')
+        >>> a.aa_frequency('A')
+        0.1
+        >>> a.aa_frequency('A', 1)
+        0.1
+        >>> a.aa_frequency('A', 2, 5)
+        0.0
+        >>> a.aa_frequency('J', 9)
+        0.5
+        """
+        if end != -1:
+            subseq = self.get_seq()[start-1:end+1]
+        else:
+            subseq = self.get_seq()[start-1:]
+        aa_num = float(subseq.count(aa))
+        return aa_num / float(len(subseq))
+
+    def all_aas_frequencies(self, start: int=1, end: int=-1,
+                            clean_zeros: bool=False) -> OrderedDict:
+        d = {}
+        for aa in list('ACDEFGHIKLMNPQRSTVWY'):
+            v = self.aa_frequency(aa, start, end)
+            if not clean_zeros:
+                d[aa] = v
+            elif clean_zeros and v != 0:
+                d[aa] = v
+        return OrderedDict(sorted(d.items(), key=lambda t: t[1]))
 
 
 def compare_2_seqs(seq_1: AASeq, seq_2: AASeq, start=0) -> None:
@@ -271,8 +307,10 @@ def compare_2_seqs(seq_1: AASeq, seq_2: AASeq, start=0) -> None:
         if aa != seq_2[i]:
             print('%s%i%s' % (aa, i, seq_2[i]))
             changes.append(i)
-    print('found %i changes, thats is %.2f%% differences' % (len(changes), 100*len(changes)/len(seq_1)))
-    print('select changes, resi %s' % '+'.join([str(change+start) for change in changes]))
+    print('found %i changes, thats is %.2f%% differences' %
+          (len(changes), 100*len(changes)/len(seq_1)))
+    print('select changes, resi %s' % '+'.join([str(change+start)
+                                                for change in changes]))
 
 
 def read_seq(file_name: str) -> AASeq:
@@ -283,7 +321,21 @@ def read_seq(file_name: str) -> AASeq:
     return AASeq(string=seq, name=name)
 
 
-if __name__ == '__main__':
+def read_seqs(file_name: str, remove_suffix=None) -> OrderedDict:
+    result = OrderedDict()
+    with open(file_name, 'r') as fin:
+        cont = fin.read().split('>')
+        for p in cont[1:]:
+            s = p.split('\n')
+            if remove_suffix is None:
+                name = s[0]
+            else:
+                name = s[0].split(remove_suffix)[0]
+            result.update({name: AASeq(string=s[1], name=s[0])})
+    return result
+
+
+if  __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-seq1')
     parser.add_argument('-seq2')
@@ -293,7 +345,7 @@ if __name__ == '__main__':
     if args['mode'] == 'compare':
         s1 = AASeq(string=args['seq1'])
         s2 = AASeq(string=args['seq2'])
-        compare_2_seqs( s1, s2 )
+        compare_2_seqs(s1, s2)
 
     # a = AASeq(string='ABCDEFG')
     # b = AASeq(string='ABCFG')

@@ -790,6 +790,11 @@ def parse_energy_table(in_file: str) -> pd.DataFrame:
     return df
 
 
+def read_pdb_df(in_file: str) -> MyPDB:
+    # df = ps.read_fwf(in_file, )
+    pass
+
+
 if __name__ == '__main__':
     import argparse
 

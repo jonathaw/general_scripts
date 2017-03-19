@@ -24,7 +24,7 @@ def main():
     fout.write('/apps/RH6U4/python/2.7.6/bin/python /home/labs/fleishman/jonathaw/membrane_prediciton/TMpredict_WinGrade.py '
                '-name %s -with_cst True -w %s -z_0 %s -hp_threshold 6 \n' % (args['name'], args['w'], args['z_0']))
 
-    command.write('bsub -u /dev/null -L /bin/bash -G fleishman-wx-grp-lsf -q new-all.q -o %s/out.%s -e %s/err.%s %s/job.%s /apps/RH6U4/blcr/0.8.5/bin/cr_run\n' % (os.getcwd(), args['name'], os.getcwd(), args['name'], os.getcwd(), args['name']))
+    command.write('bsub -u /dev/null -G fleishman-wx-grp-lsf -q new-all.q -o %s/out.%s -e %s/err.%s %s/job.%s /apps/RH6U4/blcr/0.8.5/bin/cr_run\n' % (os.getcwd(), args['name'], os.getcwd(), args['name'], os.getcwd(), args['name']))
     os.system('chmod +x %s/job.%s' % (os.getcwd(), args['name']))#-R rusage[mem=4096]
     fout.close()
 # -M 4194304
